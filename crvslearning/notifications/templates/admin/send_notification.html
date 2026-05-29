@@ -1,0 +1,154 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Envoyer une notification" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bell"></i>
+                        {% trans "Envoyer une notification" %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    {% trans "Destinataire" %}
+                                </label>
+                                <select name="username" id="username" class="form-select" required>
+                                    <option value="">{% trans "Sélectionner un utilisateur" %}</option>
+                                    <option value="all">{% trans "Tous les utilisateurs" %}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sender" class="form-label">
+                                    <i class="fas fa-user-shield"></i>
+                                    {% trans "Expéditeur" %}
+                                </label>
+                                <input type="text" name="sender" id="sender" 
+                                       class="form-control" 
+                                       value="Administration CRVS"
+                                       placeholder="{% trans "Nom de l'expéditeur" %}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">
+                                <i class="fas fa-heading"></i>
+                                {% trans "Sujet" %}
+                            </label>
+                            <input type="text" name="subject" id="subject" 
+                                   class="form-control" 
+                                   placeholder="{% trans "Sujet de la notification" %}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label">
+                                <i class="fas fa-envelope"></i>
+                                {% trans "Message" %}
+                            </label>
+                            <textarea name="message" id="message" rows="4" 
+                                      class="form-control" 
+                                      placeholder="{% trans "Contenu de votre message..." %}"
+                                      required></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="url" class="form-label">
+                                    <i class="fas fa-link"></i>
+                                    {% trans "URL de redirection" %}
+                                </label>
+                                <input type="text" name="url" id="url" 
+                                       class="form-control" 
+                                       value="/dashboard/"
+                                       placeholder="{% trans "URL vers laquelle l'utilisateur sera redirigé" %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-info-circle"></i>
+                                    {% trans "Suggestions d'URL" %}
+                                </label>
+                                <select class="form-select" onchange="document.getElementById('url').value = this.value">
+                                    <option value="/dashboard/">/dashboard/</option>
+                                    <option value="/courses/">/courses/</option>
+                                    <option value="/certifications/">/certifications/</option>
+                                    <option value="/profile/">/profile/</option>
+                                    <option value="/help/">/help/</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> {% trans "Conseils" %}</h6>
+                            <ul class="mb-0">
+                                <li>{% trans "Utilisez des emojis pour rendre vos messages plus attractifs" %}</li>
+                                <li>{% trans "Personnalisez le message avec le nom de l'utilisateur" %}</li>
+                                <li>{% trans "Choisissez une URL pertinente pour l'action souhaitée" %}</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'admin:notifications_notification_changelist' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                {% trans "Retour" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                {% trans "Envoyer" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+.alert-info h6 {
+    color: #0c5460;
+}
+</style>
+{% endblock %}

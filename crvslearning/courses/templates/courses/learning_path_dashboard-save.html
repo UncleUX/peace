@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon Parcours - CRVS Learning{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<style>
+    :root {
+        --primary-blue: #0072ce;
+        --success-green: #28a745;
+        --warning-gold: #ffc107;
+        --road-grey: #e9ecef;
+    }
+
+    .learning-path-container { max-width: 650px; margin: 0 auto; padding: 1rem; }
+
+    /* --- Profil Header --- */
+    .profile-header-card { 
+        background: white; 
+        border-radius: 5px; 
+        overflow: hidden; 
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 1rem;
+    }
+
+    /* --- ROADMAP CORE --- */
+    .roadmap-wrapper {
+        position: relative;
+        padding: 5px 0;
+    }
+
+    /* Ligne verticale centrale */
+    .roadmap-wrapper::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--road-grey);
+        transform: translateX(-50%);
+        z-index: 1;
+    }
+
+    .roadmap-step {
+        position: relative;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    /* Bulles sur la ligne */
+    .roadmap-marker {
+        position: absolute;
+        left: 50%;
+        width: 36px;
+        height: 36px;
+        background: white;
+        border: 4px solid var(--road-grey);
+        border-radius: 50%;
+        z-index: 10;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Contenu des Cartes */
+    .roadmap-card {
+        width: 45%;
+        background: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    /* Alternance Gauche / Droite */
+    .roadmap-step:nth-child(odd) { justify-content: flex-start; }
+    .roadmap-step:nth-child(even) { justify-content: flex-end; }
+
+    /* --- ETATS DES ETAPES --- */
+    
+    /* 1. Complété */
+    .roadmap-step.completed .roadmap-marker { 
+        background: var(--success-green); 
+        border-color: var(--success-green); 
+        color: white; 
+    }
+    .roadmap-step.completed .roadmap-card { border-top: 5px solid var(--success-green); }
+
+    /* 2. En cours (Actif) */
+    .roadmap-step.current .roadmap-marker { 
+        background: var(--primary-blue); 
+        border-color: var(--primary-blue); 
+        color: white;
+        box-shadow: 0 0 0 6px rgba(0, 114, 206, 0.2);
+        animation: pulse-blue 2s infinite;
+    }
+    .roadmap-step.current .roadmap-card { 
+        border-top: 5px solid var(--primary-blue); 
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    /* 3. À venir (Verrouillé) */
+    .roadmap-step.upcoming .roadmap-card { opacity: 0.6; background: #fdfdfd; }
+    .roadmap-step.upcoming .roadmap-marker { color: #adb5bd; }
+
+    @keyframes pulse-blue {
+        0% { box-shadow: 0 0 0 0px rgba(0, 114, 206, 0.4); }
+        70% { box-shadow: 0 0 0 12px rgba(0, 114, 206, 0); }
+        100% { box-shadow: 0 0 0 0px rgba(0, 114, 206, 0); }
+    }
+
+    /* Responsive Mobile */
+    @media (max-width: 768px) {
+        .roadmap-wrapper::before { left: 20px; transform: none; }
+        .roadmap-marker { left: 20px; transform: translateX(-50%); }
+        .roadmap-step { justify-content: flex-start !important; padding-left: 50px; }
+        .roadmap-card { width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+ <div class="profile-header-card">
+        <div style="height:140px; background:url('{% static 'img/scrub.jpg' %}') center/cover no-repeat;"></div>
+        <div class="p-4 bg-light d-flex flex-wrap justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:110px; height:110px; border-radius:50%; border:5px solid white; margin-top:-75px; background:#eee; overflow:hidden;">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                        <div class="h-100 d-flex align-items-center justify-content-center bg-secondary text-white">
+                            <i class="bi bi-person-fill fs-1"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-dark">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-muted mb-0 small">{{ user.email }}</p>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 mt-2">{{ user.get_role_display|default:"Apprenant" }}</span>
+                </div>
+            </div>
+            
+            <div class="text-end">
+                <span class="text-muted d-block small mb-1">Progression Globale</span>
+                <div class="h3 fw-bold text-primary mb-0">{{ stats.global_progress|floatformat:0 }}%</div>
+            </div>
+        </div>
+    </div>
+<div class="learning-path-container">
+    {% if current_template %}
+        <h4 class="mb-5 text-center fw-bold">🗺️ Votre Roadmap d'Apprentissage</h4>
+        <div class="roadmap-wrapper">
+            {% for course in path_courses %}
+                <div class="roadmap-step 
+                    {% if course in completed_courses %}completed
+                    {% elif course == current_course %}current
+                    {% else %}upcoming{% endif %}">
+                    
+                    <div class="roadmap-marker">
+                        {% if course in completed_courses %}
+                            <i class="bi bi-check-lg"></i>
+                        {% elif course == current_course %}
+                            <i class="bi bi-play-fill"></i>
+                        {% else %}
+                            <i class="bi bi-lock-fill small"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="roadmap-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-uppercase small fw-bold text-muted">Étape {{ forloop.counter }}</span>
+                            {% if course in completed_courses %}
+                                <i class="bi bi-patch-check-fill text-success"></i>
+                            {% endif %}
+                        </div>
+
+                        <h6 class="fw-bold">{{ course.title }}</h6>
+                        <p class="text-muted small">{{ course.description|truncatewords:5 }}</p>
+                        
+                        <div class="">
+                            {% if course == current_course %}
+                                <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-primary btn-sm w-100 fw-bold">
+                                    Continuer maintenant <i class="bi bi-arrow-right-short"></i>
+                                </a>
+                            {% elif course in completed_courses %}
+                                <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-outline-success btn-sm w-100">
+                                    Revoir le contenu
+                                </a>
+                            {% else %}
+                                <button class="btn btn-light btn-sm w-100 py-2 text-muted" disabled>
+                                    Étape verrouillée
+                                </button>
+                            {% endif %}
+                        </div>
+
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="card border-0 shadow-sm mt-5 bg-white rounded-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-bullseye fs-4 text-danger"></i>
+                    <h5 class="card-title mb-0 fw-bold">Mes Objectifs Personnels</h5>
+                </div>
+                <form method="post" action="{% url 'courses:update_learning_goals' %}">
+                    {% csrf_token %}
+                    <textarea name="learning_goals" class="form-control border-light-subtle bg-light mb-3" rows="3" 
+                        placeholder="Quels sont vos objectifs pour ce parcours ?">{{ learning_path.learning_goals|default:'' }}</textarea>
+                    <button type="submit" class="btn btn-dark px-4 btn-sm rounded-pill">Enregistrer mes objectifs</button>
+                </form>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-map text-muted" style="font-size: 5rem;"></i>
+            </div>
+            <h3 class="fw-bold">Aucun parcours assigné</h3>
+            <p class="text-muted">Il semblerait que vous n'ayez pas encore de route tracée.</p>
+            <a href="{% url 'courses:assign_learning_path' %}" class="btn btn-primary btn-lg rounded-pill px-5">
+                Choisir un parcours
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

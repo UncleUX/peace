@@ -1,0 +1,2062 @@
+{% extends "base.html" %}
+{% load static %}
+{% load payment_tags %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+/* Styles pour les modules verrouillés */
+.locked-module {
+    opacity: 0.6;
+    background-color: #f8f9fa !important;
+    border-left: 4px solid #dc3545 !important;
+}
+
+.locked-module .accordion-button {
+    color: #6c757d !important;
+    background-color: #f8f9fa !important;
+}
+
+.locked-module .accordion-button::after {
+    content: '🔒';
+    margin-left: 10px;
+    font-size: 1.2em;
+}
+
+/* Styles pour les avatars des utilisateurs */
+.avatars {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.avatars img, .avatar-initial, .avatar-style {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  margin-left: -8px;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.avatars img:first-child, .avatar-initial:first-child, .avatar-style:first-child {
+  margin-left: 0;
+}
+
+.avatars img:hover, .avatar-initial:hover, .avatar-style:hover {
+  transform: scale(1.1);
+  z-index: 1;
+  position: relative;
+}
+
+.avatar-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  background-color: #e2e8f0;
+  color: #4b5563;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  margin-left: -8px;
+}
+
+.avatar-initial:first-child {
+  margin-left: 0;
+}
+
+.more-users {
+   width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-left: -8px;
+  border: 2px solid #fff;
+}
+
+body{
+  background:#f3f5ff;
+  font-family:'Orbitron', 'Inter', system-ui, -apple-system, sans-serif;
+  color:#0f172a;
+  font-size:14px;
+  padding-left: 30px; /* Compensation augmentée pour le décalage de la sidebar */
+}
+
+.app {
+  max-width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 20px 1fr 250px;
+  gap: 16px;
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* Ajustements pour les écrans 1366px et plus */
+@media (min-width: 1366px) {
+  .app {
+    max-width: 110%;
+    padding: 0 24px;
+  }
+}
+
+/* Ajustements pour les très grands écrans */
+@media (min-width: 1920px) {
+  .app {
+    max-width: 95%;
+  }
+}
+
+/* Ajustements pour les tablettes */
+@media (max-width: 1199px) {
+  .app {
+    grid-template-columns: 70px 1fr;
+  }
+  
+  .panel {
+    grid-column: span 2;
+  }
+}
+
+/* Ajustements pour les mobiles */
+@media (max-width: 767px) {
+  .app {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .sidebar {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    padding: 12px;
+  }
+  
+  .panel {
+    grid-column: auto;
+  }
+}
+
+/* Sidebar */
+.sidebar {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 7px;
+  height: fit-content;
+  padding: 16px 8px;
+  display: flex;
+  width: 60px;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  margin-left: -60px;  /* Décalage vers la gauche augmenté */
+  margin-top: 30px;    /* Décalage vers le bas */
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.1), rgba(45, 45, 45, 0.2));
+  z-index: -1;
+  border-radius: 7px;
+}
+
+.sidebar .icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  color: #e0e0e0;
+  cursor: pointer;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar .icon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: 0.5s;
+}
+
+.sidebar .icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.sidebar .icon:hover::before {
+  left: 100%;
+}
+
+.sidebar .icon.active {
+  background: linear-gradient(135deg, #0072ce, #00439c);
+  color: #fff;
+  border-color: #00a4ff;
+  box-shadow: 0 4px 16px rgba(0, 114, 206, 0.4);
+}
+
+.sidebar .icon i {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.sidebar .icon:hover i {
+  transform: scale(1.1);
+}
+
+/* Header */
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;
+}
+
+.avatars img{
+  width:30px;height:30px;border-radius:50%;border:2px solid #fff;margin-left:-6px;
+}
+
+/* Main */
+.video-card{
+  background:transparent !important;border-radius:18px;overflow:hidden;position:relative;
+}
+
+.video-card img{
+  width:100%;height:280px;object-fit:cover;
+}
+
+.video-controls{
+  background:rgba(255,255,255,.9);
+  border-radius:5px;padding:6px 12px;display:flex;gap:12px;
+  border: 2px solid #00a4ff !important;
+  margin-bottom:0.5rem;
+  justify-content: center;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.video-controls i{font-size:16px;cursor:pointer;}
+
+/* Lists */
+.list-card{
+  background:#fff;border-radius:14px;padding:14px;margin-top:14px;
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+
+.list-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 0;border-bottom:1px solid #f1f5f9;
+}
+
+.list-item:last-child{border-bottom:none;}
+
+.badge-circle{
+  width:24px;height:24px;border-radius:50%;background:#6366f1;color:#fff;
+  display:grid;place-items:center;font-size:11px;font-weight:700;
+}
+
+/* Right panel */
+.panel{
+  display:flex;flex-direction:column;gap:10px;
+}
+
+.meeting-card{
+  border-radius:8px;padding:14px;color:#fff;
+  background:linear-gradient(135deg,#6366f1,#4f46e5);
+  box-shadow:0 12px 28px rgba(99,102,241,.35);
+}
+
+.meeting-card.purple{
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  color: #e0e0e0 !important;
+  border: 1px solid #3a3a3a;
+}
+
+.meeting-card.gray{
+  background:#e5e7eb;color:#111827;
+}
+
+.meeting-time{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.2);
+  padding:4px 8px;border-radius:999px;font-size:12px;
+}
+
+@media(max-width:1200px){
+  .app{grid-template-columns:70px 1fr;}
+  .panel{grid-column:span 2;}
+}
+
+
+
+@media(max-width:768px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{flex-direction:row;justify-content:center;}
+}
+
+/* =========================
+   TABS DESIGN (LD-TABS)
+========================= */
+.ld-tabs {margin-top:-2.3rem;}
+
+.ld-tabs .nav-tabs {
+  border: none;
+  gap: 8px;
+  background: rgba(26, 26, 26, 0.1);
+  padding: 6px;
+  border-radius: 5px;
+  width: fit-content;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ld-tabs .nav-tabs .nav-link {
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 8px 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #e0e0e0;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.ld-tabs .nav-tabs .nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: 0.5s;
+}
+
+.ld-tabs .nav-tabs .nav-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.ld-tabs .nav-tabs .nav-link:hover::before {
+  left: 100%;
+}
+
+.ld-tabs .nav-tabs .nav-link.active {
+  background: linear-gradient(135deg, #0072ce, #00439c);
+  border-color: #00a4ff;
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 114, 206, 0.4);
+  transform: translateY(-2px);
+}
+
+.ld-tabs .nav-tabs .nav-link.active:hover {
+  background: linear-gradient(135deg, #0088ff, #0055cc);
+  box-shadow: 0 8px 25px rgba(0, 136, 255, 0.5);
+}
+
+.ld-tabs .tab-content {
+  margin-top: 20px;
+  padding: 20px 0;
+}
+
+/* =========================
+   MODERN WHITE ACCORDION STYLE
+========================= */
+.ld-tabs .accordion-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ld-tabs .accordion-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.ld-tabs .accordion-button {
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 16px 20px;
+  background: #ffffff;
+  color: #1e293b;
+  border: none;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.ld-tabs .accordion-button:not(.collapsed) {
+  background: #f8fafc;
+  color: #1e40af;
+  box-shadow: none;
+}
+
+.ld-tabs .accordion-button:focus {
+  box-shadow: none;
+  border-color: #93c5fd;
+}
+
+.ld-tabs .accordion-button::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%234b5563'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  background-size: 1rem;
+  transition: transform 0.3s ease, background-image 0.3s ease;
+}
+
+.ld-tabs .accordion-button:not(.collapsed)::after {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231e40af'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  transform: rotate(180deg);
+}
+
+.ld-tabs .accordion-body {
+  background: #ffffff;
+  padding: 0 20px 16px;
+  border-top: 1px solid #f1f5f9;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Style pour les éléments de liste dans l'accordéon */
+.ld-tabs .video-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ld-tabs .video-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 6px;
+}
+
+.ld-tabs .video-item:hover {
+  background: #f8fafc;
+  padding-left: 16px;
+}
+
+.ld-tabs .video-item:last-child {
+  border-bottom: none;
+}
+
+.ld-tabs .v-dur {
+  font-size: 0.75rem;
+  color: #4b5563;
+  background: #f3f4f6;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.ld-tabs .locked {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.ld-tabs .pill {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Style pour les éléments actifs/sélectionnés */
+.ld-tabs .video-item.active {
+  background-color: #f0f9ff;
+  border-left: 3px solid #0ea5e9;
+  padding-left: 20px;
+}
+
+/* Style pour les icônes */
+.ld-tabs .video-item i {
+  margin-right: 8px;
+  color: #64748b;
+  font-size: 0.9em;
+}
+
+/* Style pour les éléments verrouillés */
+.ld-tabs .video-item.locked-item {
+  opacity: 0.7;
+  background-color: #f9fafb;
+}
+
+.ld-tabs .video-item.locked-item .video-title {
+  color: #9ca3af;
+}
+
+.video-list{list-style:none;padding:0;margin:0;}
+.video-item{padding:6px 0;font-size:0.85rem;border-bottom:1px dashed #e5e7eb;}
+.video-item:last-child{border-bottom:none;}
+.v-dur{font-size:0.75rem;color:#64748b;}
+.locked{color:#94a3b8;font-style:italic;}
+.pill{background:#22c55e;color:#fff;font-size:0.65rem;padding:2px 6px;border-radius:999px;font-weight:700;}
+.muted{color:#94a3b8;font-size:0.85rem;}
+
+/* Hero Section */
+.course-hero {
+  position: relative;
+  border-radius: 5px;
+  /* background: #0f172a; */
+  color: #fff;
+  padding: 12px;
+  margin: 0px 0 0px;
+  min-height: 200px;
+  overflow: hidden;
+
+}
+
+.hero-media {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  filter: brightness(0.5) saturate(1.1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-media.no-thumb {
+  background-color: #1e293b;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  
+  z-index: 2;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 3;
+  max-width: 800px;
+}
+
+.hero-inner .title {
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 0 0 0px 0;
+  color: #080808;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.hero-inner .desc {
+  font-size: 1rem;
+  color: #e2e8f0;
+  margin: 0 0 0px 0;
+  line-height: 1.5;
+}
+
+.hero-inner .meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.hero-inner .badge {
+  color: #fff;
+  padding: 9px 13px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+}
+
+.hero-inner .badge.alt {
+  
+
+}
+
+.hero-inner .cta .btn {
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.hero-inner .btn.solid {
+  background: #4f46e5;
+  color: white;
+  border: none;
+}
+
+.hero-inner .btn.solid:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.level-bar .fill{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6)}
+.btn.tiny{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none}
+.btn.ghost{background:#f3f4f6;color:#111;border:1px solid #e5e7eb}
+
+.modules h3{margin:12px 0 8px 0}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.module-card{background:#fff;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.06);padding:12px}
+.module-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.badge.subtle{background:#f3f4f6;color:#111;border:1px solid #e5e7eb}
+.lesson-list{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.lesson-list li a{text-decoration:none;color:#111;font-weight:700}
+.lesson-list li a:hover{text-decoration:underline}
+.pill{display:inline-block;background:#e0f2fe;color:#0369a1;border-radius:999px;padding:2px 6px;font-size:11px;font-weight:700}
+.locked{color:#9ca3af}
+.muted{color:#6b7280}
+
+/* Styles des boutons d'état du cours - Version ajustée */
+.btn-enrolled {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  color: #fff !important;
+  border: 1px solid #2a5d8a;
+  border-radius: 5px;
+  padding: 9px 13px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease;
+  cursor: not-allowed;
+  width: auto;
+  min-width: auto;
+  overflow: hidden;
+  height: auto;
+  line-height: 1.2;
+  backdrop-filter: blur(5px);
+}
+
+.btn-enrolled::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transition: 0.5s;
+}
+
+.btn-enrolled i {
+  font-size: 1.3em;
+  margin-right: 10px;
+  color: #0072ce;
+  transition: all 0.3s ease;
+}
+
+.btn-mark-completed {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  color: #e0e0e0 !important;
+  border: 1px solid #3a3a3a;
+  border-radius: 5px;
+  padding: 9px 13px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  width: auto;
+  min-width: auto;
+  overflow: hidden;
+  height: auto;
+  line-height: 1.2;
+  backdrop-filter: blur(5px);
+  margin: 0 0 0 10px;
+}
+
+.btn-mark-completed:hover {
+  border-color: #0072ce;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.btn-mark-completed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: 0.5s;
+}
+
+.btn-mark-completed:hover::before {
+  left: 100%;
+}
+
+.btn-mark-completed.completed {
+  background: linear-gradient(135deg, #0072ce, #00439c);
+  border-color: #00a4ff;
+  color: #fff !important;
+  box-shadow: 0 6px 20px rgba(0, 114, 206, 0.4);
+}
+
+.btn-mark-completed.completed:hover {
+  background: linear-gradient(135deg, #0088ff, #0055cc);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 136, 255, 0.5);
+}
+
+.btn-mark-completed i {
+  font-size: 1.3em;
+  margin-right: 10px;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+/* Animation de survol pour les deux boutons */
+.cta .btn {
+  position: relative;
+  z-index: 1;
+}
+
+.cta .btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transform: translateX(-100%);
+  transition: 0.6s;
+  z-index: -1;
+}
+
+.cta .btn:hover::after {
+  transform: translateX(100%);
+}
+
+.modal-backdrop { z-index: 1990 !important; }
+.modal { z-index: 2000 !important; }
+@media(max-width:1366px)
+{
+.app{
+  zoom: 0.9;
+}
+
+.animate-text {
+  height: 46px;
+  overflow: hidden;
+}
+
+.animate-text span{
+    font-size: 40px;
+    color:#FFFFFF;
+    font-weight: 700;
+    line-height: 46px;
+    display: none;
+}
+
+.animate-text span.text-in{
+	display: block;
+	animation: textIn .5s ease;
+}
+.animate-text span.text-out{
+	animation: textOut 1s ease;
+}
+@keyframes textIn{
+	0%{
+		transform: translateY(100%);
+	}
+	100%{
+		transform: translateY(0%);
+	}
+}
+@keyframes textOut{
+	0%{
+		transform: translateY(0%);
+	}
+	100%{
+		transform: translateY(-100%);
+
+	}
+}
+
+</style>
+
+<style>
+  /* Styles pour la transition 3D */
+  .carousel-inner {
+    perspective: 1000px;
+  }
+  .carousel-item {
+    transition: transform 1s ease-in-out, opacity 0.5s ease-in-out;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+  }
+  .carousel-item-next.carousel-item-start,
+  .carousel-item-prev.carousel-item-end {
+    transform: translate3d(0, 0, 0);
+  }
+  .carousel-item-next,
+  .active.carousel-item-end {
+    transform: translate3d(100%, 0, -120px) rotateY(-20deg);
+    opacity: 0;
+  }
+  .carousel-item-prev,
+  .active.carousel-item-start {
+    transform: translate3d(-100%, 0, -120px) rotateY(20deg);
+    opacity: 0;
+  }
+  .carousel-fade .carousel-item {
+    opacity: 0;
+    transition-property: opacity, transform;
+    transform: translate3d(0, 0, 0);
+  }
+  .carousel-fade .carousel-item.active,
+  .carousel-fade .carousel-item-next.carousel-item-start,
+  .carousel-fade .carousel-item-prev.carousel-item-end {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+</style>
+  <div class="container">
+  <div class="row">
+    <section class="course-hero">
+        <h5 class="d-flex text-dark">
+            WelCome,
+            <p class="text-muted" style="font-size: 14px;">@{{ request.user.username|lower }}</p>
+        </h5>
+        <div class="hero-overlay"></div>
+        <div class="hero-inner" style="position: relative;">
+          {% if has_passed_evaluation %}
+          <div class="badge alt" style="font-size: 3.1em; padding: 10px 16px; background: linear-gradient(135deg, #1a1a1a, #2d2d2d); border: 1px solid #3a3a3a; position: absolute; top: 20px; right: 20px;">
+            <i class="bi bi-award-fill me-1" style="color: #ffd700;"></i>
+            <!-- <span>Expert</span> -->
+          </div>
+          {% endif %}
+            <h1 class="title">{{ course.title }}</h1>
+            <p class="desc text-dark mt-0">{{ course.description|truncatechars:180 }}</p>
+            <div class="course-details text-muted mb-2" style="font-size: 0.875rem;">
+              <span>
+                <i class="bi bi-star-fill text-warning me-1"></i>
+                {% if avg_rating %}{{ avg_rating }}/5{% else %}N/A{% endif %}
+              </span>
+              <span class="mx-2">|</span>
+              <span>
+                <i class="bi bi-trophy-fill text-warning me-1"></i>
+                Top #{{ course.id }}
+              </span>
+              <span class="mx-2">|</span>
+              <span>
+                <i class="bi bi-tag-fill text-info me-1"></i>
+                {{ course.get_level_display|default:"General" }}
+              </span>
+            </div>
+            <div class="meta d-flex align-items-center flex-wrap" style="gap: 8px;">
+            {% if is_enrolled %}
+              <button class="btn btn-enrolled" disabled>
+                  <i class="bi bi-check-circle-fill me-1"></i>
+                  <span>Inscrit(e)</span>
+              </button>
+              <form method="post" action="{% url 'courses:mark_course_completed' course.id %}" id="mark-course-completed-form">
+                  {% csrf_token %}
+                  <button type="button" 
+                          class="btn btn-mark-completed {% if is_course_completed %}completed{% endif %}"
+                          id="mark-course-completed-btn"
+                          data-completed="{% if is_course_completed %}true{% else %}false{% endif %}">
+                      <i class="bi {% if is_course_completed %}bi-check-circle-fill{% else %}bi-circle{% endif %} me-1"></i>
+                      <span>{% if is_course_completed %}Terminé{% else %}Marquer terminé{% endif %}</span>
+                  </button>
+              </form>
+            {% else %}
+              <form method="post" action="{% url 'courses:enroll_course' course.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-mark-completed" type="submit">
+                    <i class="bi bi-person-plus me-1"></i>
+                    <span>S'inscrire</span>
+                  </button>
+              </form>
+            {% endif %}
+            </div>
+            <!-- Les boutons ont été déplacés dans la div .meta -->
+            <div class="cta d-none"></div>
+        </div>
+    </section>
+</div>
+  </div>
+<div class="container-fluid px-4 px-xl-5">
+  <style>
+    .box {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+    }
+    .box div {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: rgba(0, 164, 255, 0.2);
+        border: 2px solid rgba(0, 164, 255, 0.8);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    .box div:nth-child(1){
+        top: 10%;
+        left: 41%;
+        animation: animate 10s linear infinite; 
+    }
+     .box div:nth-child(2){
+        top: 70%;
+        left: 50%;
+        animation: animate 7s linear infinite; 
+    }
+    .box div:nth-child(3){
+        top: 10%;
+        left: 6%;
+        animation: animate 9s linear infinite; 
+    }
+    .box div:nth-child(4){
+        top: 20%;
+        left: 60%;
+        animation: animate 10s linear infinite; 
+    }   
+    .box div:nth-child(5){
+        top: 67%;
+        left: 10%;
+        animation: animate 6s linear infinite; 
+    }   
+    .box div:nth-child(6){
+        top: 80%;
+        left: 70%;
+        animation: animate 12s linear infinite; 
+    }   
+    .box div:nth-child(7){
+        top: 60%;
+        left: 80%;
+        animation: animate 15s linear infinite; 
+    }           
+    .box div:nth-child(8){
+        top: 32%;
+        left: 25%;
+        animation: animate 16s linear infinite; 
+    }           
+    .box div:nth-child(9){
+        top: 90%;
+        left: 80%;
+        animation: animate 9s linear infinite; 
+    }  
+    .box div:nth-child(10){
+        top: 20%;
+        left: 80%;
+        animation: animate 5s linear infinite; 
+    }          
+    .box div:nth-child(11){
+        top: 50%;
+        left: 40%;
+        animation: animate 11s linear infinite; 
+    }  
+    @keyframes animate{
+        0%{
+            transform: scale(0) translateY(0) translateX(0);
+            opacity:1;
+        }
+        100%{
+            transform: scale(1.3) translateY(-90px) translateX(360deg);
+            opacity:0;
+        }
+    }
+</style>
+<div class="box">
+    <div style="top: 10%; left: 15%;"></div>
+    <div style="top: 30%; left: 80%;"></div>
+    <div style="top: 70%; left: 15%;"></div>
+    <div style="top: 20%; left: 50%;"></div>
+    <div style="top: 60%; left: 30%;"></div>
+    <div style="top: 80%; left: 70%;"></div>
+    <div style="top: 40%; left: 20%;"></div>
+    <div style="top: 50%; left: 75%;"></div>
+    <div style="top: 10%; left: 60%;"></div>
+    <div style="top: 90%; left: 40%;"></div>
+    <div style="top: 25%; left: 25%;"></div>
+</div>
+
+  <div class="app mx-auto gap-3 p-0 px-0" style="position: relative; z-index: 2;">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="icon active" title="Contenu du cours"><i class="bi bi-paperclip"></i></div>
+    <a href="{% url 'users:dashboard' %}" class="icon" title="Tableau de bord"><i class="bi bi-grid"></i></a>
+    <a href="{% url 'users:profile' %}" class="icon" title="Mon profil"><i class="bi bi-person"></i></a>
+    <a href="#" class="icon" id="settings-btn" title="Paramètres"><i class="bi bi-gear"></i></a>
+  </div>
+
+  <!-- Main -->
+  <div>
+    <div class="header">
+      <div>
+       <h3>Participent au cours</h3>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <!-- <i class="bi bi-search"></i> -->
+        <div class="avatars">
+          {% for enrollment in course.enrollments.all|slice:":5" %}
+            {% with user=enrollment.user %}
+              {% with avatar=user.get_avatar_display %}
+                {% if avatar.type == 'image' %}
+                  <img src="{{ avatar.url }}" 
+                       alt="{{ avatar.alt }}" 
+                       title="{{ user.get_full_name|default:user.username }}"
+                       class="enrolled-user-avatar">
+                {% else %}
+                  <div class="avatar-initial" 
+                       data-bg-color="{{ avatar.bg_color|default:'#e2e8f0' }}" 
+                       data-text-color="{{ avatar.color|default:'#4b5563' }}"
+                       title="{{ user.get_full_name|default:user.username }}">
+                    {{ avatar.text|default:user.username|slice:":1"|upper }}
+                  </div>
+                {% endif %}
+              {% endwith %}
+            {% endwith %}
+          {% empty %}
+            <span class="text-muted small">Aucun inscrit pour le moment</span>
+          {% endfor %}
+          {% if course.enrollments.count > 5 %}
+            <div class="more-users" title="Plus d'utilisateurs">+{{ course.enrollments.count|add:"-5" }}</div>
+          {% endif %}
+        </div>
+        <!-- <button class="btn btn-dark btn-sm rounded-pill">+ Add Member</button> -->
+      </div>
+    </div>
+
+    
+   
+ 
+      <div class="row">
+            <!-- Bouton Vidéo Promotionnelle -->
+      {% if course.video_promotionnelle %}
+      <section class="promotional-video-section mb-5">
+        <div class="video-promotional-card">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between">
+              <!-- Texte à gauche -->
+               <div class="text-content flex-grow-1">
+                <h4 class="mb-2" style="font-size: 1rem;">
+                  <i class="bi bi-play-circle me-2 text-primary"></i>
+                  Découvrez ce cours gratuitement
+                </h4>
+                <p class="text-muted mb-0" style="font-size: 0.875rem;">
+                  Visionnez un aperçu du contenu avant de vous inscrire
+                </p>
+              </div>
+             <div class="animate-text">
+               <span>🎓 Formation complète</span>
+               <span>📚 Apprenez à votre rythme</span>
+               <span>🎯 Cours pratiques</span>
+               <span>💼 Développez vos compétences</span>
+               <span>🏆 Certificat reconnu</span>
+             </div>
+
+              <!-- Bouton à droite -->
+              <div class="button-content ms-4">
+                <button type="button" 
+                        class="btn btn-primary" 
+                        style="font-size: 0.875rem; padding: 8px 16px;"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#promotionalVideoModal">
+                  <i class="bi bi-play-fill me-2"></i>
+                  Regarder la vidéo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modal Vidéo Promotionnelle -->
+      <div class="modal fade" 
+           id="promotionalVideoModal" 
+           tabindex="-1" 
+           aria-labelledby="promotionalVideoModalLabel" 
+           aria-hidden="true"
+           data-bs-backdrop="false">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header bg-gradient-primary text-white">
+              <h5 class="modal-title" id="promotionalVideoModalLabel">
+                <i class="bi bi-play-circle me-2"></i>
+                {{ course.title }} - Vidéo de présentation
+              </h5>
+              <button type="button" 
+                      class="btn-close btn-close-white" 
+                      data-bs-dismiss="modal" 
+                      aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+              <div class="video-wrapper">
+                <video 
+                  id="promotional-video-modal"
+                  class="w-100" 
+                  controls 
+                  autoplay
+                  poster="{% if course.thumbnail %}{{ course.thumbnail.url }}{% else %}{% static 'images/default-video-poster.jpg' %}{% endif %}"
+                  preload="metadata">
+                  <source src="{{ course.video_promotionnelle.url }}" type="video/mp4">
+                  Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <small class="text-muted">
+                <i class="bi bi-info-circle me-2"></i>
+                Cette vidéo promotionnelle est accessible gratuitement à tous les visiteurs.
+              </small>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+      .promotional-video-section {
+        margin-top: 10px;
+      }
+      
+      .video-promotional-card {
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: linear-gradient(135deg, #f8f9ff, #ffffff);
+        width: 100%;
+      }
+      
+      .bg-gradient-primary {
+        background: linear-gradient(135deg, #0072ce, #00439c);
+      }
+      
+      .modal-dialog .video-wrapper {
+        position: relative;
+        padding-bottom: 56.25%; /* Ratio 16:9 */
+        height: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      
+      .modal-dialog .video-wrapper video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      /* Arrêter la vidéo quand le modal se ferme */
+      #promotionalVideoModal .btn-close {
+        z-index: 10;
+      }
+      
+      /* Styles pour le modal sans backdrop */
+      #promotionalVideoModal {
+        z-index: 9999;
+      }
+      
+      #promotionalVideoModal .modal-dialog {
+        z-index: 10000;
+      }
+      
+      #promotionalVideoModal .modal-content {
+        z-index: 10001;
+      }
+      </style>
+
+      <script>
+      // Gestion de la vidéo promotionnelle
+      document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('promotionalVideoModal');
+        const video = document.getElementById('promotional-video-modal');
+        
+        if (modal && video) {
+          // Lancer la vidéo quand le modal s'ouvre
+          modal.addEventListener('shown.bs.modal', function () {
+            // Petit délai pour s'assurer que le modal est complètement visible
+            setTimeout(() => {
+              video.play().catch(function(error) {
+                console.log('Autoplay bloqué par le navigateur:', error);
+              });
+            }, 300);
+          });
+          
+          // Arrêter la vidéo quand le modal se ferme
+          modal.addEventListener('hidden.bs.modal', function () {
+            video.pause();
+            video.currentTime = 0;
+          });
+        }
+      });
+      </script>
+      {% endif %}
+      
+      </div>
+    
+      
+
+      
+    
+ <div class="row ">
+      <section class="ld-tabs" style="margin-bottom: 20px !important;">
+          <ul class="nav nav-tabs mb-0" role="tablist" style="border-bottom: 1px solid #dee2e6;">
+          <li class="nav-item" role="presentation"><a class="nav-link active" data-bs-toggle="tab" href="#tab-curr">Programme</a></li>
+          <li class="nav-item" role="presentation"><a class="nav-link" data-bs-toggle="tab" href="#tab-desc">Overview</a></li>
+          <li class="nav-item" role="presentation"><a class="nav-link" data-bs-toggle="tab" href="#tab-res">Ressources</a></li>
+        </ul>
+        <div class="tab-content p-0 mt-0">
+          <div id="tab-curr" class="tab-pane fade show active">
+            <div class="accordion" id="modulesAcc">
+              {% if modules %}
+                {% for module in modules %}
+                <div class="accordion-item {% if module.is_locked and module.order > 1 %}locked-module{% endif %}">
+                  <h2 class="accordion-header" id="mod-h-{{ module.id }}">
+                    <button class="accordion-button {% if module.is_locked and module.order > 1 %}text-muted{% endif %}" 
+                            type="button" 
+                            {% if module.is_locked and module.order > 1 %}disabled{% endif %}
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#mod-c-{{ module.id }}" 
+                            aria-expanded="true" 
+                            aria-controls="mod-c-{{ module.id }}">
+                      {{ module.title }} <span class="acc-count ms-2">({{ module.lessons.all|length }} leçon{{ module.lessons.all|length|pluralize }})</span>
+                      {% if module.is_locked and module.order > 1 %}
+                        <span class="badge bg-warning ms-2">Verrouillé</span>
+                      {% endif %}
+                      {% if module.is_paid %}
+                        <span class="badge bg-success ms-2">💳 Premium {{ module.price|format_price }}</span>
+                      {% endif %}
+                    </button>
+                  </h2>
+                  <div id="mod-c-{{ module.id }}" class="accordion-collapse show" aria-labelledby="mod-h-{{ module.id }}">
+                    <div class="accordion-body">
+                      {% if module.lessons.all %}
+                      {% if is_enrolled and not module.is_locked %}
+                      <form method="post" action="{% url 'courses:mark_module_completed' course.id module.id %}" class="mb-2">
+                        {% csrf_token %}
+                        <button class="btn-mark-completed" type="submit" style="margin: 0;" title="Marquer ce module comme terminé">
+                          <i class="bi bi-check-circle me-1"></i>
+                          <span>Marquer ce module terminé</span>
+                        </button>
+                      </form>
+                      {% elif not is_enrolled and module.order == 1 %}
+                      <div class="alert alert-info p-2 mb-2 d-flex align-items-center" style="font-size: 0.9rem; background-color: #f8f9fa; border-left: 4px solid #0d6efd;">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>
+                        <div>
+                          <span class="d-block mb-1">Veuillez vous inscrire pour accèder à ce module</span>
+                        
+                        </div>
+                      </div>
+                      {% endif %}
+                      <div class="accordion accordion-flush" id="lessonsAcc-{{ module.id }}" data-bs-parent="#modulesAcc">
+                        {% with active_lessons=module.lessons.all %}
+                          {% if active_lessons %}
+                            {% for lesson in active_lessons %}
+                              {% if lesson.is_active %}
+                              <div class="accordion-item">
+                                <h2 class="accordion-header" id="les-h-{{ lesson.id }}">
+                                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#les-c-{{ lesson.id }}" aria-expanded="true" aria-controls="les-c-{{ lesson.id }}">
+                                    {% if is_enrolled or forloop.first and forloop.parentloop.first %}
+                                      <a href="{% url 'courses:lesson_detail' lesson.id %}" class="stretched-link text-decoration-none">
+                                        {% if is_enrolled %}📺{% else %}📺{% endif %} {{ lesson.title }}
+                                        {% if completed_lesson_ids and lesson.id in completed_lesson_ids %}
+                                          <span class="pill" style="margin-left:8px;">Lu</span>
+                                        {% endif %}
+                                      </a>
+                                    {% else %}
+                                      <span class="locked">🔒 {{ lesson.title }}</span>
+                                    {% endif %}
+                                  </button>
+                                </h2>
+                                <div id="les-c-{{ lesson.id }}" class="accordion-collapse show" aria-labelledby="les-h-{{ lesson.id }}" data-bs-parent="#lessonsAcc-{{ module.id }}">
+                                  <div class="accordion-body">
+                                    {% if lesson.videos.all %}
+                                      <ul class="video-list">
+                                        {% for v in lesson.videos.all %}
+                                          {% if v.video_file %}
+                                          <li class="video-item d-flex justify-content-between">
+                                            {% if is_enrolled or forloop.parentloop.parentloop.first and forloop.parentloop.parentloop.parentloop.first %}
+                                              <a href="{% url 'courses:lesson_detail' lesson.id %}" class="v-title text-decoration-none">📺 {{ v.title|default:lesson.title }}</a>
+                                            {% else %}
+                                              <span class="locked">🔒 {{ v.title|default:lesson.title }}</span>
+                                            {% endif %}
+                                            {% if v.duration %}<span class="v-dur">{{ v.duration }}</span>{% endif %}
+                                          </li>
+                                          {% endif %}
+                                        {% endfor %}
+                                      </ul>
+                                    {% elif lesson.video_file %}
+                                      <ul class="video-list">
+                                        <li class="video-item d-flex justify-content-between">
+                                          {% if is_enrolled or forloop.first and forloop.parentloop.first %}
+                                            <a href="{% url 'courses:lesson_detail' lesson.id %}" class="v-title text-decoration-none">📺 {{ lesson.title }}</a>
+                                          {% else %}
+                                            <span class="locked">🔒 {{ lesson.title }}</span>
+                                          {% endif %}
+                                          {% if lesson.duration %}<span class="v-dur">{{ lesson.duration }}</span>{% endif %}
+                                        </li>
+                                      </ul>
+                                    {% else %}
+                                      <div class="muted">Aucune vidéo listée.</div>
+                                    {% endif %}
+                                    {% if is_enrolled and lesson.exercises.exists %}
+                                      <div class="mt-3">
+                                        <button 
+                                          onclick="confirmQuizStart({{ lesson.id }}, {{ lesson.exercises.count }}, '{{ lesson.title|escapejs }}'); return false;"
+                                          class="btn-mark-completed {% if request.user in lesson.exercices_completed_by.all %}completed{% endif %}"
+                                          style="margin: 0;"
+                                        >
+                                          <i class="bi {% if request.user in lesson.exercices_completed.all %}bi-check-circle-fill{% else %}bi-question-circle{% endif %} me-1"></i>
+                                          <span>{% if request.user in lesson.exercices_completed_by.all %}Quiz réussi{% else %} Prêt à débloquer le module suivant ? {% endif %}</span>
+                                          {% if request.user in lesson.exercices_completed_by.all %}
+                                            <span class="badge bg-transparent ms-1">✓</span>
+                                          {% endif %}
+                                        </button>
+                                      </div>
+                                    {% endif %}
+                                  </div>
+                                </div>
+                              </div>
+                              {% endif %}
+                            {% endfor %}
+                          {% else %}
+                            <div class="muted">Aucune leçon active dans ce module.</div>
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <p class="muted">Aucun module disponible.</p>
+              {% endif %}
+            </div>
+          </div>
+          <div id="tab-desc" class="tab-pane fade">
+             <div class="container">
+              <h3 class="mt-4 py-1">DESCRIPTION DU COURS</h3>
+               <p>{{ course.description }}</p>
+                 <div class="row g-3">
+             
+
+      
+
+   <section style="background:#0f172a;color:#ffffff;padding:40px;border-radius:16px;max-width:1000px;margin:40px auto;font-family:Segoe UI,Arial,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+
+    <h2 style="font-size:28px;margin-bottom:10px;color:#38bdf8;">
+        🎯 Ce que vous apprendrez
+    </h2>
+
+    <p style="font-size:16px;color:#cbd5f5;margin-bottom:25px;">
+        À l’issue de cette formation sur le <strong>SIGEC (Système Intégré de Gestion de l’État Civil)</strong>, vous serez capable de :
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;">
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Comprendre les principes fondamentaux de l’état civil et le rôle du SIGEC
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Maîtriser l’architecture générale du système SIGEC et ses modules
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Utiliser efficacement l’interface de l’application
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Enregistrer et gérer les actes : naissances, mariages, décès
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Gérer le cycle de vie complet d’un acte (création, validation, archivage)
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Rechercher, consulter et éditer des actes et certificats
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Comprendre les rôles et profils utilisateurs
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Appliquer les bonnes pratiques de sécurité et de traçabilité
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Exploiter les statistiques et rapports
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Comprendre la synchronisation, la centralisation et la sauvegarde des données
+        </div>
+
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(56,189,248,0.3);padding:14px 16px;border-radius:10px;font-size:15px;">
+            ✔ Être autonome dans l’utilisation quotidienne du SIGEC
+        </div>
+
+    </div>
+
+</section>
+
+            </div> <!-- Fin de la row -->
+              </div>
+          
+          <div id="tab-res" class="tab-pane fade">
+            <div class="rating-block">
+              <div class="rb-head">Note du cours: <strong>{% if avg_rating %}{{ avg_rating }}/5{% else %}N/A{% endif %}</strong> · <span class="like-count">❤ {{ like_count }}</span></div>
+              {% if user.is_authenticated %}
+              <div class="rb-row">
+                <form method="post" action="{% url 'courses:rate_course' course.id %}" class="rating-stars">
+                  {% csrf_token %}
+                  <input type="radio" name="rating" id="star5" value="5" {% if user_rating_value == 5 %}checked{% endif %}><label for="star5">★</label>
+                  <input type="radio" name="rating" id="star4" value="4" {% if user_rating_value == 4 %}checked{% endif %}><label for="star4">★</label>
+                  <input type="radio" name="rating" id="star3" value="3" {% if user_rating_value == 3 %}checked{% endif %}><label for="star3">★</label>
+                  <input type="radio" name="rating" id="star2" value="2" {% if user_rating_value == 2 %}checked{% endif %}><label for="star2">★</label>
+                  <input type="radio" name="rating" id="star1" value="1" {% if user_rating_value == 1 %}checked{% endif %}><label for="star1">★</label>
+                  <button class="btn ghost" type="submit">Noter</button>
+                </form>
+                <form method="post" action="{% url 'courses:toggle_like' course.id %}" class="like-form">
+                  {% csrf_token %}
+                  <button class="btn {% if user_liked %}solid{% else %}ghost{% endif %}" type="submit">{% if user_liked %}❤ Je n'aime plus{% else %}❤ J'aime{% endif %}</button>
+                </form>
+              </div>
+              {% else %}
+              <p class="muted">Connectez-vous pour noter et aimer ce cours.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+ </div>
+   
+  </div>
+
+  <!-- Right Panel -->
+ <div class="panel mt-5 p-3 bg-white rounded">
+    <div class="meeting-card">
+      <h6>Votre Progression</h6>
+      
+      {% if is_enrolled %}
+      <div class="progress-wrap mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small text-muted">
+            {{ completed_count }}/{{ total_lessons }} leçon{{ total_lessons|pluralize }}
+          </span>
+          <span class="fw-bold">{{ progress_percent }}%</span>
+        </div>
+
+        <!-- Barre de progression -->
+        <div class="progress" style="height: 10px; border-radius: 5px;">
+          <div class="progress-bar bg-success" 
+               role="progressbar" 
+               style="width: {{ progress_percent }}%;" 
+               aria-valuenow="{{ progress_percent }}" 
+               aria-valuemin="0" 
+               aria-valuemax="100">
+          </div>
+        </div>
+
+        <!-- {% if total_lessons %}
+        <div class="mt-3 text-center">
+          <form method="post" 
+                action="{% url 'courses:mark_course_completed' course.id %}" 
+                class="mark-course-completed-form"
+                style="display: inline-block;">
+            {% csrf_token %}
+            <button type="submit" 
+                    class="btn {% if is_course_completed %}btn-success{% else %}btn-outline-primary{% endif %} w-100"
+                    {% if is_course_completed %}disabled{% endif %}>
+              <i class="bi {% if is_course_completed %}bi-check-circle-fill{% else %}bi-circle{% endif %} me-1"></i>
+              {% if is_course_completed %}Cours terminé{% else %}Marquer comme terminé{% endif %}
+            </button>
+          </form>
+        </div>
+        {% endif %} -->
+      </div>
+      {% else %}
+      <br>
+      <div class="alert alert-info">
+        <small>Inscrivez-vous pour suivre votre progression et marquer les leçons comme terminées.</small>
+      </div>
+      {% endif %}
+      <br>
+      <div class="meeting-time">
+        <i class="bi bi-clock"></i> {{ course.duration|default:"Durée non spécifiée" }}
+      </div>
+    </div>
+
+    <div class="meeting-card purple">
+      <small style="font-size: 16px; font-weight: bold;">Course Overview</small> <br>
+       <span class="badge" style="font-size: 16px;">{{ nombre_inscrits }} inscrits</span> <br>
+        {% if course.category %}<span class="badge alt" style="font-size: 13px;">Categorie: {{ course.category.name }}</span>{% endif %} <br>
+        <span class="badge alt" style="font-size: 13px;">Module: {{ modules|length }} modules</span>
+    </div>
+
+    <div class="meeting-card gray">
+      <div class="d-flex flex-column h-100">
+        {% if quiz_score %}
+          <small>Résultat du Quiz</small>
+          <h6 class="mt-2">Votre score</h6>
+          <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1">
+            {% with score=quiz_score.score|default:0|floatformat:0 %}
+            <div class="circular-progress mb-2" 
+                 data-percent="{{ score }}" 
+                 style="--progress-color: {% if score >= 70 %}#28a745{% else %}#ffc107{% endif %}">
+              <div class="progress-value">{{ score }}%</div>
+            </div>
+            <div class="text-center">
+              <p class="mb-1">
+                <i class="bi {% if score >= 70 %}bi-check-circle-fill text-success{% else %}bi-exclamation-circle-fill text-warning{% endif %} me-1"></i>
+                {% if score >= 70 %}
+                  Félicitations !
+                {% else %}
+                  Continuez à vous entraîner
+                {% endif %}
+              </p>
+              <div class="mb-1">
+                <span class="badge bg-{% if score >= 70 %}success{% else %}warning{% endif %} text-dark">
+                  {{ quiz_score.correct_answers }}/{{ quiz_score.total_questions }} exercices réussis
+                </span>
+              </div>
+              <small class="text-muted">Dernière tentative: {{ quiz_score.last_attempt|date:"d/m/Y H:i" }}</small>
+              <div class="text-warning small mt-1">
+                <i class="bi bi-exclamation-triangle-fill"></i> Score minimum: 70%
+              </div>
+            </div>
+            {% endwith %}
+          </div>
+        {% else %}
+          <small>Quiz</small>
+          <h6 class="mt-2">Aucun résultat</h6>
+          <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1">
+            <div class="text-center py-3">
+              <i class="bi bi-clipboard-data fs-1 text-muted mb-2"></i>
+              <p class="mb-0">Passez le quiz pour voir votre score</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock content %}
+
+{% block extra_css %}
+<style>
+/* Styles pour les modules verrouillés */
+.locked-module {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+  border-left: 4px solid #ffc107;
+}
+
+.locked-module .accordion-button {
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.locked-module .accordion-button:not(.collapsed) {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.locked-module .accordion-button::after {
+  opacity: 0.5;
+}
+
+.locked-module .accordion-body {
+  background-color: #f8f9fa;
+}
+
+/* Styles pour les cartes compactes */
+.meeting-card {
+  padding: 0.75rem;
+  margin-bottom: 0;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.meeting-card h6 {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.meeting-card small {
+  font-size: 0.75rem;
+  color: #6c757d;
+  line-height: 1.3;
+}
+
+.meeting-card .progress {
+  height: 6px;
+  margin: 0.5rem 0;
+}
+
+.meeting-time {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  color: #6c757d;
+}
+
+.meeting-card .badge {
+  font-size: 0.7rem !important;
+  padding: 0.2em 0.5em;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  display: inline-block;
+}
+
+/* Style spécifique pour la carte Course Overview */
+.meeting-card.purple {
+  padding: 0.75rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.meeting-card.purple .badge {
+  white-space: normal;
+  text-align: left;
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+  display: block;
+  width: 100%;
+}
+
+.meeting-card.purple small {
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Ajustement pour la carte de score de quiz */
+.meeting-card.gray {
+  padding: 0.75rem;
+}
+
+.circular-progress {
+  width: 50px !important;
+  height: 50px !important;
+  margin: 0.25rem auto 0.25rem !important;
+}
+
+.circular-progress .progress-value {
+  font-size: 0.8rem !important;
+  font-weight: 600;
+}
+
+/* Ajustement pour les cartes sur mobile */
+@media (max-width: 768px) {
+  .meeting-card {
+    padding: 0.6rem;
+  }
+  
+  .meeting-card h6 {
+    font-size: 0.85rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .meeting-card small, 
+  .meeting-time {
+    font-size: 0.7rem;
+  }
+  
+  .meeting-card .badge {
+    font-size: 0.65rem !important;
+    padding: 0.15em 0.4em;
+  }
+}
+</style>
+<style>
+/* Style pour le cercle de progression */
+.circular-progress {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--progress-color, #28a745) calc(var(--progress, 0) * 1%),
+    #e9ecef 0
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.circular-progress::before {
+  content: '';
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: white;
+}
+
+.progress-value {
+  position: relative;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Animation du cercle */
+@keyframes progress {
+  0% { --progress: 0; }
+  100% { --progress: var(--progress-value); }
+}
+
+.circular-progress {
+  animation: progress 1.5s ease-in-out forwards;
+  --progress-value: 0;
+}
+
+/* Support pour les navigateurs qui ne supportent pas @property */
+@supports not (background: paint(something)) {
+  .circular-progress {
+    background: conic-gradient(
+      var(--progress-color, #28a745) calc(0 * 1%),
+      #e9ecef 0
+    );
+    transition: background 1.5s ease-in-out;
+  }
+}
+</style>
+<!-- close container opened at top of content block -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Fonction de confirmation pour le démarrage du quiz avec SweetAlert2
+function confirmQuizStart(lessonId, questionCount, lessonTitle) {
+    const plural = questionCount > 1 ? 's' : '';
+    
+    Swal.fire({
+        title: `${lessonTitle}`,
+        html: `<div class="text-start">
+                 <p>Cette leçon contient ${questionCount} question${plural}.</p>
+                 <p class="mb-0">Voulez-vous commencer maintenant ?</p>
+              </div>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Commencer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-outline-secondary me-2'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/exercices/lesson/${lessonId}/quiz/`;
+        }
+    });
+}
+
+// Fonction pour animer le cercle de progression
+function animateCircularProgress() {
+    const progressElements = document.querySelectorAll('.circular-progress');
+    
+    progressElements.forEach(progress => {
+        const percent = progress.getAttribute('data-percent');
+        const progressValue = progress.querySelector('.progress-value');
+        
+        // Mettre à jour la variable CSS avec la valeur du pourcentage
+        progress.style.setProperty('--progress-value', percent);
+        
+        // Pour les navigateurs qui ne supportent pas @property
+        if (!CSS.supports('background', 'paint(something)')) {
+            progress.style.background = `conic-gradient(
+                ${progress.style.getPropertyValue('--progress-color') || '#28a745'} ${percent}%,
+                #e9ecef 0
+            )`;
+        }
+        
+        // Animation du compteur
+        let startValue = 0;
+        const duration = 1500; // 1.5 secondes
+        const increment = percent / (duration / 16); // 60fps
+        
+        const timer = setInterval(() => {
+            startValue += increment;
+            if (startValue >= percent) {
+                startValue = percent;
+                clearInterval(timer);
+            }
+            progressValue.textContent = `${Math.round(startValue)}%`;
+        }, 16);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animer les cercles de progression
+    if (document.querySelector('.circular-progress')) {
+        animateCircularProgress();
+    }
+    // Gestion de la sidebar
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Si c'est un lien #, empêcher le comportement par défaut
+            if (this.getAttribute('href') === '#') {
+                e.preventDefault();
+                
+                // Retirer la classe active de toutes les icônes
+                document.querySelectorAll('.sidebar .icon').forEach(icon => {
+                    icon.classList.remove('active');
+                });
+                
+                // Ajouter la classe active à l'icône cliquée
+                this.classList.add('active');
+                
+                // Récupérer l'icône cliquée
+                const iconElement = this.querySelector('i');
+                const iconClass = Array.from(iconElement.classList).find(cls => cls.startsWith('bi-'));
+                
+                if (!iconClass) return;
+                
+                // Actions spécifiques pour chaque icône
+                if (iconClass === 'bi-gear') {
+                    // Afficher un message pour les paramètres
+                    showToast('Paramètres', 'Accès aux paramètres du compte', 'info');
+                }
+            } else {
+                // Pour les liens normaux, la redirection se fera automatiquement
+                // On ne fait rien ici, le comportement par défaut du navigateur s'occupe de la redirection
+            }
+        });
+    });
+    
+    // Gestion du clic sur l'icône du contenu du cours (qui n'est pas dans un lien <a>)
+    document.querySelector('.sidebar > .icon:first-child').addEventListener('click', function() {
+        // Retirer la classe active de toutes les icônes
+        document.querySelectorAll('.sidebar .icon').forEach(icon => {
+            icon.classList.remove('active');
+        });
+        
+        // Ajouter la classe active à l'icône cliquée
+        this.classList.add('active');
+        
+        // Afficher le contenu principal du cours
+        document.querySelector('.ld-tabs').style.display = 'block';
+        document.querySelector('.panel').style.display = 'block';
+    });
+
+    // Gestion du formulaire de marquage du cours comme terminé
+    document.querySelectorAll('.mark-course-completed-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const button = this.querySelector('button[type="submit"]');
+            const icon = button.querySelector('i');
+            const formData = new FormData(this);
+            
+            // Désactiver le bouton pendant la requête
+            button.disabled = true;
+            
+            // Mise à jour immédiate de l'interface utilisateur
+            const isCurrentlyCompleted = button.classList.contains('btn-success');
+            
+            // Envoyer la requête au serveur
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Mettre à jour l'interface utilisateur
+                    if (data.completed) {
+                        button.classList.remove('btn-outline-primary');
+                        button.classList.add('btn-success');
+                        icon.className = 'bi bi-check-circle-fill me-1';
+                        button.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Cours terminé';
+                        button.disabled = true;
+                        
+                        // Mettre à jour la barre de progression
+                        if (data.progress) {
+                            const progressBar = document.querySelector('.progress-bar');
+                            const progressText = document.querySelector('.progress-wrap .fw-bold');
+                            const progressCount = document.querySelector('.progress-wrap .small');
+                            
+                            if (progressBar && progressText && progressCount) {
+                                progressBar.style.width = `${data.progress.percent}%`;
+                                progressBar.setAttribute('aria-valuenow', data.progress.percent);
+                                progressText.textContent = `${data.progress.percent}%`;
+                                progressCount.textContent = `${data.progress.completed}/${data.progress.total} leçon${data.progress.total > 1 ? 's' : ''}`;
+                            }
+                        }
+                        
+                        showToast('Succès', data.message, 'success');
+                    } else {
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-outline-primary');
+                        icon.className = 'bi bi-circle me-1';
+                        button.innerHTML = '<i class="bi bi-circle me-1"></i> Marquer comme terminé';
+                        showToast('Succès', data.message, 'info');
+                    }
+                } else {
+                    throw new Error(data.message || 'Erreur lors de la mise à jour');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast('Erreur', error.message || 'Une erreur est survenue. Veuillez réessayer.', 'error');
+            })
+            .finally(() => {
+                if (!isCurrentlyCompleted) {
+                    button.disabled = isCurrentlyCompleted;
+                }
+            });
+        });
+    });
+    
+    // Fonction utilitaire pour afficher des notifications
+    function showToast(title, message, type = 'info') {
+        // Utiliser Toastify, SweetAlert2 ou tout autre système de notification
+        // Par exemple, avec SweetAlert2 :
+        if (typeof Swal !== 'undefined') {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+            
+            Toast.fire({
+                icon: type,
+                title: title,
+                text: message
+            });
+        } else if (typeof toastr !== 'undefined') {
+            // Ou utiliser toastr
+            toastr[type](message, title);
+        } else {
+            // Fallback à une alerte native
+            alert(`${title}: ${message}`);
+        }
+    }
+});
+</script>
+<script>
+  const {children: titles} = document.querySelector(".animate-text");
+const txtsLen = titles.length;
+let index = 0;
+const textInTimer = 9000;
+const textOutTimer = 9000;
+
+function animateText() {
+  for (let i = 0; i < txtsLen; i++) {
+    titles[i].classList.remove("text-in", "text-out");
+  }
+  titles[index].classList.add("text-in");
+
+  setTimeout(function () {
+    titles[index].classList.add("text-out");
+  }, textOutTimer);
+
+  setTimeout(function () {
+    if (index == txtsLen - 1) {
+      index = 0;
+    } else {
+      index++;
+    }
+    animateText();
+  }, textInTimer);
+}
+
+window.onload = animateText;
+</script>
+{% endblock %}

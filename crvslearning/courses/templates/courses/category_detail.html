@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - PEACE Academy{% endblock %}
+
+{% block content %}
+{% include 'courses/partials/course_loader.html' %}
+
+<div class="category-page-wrapper" style="margin-left: -25px; overflow-x: hidden    ;">
+    <header class="hero-category">
+        <div class="hero-bg" style="background-image: url('{% static 'img/scrub.jpg' %}');"></div>
+        <div class="hero-overlay">
+            <div class="container-fluid px-lg-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <div class="hero-content">
+                            <nav aria-label="breadcrumb" class="mb-4">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="/" class="text-white-50">Accueil</a></li>
+                                    <li class="breadcrumb-item"><a href="{% url 'courses:category_list' %}" class="text-white-50">Catalogue</a></li>
+                                    <li class="breadcrumb-item active text-white fw-bold">{{ category.name }}</li>
+                                </ol>
+                            </nav>
+                            
+                            <div class="d-flex align-items-start gap-4 mb-4">
+                                <div class="cat-icon-box">
+                                    {% if category.image %}
+                                        <img src="{{ category.image.url }}" alt="{{ category.name }}">
+                                    {% else %}
+                                        <i class="bi bi-layers-half text-white"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h2 class=" fw-black text-white mb-2">{{ category.name }}</h2>
+                                    <div class="hero-badges">
+                                        <span class="h-badge"><i class="bi bi-mortarboard-fill me-2"></i>{{ total_courses }} Cours Certifiants</span>
+                                        <span class="h-badge"><i class="bi bi-check-circle-fill me-2"></i>Contenu Expert</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <p class="hero-description text-white-50 mb-0">
+                                Propulsez votre carrière avec nos formations en <strong>{{ category.name }}</strong>. 
+                                Un cursus complet conçu pour les professionnels du secteur.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-5 d-none d-lg-block">
+                        <div class="promo-card-glass">
+                            <div class="p-4">
+                                <div class="badge bg-primary mb-3">Recommandé</div>
+                                <h5 class="text-white mb-3">Parcours Spécialisé de {{ category.name }}</h5>
+                                <p class="text-white-50 small mb-4">Obtenez votre certification PEACE Academy en complétant l'ensemble des modules recommandés.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="user-avatars">
+                                        <img src="https://i.pravatar.cc/30?u=1" class="rounded-circle border border-2 border-dark" alt="">
+                                        <img src="https://i.pravatar.cc/30?u=2" class="rounded-circle border border-2 border-dark ms-n2" alt="">
+                                        <span class="small text-white-50 ms-2">+1,200 apprenants</span>
+                                    </div>
+                                    <button class="btn btn-light btn-sm fw-bold rounded-pill px-3">Explorer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="skills-highlight py-4 border-bottom bg-white">
+        <div class="container-fluid px-lg-5">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-shield-check text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">Certifié</h6><small class="text-muted">Diplôme reconnu</small></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-person-video3 text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">Interactif</h6><small class="text-muted">Projets réels</small></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-infinity text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">À vie</h6><small class="text-muted">Accès illimité</small></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-chat-dots text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">Support</h6><small class="text-muted">Experts à l'écoute</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="sticky-filter-bar shadow-sm">
+        <div class="container-fluid px-lg-5">
+            <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center gap-3 py-2">
+                    <a href="?{% if current_cible %}cible={{ current_cible }}&{% endif %}"
+                       class="filter-pill {% if not current_niveau %}active{% endif %}">Tous les cours</a>
+                    {% for niveau_value, niveau_label in niveau_choices %}
+                        <a href="?{% if current_cible %}cible={{ current_cible }}&{% endif %}niveau={{ niveau_value }}"
+                           class="filter-pill {% if current_niveau == niveau_value %}active{% endif %}">{{ niveau_label }}</a>
+                    {% endfor %}
+                </div>
+                <div class="d-none d-md-block">
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control border-start-0 bg-transparent" placeholder="Chercher un cours...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container-fluid px-lg-5">
+        <div class="section-title-box mb-5">
+            <h4 class="fw-bold mb-1">Programmes disponibles</h4>
+            <p class="text-muted small">Explorez nos {{ courses.count }} formations spécialisées.</p>
+        </div>
+
+        <div class="custom-cards-container" id="courses-container">
+            {% if courses %}
+                {% for course in courses %}
+                <div class="custom-course-card">
+                    <div class="card h-100 border-0 shadow-sm course-card-academy">
+                        <a href="{% url 'courses:course_detail' course.id %}" class="card-link-wrapper">
+                            <div class="card-thumb">
+                                {% if course.thumbnail %}
+                                    <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}">
+                                {% else %}
+                                    <div class="thumb-placeholder"><i class="bi bi-image"></i></div>
+                                {% endif %}
+                                <div class="thumb-overlay"></div>
+                                <div class="thumb-tags">
+                                    <span class="badge-type">{{ course.get_niveau_display }}</span>
+                                </div>
+                            </div>
+                            <div class="card-body-academy">
+                                <h3 class="course-title-academy">{{ course.title }}</h3>
+                                <div class="course-meta-academy">
+                                    <span><i class="bi bi-person me-1"></i>{{ course.created_by.username }}</span>
+                                    <span><i class="bi bi-collection me-1"></i>{{ course.modules.count }} mod.</span>
+                                </div>
+                                <div class="course-btn-play">
+                                    <i class="bi bi-play-fill"></i>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="w-100 text-center py-5">
+                    <div class="empty-state py-5">
+                        <i class="bi bi-folder2-open display-1 opacity-25"></i>
+                        <p class="mt-3 fs-5 text-muted">Aucun cours trouvé pour cette sélection.</p>
+                        <a href="?" class="btn btn-primary rounded-pill px-4">Trier par défaut</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<style>
+    a{
+        text-decoration: none;
+    }
+/* Variables et Couleurs */
+:root {
+    --primary-lms: #3b82f6;
+    --dark-lms: #0f172a;
+    --bg-lms: #f1f5f9;
+}
+
+/* Structure Globale */
+.category-page-wrapper { background: var(--bg-lms); min-height: 100vh; overflow-x: hidden; width: 100vw; }
+.fw-black { font-weight: 900; }
+
+/* HERO HEADER (FULL VW) */
+.hero-category {
+    width: 100vw !important; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw;
+    height: 350px; background: #000; overflow: hidden;
+}
+.hero-bg {
+    position: absolute; inset: 0; background-size: cover; background-position: center;
+    transform: scale(1.1); animation: slowZoom 30s infinite alternate;
+}
+@keyframes slowZoom { from { transform: scale(1); } to { transform: scale(1.2); } }
+
+.hero-overlay {
+    position: relative; z-index: 5; height: 100%;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.5) 100%);
+    display: flex; align-items: center;
+}
+.cat-icon-box {
+    width: 80px; height: 80px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 18px;
+    display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+}
+.cat-icon-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 18px; }
+
+.h-badge { 
+    background: rgba(59, 130, 246, 0.15); color: #93c5fd; padding: 6px 16px; 
+    border-radius: 50px; font-size: 0.8rem; font-weight: 700; margin-right: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.hero-description { max-width: 650px; line-height: 1.7; opacity: 0.8; }
+
+.promo-card-glass {
+    background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px;
+}
+
+/* SKILLS BAR */
+.skill-item { display: flex; align-items: center; gap: 15px; padding: 10px; }
+
+/* STICKY BAR */
+.sticky-filter-bar {
+    position: sticky; top: 0; z-index: 1000;
+    background: white; border-bottom: 1px solid #e2e8f0;
+}
+.filter-pill {
+    padding: 8px 20px; border-radius: 50px; background: #f8fafc;
+    color: #475569; font-size: 0.85rem; font-weight: 700; text-decoration: none;
+    border: 1px solid #e2e8f0; transition: all 0.3s;
+}
+.filter-pill.active { background: var(--dark-lms); color: white; border-color: var(--dark-lms); }
+
+/* CARDS GRID (220px Fixed) */
+.custom-cards-container {
+    display: flex !important; flex-wrap: wrap !important;
+    gap: 20px !important; justify-content: center !important;
+}
+.custom-course-card { width: 220px !important; height: 280px !important; flex: none !important; }
+.course-card-academy {
+    background: white; border-radius: 5px; overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.course-card-academy:hover { transform: translateY(-12px); box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.15); }
+
+.card-thumb { position: relative; height: 150px; overflow: hidden; }
+.card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 23, 42, 0.7), transparent); }
+
+.badge-type { background: var(--primary-lms); color: white; padding: 4px 10px; border-radius: 8px; font-size: 0.6rem; font-weight: 900; }
+
+.card-body-academy { padding: 18px; position: relative; }
+.course-title-academy { font-size: 0.95rem; font-weight: 800; color: var(--dark-lms); height: 2.8em; overflow: hidden; }
+
+.course-meta-academy { display: flex; justify-content: space-between; font-size: 0.7rem; color: #64748b; }
+
+.course-btn-play {
+    position: absolute; right: 15px; bottom: 15px; width: 35px; height: 35px; 
+    background: var(--primary-lms); color: white; border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(0.5); transition: 0.3s;
+}
+.course-card-academy:hover .course-btn-play { opacity: 1; transform: scale(1); }
+
+/* Responsive */
+@media (max-width: 991px) {
+    .hero-category { height: auto; padding: 80px 0; }
+    .hero-overlay { background: rgba(15, 23, 42, 0.95); }
+    .custom-cards-container { justify-content: center !important; }
+}
+/* --- MOBILE VUE --- */
+  
+@media (max-width: 768px) {
+     .skills-highlight{
+        display:none;
+    }
+    .hero-bg{
+        height: 300px;
+    }
+    .hero-category {
+        height: 500px !important;
+        margin-top: -80px;
+    }
+    .hero-bg{
+        display: none !important;
+    }
+    .hero-category{
+        background: transparent !important;
+    }
+        }
+</style>
+{% endblock %}

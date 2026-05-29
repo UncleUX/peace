@@ -1,0 +1,1058 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load forum_filters %}
+
+{% block extra_css %}
+<style>
+.forum-header {
+    height: 100px;
+    width: 100%;
+    background-image: url('{% static 'img/scrub.jpg' %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.forum-header-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 30px;
+}
+
+.forum-header-content {
+    text-align: left;
+    color: white;
+    z-index: 2;
+}
+
+.forum-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.forum-subtitle {
+    font-size: 1.1rem;
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'courses/partials/course_loader.html' %}
+<!-- Header Forum -->
+<div class="forum-header">
+    <div class="forum-header-overlay">
+        <div class="forum-header-content">
+            <h1 class="forum-title">
+                <i class="bi bi-chat-dots me-3"></i>
+                Forum CRVS Learning
+            </h1>
+            <p class="forum-subtitle">
+                Espace d'échange et de partage de connaissances
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Breadcrumb / Navigation -->
+    <div class="row ">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'forum:home' %}">
+                            <i class="bi bi-house me-1"></i>Forum
+                        </a>
+                    </li>
+                    {% if question.category %}
+                        <li class="breadcrumb-item">
+                            <a href="?category={{ question.category.id }}">
+                                {{ question.category.name }}
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li class="breadcrumb-item active">{{ question.title|truncatewords:5 }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <!-- Layout 2 colonnes : Sidebar gauche + Main content -->
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-2 col-md-2 col-sm-1">
+            <!-- Navigation rapide -->
+            <div class="card border-0 shadow-sm mb-2">
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'forum:home' %}" class="btn btn-outline-secondary btn-sm text-start">
+                            <i class="bi bi-house me-2"></i>
+                            Accueil
+                        </a>
+                        <a href="{% url 'forum:create_question' %}" class="btn btn-outline-secondary btn-sm text-start">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Poser une question
+                        </a>
+                        <a href="{{ question.get_absolute_url }}" class="btn btn-outline-secondary btn-sm text-start active">
+                            <i class="bi bi-chat-dots me-2"></i>
+                            Question actuelle
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm text-start">
+                            <i class="bi bi-bookmark me-2"></i>
+                            Mes questions
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm text-start">
+                            <i class="bi bi-chat-dots me-2"></i>
+                            Mes réponses
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filtres -->
+            <div class="card border-0 shadow-sm mb-4">
+                <!-- <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-funnel me-2"></i>
+                        Filtres rapides
+                    </h6>
+                </div> -->
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label small">Par catégorie</label>
+                        <select class="form-select form-select-sm">
+                            <option>Toutes les catégories</option>
+                            {% if question.category %}
+                                <option selected>{{ question.category.name }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Par statut</label>
+                        <select class="form-select form-select-sm">
+                            <option>Toutes les questions</option>
+                            <option>Questions récentes</option>
+                            <option>Questions sans réponse</option>
+                            <option>Questions résolues</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small">Par période</label>
+                        <select class="form-select form-select-sm">
+                            <option>Aujourd'hui</option>
+                            <option>Cette semaine</option>
+                            <option>Ce mois</option>
+                            <option>Cette année</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Top Contributors -->
+            {% if top_contributors %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="bi bi-trophy me-2"></i>
+                            Top Contributors
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% for contributor in top_contributors %}
+                            <div class="d-flex align-items-center mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+                                <div class="me-3">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                                         style="width: 40px; height: 40px; font-size: 14px;">
+                                        {{ contributor.user.username|slice:":1"|upper }}
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small">{{ contributor.user.username }}</div>
+                                    <div class="text-muted small">
+                                        <span class="badge bg-success me-1">{{ contributor.answers_count }} réponses</span>
+                                        {% if contributor.validated_answers > 0 %}
+                                            <span class="badge bg-primary me-1">{{ contributor.validated_answers }} validées</span>
+                                        {% endif %}
+                                        {% if contributor.total_votes > 0 %}
+                                            <span class="badge bg-info">{{ contributor.total_votes }} votes</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    {% if forloop.first %}
+                                        <i class="bi bi-trophy-fill text-warning" style="font-size: 1.2rem;"></i>
+                                    {% elif forloop.counter == 2 %}
+                                        <i class="bi bi-trophy-fill text-secondary" style="font-size: 1rem;"></i>
+                                    {% elif forloop.counter == 3 %}
+                                        <i class="bi bi-trophy-fill text-danger" style="font-size: 0.8rem;"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Contenu principal -->
+        <div class="col-lg-10 col-md-10 col-sm-11">
+            <!-- Question principale -->
+            <div class="card border-0 shadow-sm question-container mb-4">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <!-- Colonne gauche - Votes Stack Overflow style -->
+                        <div class="col-auto vote-cell">
+                            <div class="d-flex flex-column align-items-center">
+                                <form method="post" action="{% url 'forum:vote_question' question.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="vote_type" value="up">
+                                    <button type="submit" class="upvote-btn">
+                                        <i class="bi bi-triangle-fill"></i>
+                                    </button>
+                                </form>
+                                <div class="vote-count">{{ question.total_votes }}</div>
+                                <form method="post" action="{% url 'forum:vote_question' question.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="vote_type" value="down">
+                                    <button type="submit" class="downvote-btn">
+                                        <i class="bi bi-triangle"></i>
+                                    </button>
+                                </form>
+                                {% if question.is_validated %}
+                                    <div class="accepted-answer mt-2">
+                                        <i class="bi bi-check-lg"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="text-center mt-2">
+                                    <div class="text-muted small">réponses</div>
+                                    <div class="fw-bold">{{ question.question_answers.count }}</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-muted small">vues</div>
+                                    <div class="fw-bold">{{ question.views_count }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne principale - Contenu -->
+                        <div class="col">
+                            <!-- En-tête de la question -->
+                            <div class="mb-3">
+                                <h1 class="h3 mb-2">{{ question.title }}</h1>
+                                
+                                <!-- Tags Stack Overflow style -->
+                                {% if question.tags %}
+                                    <div class="mb-3">
+                                        {% for tag in question.tags|split:"," %}
+                                            <span class="tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Métadonnées -->
+                                <div class="text-muted small mb-3">
+                                    <i class="bi bi-person me-1"></i>{{ question.author.username }}
+                                    <i class="bi bi-clock me-1"></i>{{ question.created_at|date:"d M Y à H:i" }}
+                                    {% if question.category %}
+                                        <span class="badge ms-2" 
+                                              style="background-color: {{ question.category.color }}; color: white;">
+                                            {{ question.category.name }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Contenu de la question -->
+                            <div class="prose mb-4">
+                                {{ question.content|linebreaks }}
+                            </div>
+                            
+                            <!-- Actions sur la question -->
+                            <div class="d-flex gap-2 mb-4">
+                                <form method="post" action="{% url 'forum:vote_question' question.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="vote_type" value="up">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-hand-thumbs-up me-1"></i>
+                                        {{ question.upvotes }}
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'forum:vote_question' question.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="vote_type" value="down">
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-hand-thumbs-down me-1"></i>
+                                        {{ question.downvotes }}
+                                    </button>
+                                </form>
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-share me-1"></i>
+                                    Partager
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="toggleAnswerForm()" id="replyButton">
+                                    <i class="bi bi-reply me-1"></i>
+                                    Répondre
+                                </button>
+                                
+                                {% if question.author == request.user or request.user.is_staff or request.user.is_superuser %}
+                                    {% if not question.is_closed %}
+                                        <a href="{% url 'forum:close_question' question.id %}" class="btn btn-outline-warning btn-sm">
+                                            <i class="bi bi-lock me-1"></i>
+                                            Fermer
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'forum:delete_question' question.id %}" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash me-1"></i>
+                                       
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                           <!-- Formulaire de réponse (caché par défaut) -->
+            <div id="answerFormContainer" class="d-none">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <form method="post" action="{% url 'forum:answer_question' question.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="id_content" class="form-label fw-bold">Votre réponse</label>
+                                <textarea name="content" id="id_content" class="form-control" rows="4" 
+                                          placeholder="Développez votre réponse de manière claire et précise..." required></textarea>
+                                <small class="form-text text-muted">
+                                    Soyez clair et précis dans votre réponse. N'hésitez pas à inclure des exemples concrets.
+                                </small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-send me-2"></i>
+                                    Soumettre
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAnswerForm()">
+                                    <i class="bi bi-x-circle me-2"></i>
+                                    Annuler
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+                    </div>
+                </div>
+            </div>
+              <!-- Bouton Répondre et Formulaire -->
+            <div class="row">
+                <div class="col-12">
+                    <!-- Bouton Répondre Stack Overflow style -->
+                    <div class="text-center"></div>
+                    </div>
+                    
+                
+            </div>
+        
+        <!-- Réponses Stack Overflow style -->
+        <div class="row mb-1">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h3 class="h5">
+                        <i class="bi bi-chat-dots me-2"></i>
+                        {{ answers.count }} Réponses
+                    </h3>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active">Plus récent</button>
+                        <button class="btn btn-outline-secondary">Plus voté</button>
+                        <button class="btn btn-outline-secondary">Plus ancien</button>
+                    </div>
+                </div>
+                
+                {% for answer in answers %}
+                    <div class="card border-0 shadow-sm mb-3 answer-card {% if answer.is_validated %}accepted{% endif %}">
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <!-- Colonne gauche - Votes Stack Overflow style -->
+                                <div class="col-auto vote-cell">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <form method="post" action="{% url 'forum:vote_answer' answer.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="vote_type" value="up">
+                                            <button type="submit" class="upvote-btn">
+                                                <i class="bi bi-triangle-fill"></i>
+                                            </button>
+                                        </form>
+                                        <div class="vote-count">{{ answer.total_votes }}</div>
+                                        <form method="post" action="{% url 'forum:vote_answer' answer.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="vote_type" value="down">
+                                            <button type="submit" class="downvote-btn">
+                                                <i class="bi bi-triangle"></i>
+                                            </button>
+                                        </form>
+                                        {% if answer.is_validated %}
+                                            <div class="accepted-answer mt-2">
+                                                <i class="bi bi-check-lg"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Colonne principale - Contenu -->
+                                <div class="col">
+                                    <!-- En-tête de la réponse -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <span class="me-3">
+                                                    <i class="bi bi-person me-1"></i>
+                                                    <strong>{{ answer.author.username }}</strong>
+                                                    {% if answer.author.is_staff or answer.author.is_superuser %}
+                                                        <span class="badge bg-primary ms-1">Formateur</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary ms-1">Apprenant</span>
+                                                    {% endif %}
+                                                </span>
+                                                <span class="text-muted small">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    {{ answer.created_at|date:"d M Y à H:i" }}
+                                                </span>
+                                            </div>
+                                            
+                                            {% if answer.is_validated %}
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                    Réponse validée
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Contenu de la réponse -->
+                                    <div class="answer-content mb-3">
+                                        <div class="prose">
+                                            {{ answer.content|linebreaks }}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Section unifiée des commentaires -->
+                                    <div class="comments-section mt-3">
+                                        <!-- En-tête des commentaires -->
+                                        <div class="comments-header d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-chat-dots me-2 text-muted"></i>
+                                                <span class="text-muted fw-bold">
+                                                    {{ answer.comments.count }} commentaire{{ answer.comments.count|pluralize }}
+                                                </span>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <!-- Bouton "Voir les commentaires" -->
+                                                {% if answer.comments.all %}
+                                                    <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                            onclick="toggleComments({{ answer.id }})"
+                                                            id="toggleCommentsBtn_{{ answer.id }}">
+                                                        <i class="bi bi-eye me-1"></i>
+                                                        {% if answer.comments.count == 1 %}
+                                                            Voir le commentaire
+                                                        {% else %}
+                                                            {{ answer.comments.count }} commentaires
+                                                        {% endif %}
+                                                    </button>
+                                                {% endif %}
+                                                
+                                                <!-- Bouton "Ajouter un commentaire" -->
+                                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleCommentForm({{ answer.id }})">
+                                                    <i class="bi bi-plus-circle me-1"></i>
+                                                    Ajouter un commentaire
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Arborescence des commentaires (masquée par défaut) -->
+                                        {% if answer.comments.all %}
+                                            <div class="comments-tree mb-3 d-none" id="commentsTree_{{ answer.id }}">
+                                                {% for comment in answer.comments.all %}
+                                                    <div class="comment-item" data-comment-id="{{ comment.id }}">
+                                                        <div class="comment-content">
+                                                            <!-- Bouton supprimer en haut -->
+                                                            {% if comment.author == request.user or request.user.is_staff or request.user.is_superuser %}
+                                                                <div class="d-flex justify-content-end mb-2">
+                                                                    <button class="btn btn-outline-danger btn-sm" onclick="deleteComment({{ comment.id }})">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </div>
+                                                            {% endif %}
+                                                            
+                                                            <div class="comment-header d-flex justify-content-between align-items-start mb-2">
+                                                                <div class="comment-author">
+                                                                    <span class="fw-bold">
+                                                                        <i class="bi bi-person-circle me-1 text-muted"></i>
+                                                                        {{ comment.author.username }}
+                                                                    </span>
+                                                                    {% if comment.author.is_staff or comment.author.is_superuser %}
+                                                                        <span class="badge bg-primary ms-1">Formateur</span>
+                                                                    {% else %}
+                                                                        <span class="badge bg-secondary ms-1">Apprenant</span>
+                                                                    {% endif %}
+                                                                    <span class="text-muted small ms-2">
+                                                                        <i class="bi bi-clock me-1"></i>
+                                                                        {{ comment.created_at|date:"d M Y à H:i" }}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="comment-body">
+                                                                <p class="mb-0">{{ comment.content|linebreaks }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Formulaire de commentaire (caché par défaut) -->
+                                        <div id="commentForm_{{ answer.id }}" class="d-none">
+                                            <div class="card border-0 shadow-sm">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0">
+                                                        <i class="bi bi-chat-dots me-2"></i>
+                                                        Ajouter un commentaire
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <form method="post" action="{% url 'forum:comment_answer' answer.id %}">
+                                                        {% csrf_token %}
+                                                        <div class="mb-3">
+                                                            <textarea name="content" class="form-control" rows="3" 
+                                                                      placeholder="Votre commentaire sur cette réponse..." required></textarea>
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                                <i class="bi bi-send me-1"></i>
+                                                                Publier
+                                                            </button>
+                                                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleCommentForm({{ answer.id }})">
+                                                                <i class="bi bi-x-circle me-1"></i>
+                                                                Annuler
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Actions sur la réponse -->
+                                    <div class="d-flex gap-2">
+                                        {% if can_validate and not answer.is_validated %}
+                                            <a href="{% url 'forum:validate_answer' answer.id %}" class="btn btn-success btn-sm">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Valider
+                                            </a>
+                                        {% endif %}
+                                        {% if answer.author == request.user or request.user.is_staff or request.user.is_superuser %}
+                                            <a href="{% url 'forum:delete_answer' answer.id %}" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-trash me-1"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                {% empty %}
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-chat-dots text-muted" style="font-size: 3rem;"></i>
+                            <h4 class="mt-3">Aucune réponse pour le moment</h4>
+                            <p class="text-muted">Soyez le premier à répondre à cette question !</p>
+                        </div>
+                {% endfor %}
+            </div>
+        </div>    
+        </div>
+    </div>
+    
+</div>
+
+<script>
+function toggleAnswerForm() {
+    const formContainer = document.getElementById('answerFormContainer');
+    const replyButton = document.getElementById('replyButton');
+    
+    if (formContainer.classList.contains('d-none')) {
+        // Afficher le formulaire
+        formContainer.classList.remove('d-none');
+        formContainer.classList.add('d-block');
+        replyButton.innerHTML = '<i class="bi bi-x me-1"></i>Annuler';
+        replyButton.classList.remove('btn-primary');
+        replyButton.classList.add('btn-outline-secondary');
+        
+        // Scroll vers le formulaire
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Focus sur le textarea
+        setTimeout(() => {
+            document.getElementById('id_content').focus();
+        }, 300);
+    } else {
+        // Cacher le formulaire
+        formContainer.classList.remove('d-block');
+        formContainer.classList.add('d-none');
+        replyButton.innerHTML = '<i class="bi bi-reply me-1"></i>Répondre';
+        replyButton.classList.remove('btn-outline-secondary');
+        replyButton.classList.add('btn-primary');
+    }
+}
+
+function toggleCommentForm(answerId) {
+    const commentForm = document.getElementById('commentForm_' + answerId);
+    
+    if (commentForm) {
+        if (commentForm.classList.contains('d-none')) {
+            // Afficher le formulaire de commentaire
+            commentForm.classList.remove('d-none');
+            commentForm.classList.add('d-block');
+            
+            // Scroll vers le formulaire
+            commentForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Focus sur le textarea
+            setTimeout(() => {
+                commentForm.querySelector('textarea').focus();
+            }, 300);
+        } else {
+            // Cacher le formulaire de commentaire
+            commentForm.classList.remove('d-block');
+            commentForm.classList.add('d-none');
+        }
+    }
+}
+
+function toggleComments(answerId) {
+    const commentsTree = document.getElementById('commentsTree_' + answerId);
+    const toggleBtn = document.getElementById('toggleCommentsBtn_' + answerId);
+    
+    if (commentsTree) {
+        if (commentsTree.classList.contains('d-none')) {
+            // Afficher les commentaires
+            commentsTree.classList.remove('d-none');
+            commentsTree.classList.add('d-block');
+            
+            // Changer le bouton en "Masquer"
+            toggleBtn.innerHTML = '<i class="bi bi-eye-slash me-1"></i>Masquer les commentaires';
+            toggleBtn.classList.remove('btn-outline-primary');
+            toggleBtn.classList.add('btn-outline-secondary');
+            
+            // Animation d'apparition
+            commentsTree.style.opacity = '0';
+            commentsTree.style.transition = 'opacity 0.3s ease-in-out';
+            
+            setTimeout(() => {
+                commentsTree.style.opacity = '1';
+            }, 100);
+            
+        } else {
+            // Masquer les commentaires
+            commentsTree.style.opacity = '0';
+            
+            setTimeout(() => {
+                commentsTree.classList.remove('d-block');
+                commentsTree.classList.add('d-none');
+                
+                // Restaurer le bouton "Voir"
+                const commentCount = parseInt(toggleBtn.textContent.match(/\d+/)[0]);
+                if (commentCount === 1) {
+                    toggleBtn.innerHTML = '<i class="bi bi-eye me-1"></i>Voir le commentaire';
+                } else {
+                    toggleBtn.innerHTML = '<i class="bi bi-eye me-1"></i>Voir les ' + commentCount + ' commentaires';
+                }
+                toggleBtn.classList.remove('btn-outline-secondary');
+                toggleBtn.classList.add('btn-outline-primary');
+            }, 300);
+        }
+    }
+}
+
+function loadMoreComments(answerId) {
+    const commentsTree = document.getElementById('commentsTree_' + answerId);
+    const loadMoreBtn = document.getElementById('loadMoreBtn_' + answerId);
+    
+    // Simuler le chargement de tous les commentaires
+    // En pratique, vous devriez faire un appel AJAX pour charger les commentaires supplémentaires
+    const allComments = [
+        // Ici vous devriez avoir accès à tous les commentaires
+        // Pour la démo, nous allons juste simuler
+    ];
+    
+    // Masquer le bouton "Voir plus"
+    loadMoreBtn.style.display = 'none';
+    
+    // Afficher un message de chargement
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'text-center mt-3';
+    loadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"></div> <span class="ms-2">Chargement des commentaires...</span>';
+    loadMoreBtn.parentNode.appendChild(loadingDiv);
+    
+    // Simuler le chargement (remplacer par un vrai appel AJAX)
+    setTimeout(() => {
+        // En pratique, vous devriez charger les commentaires supplémentaires via AJAX
+        // et les ajouter au DOM ici
+        
+        // Pour l'instant, nous allons juste afficher un message
+        loadingDiv.innerHTML = '<div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Tous les commentaires sont maintenant affichés</div>';
+        
+        // Vous pourriez aussi ajouter les commentaires supplémentaires ici
+        // commentsTree.innerHTML += nouveauxCommentaires;
+    }, 1000);
+}
+
+function deleteComment(commentId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+        // En pratique, vous devriez faire un appel AJAX pour supprimer le commentaire
+        // et le retirer du DOM ici
+        const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+        if (commentElement) {
+            commentElement.style.opacity = '0.5';
+            commentElement.style.transition = 'opacity 0.3s';
+            
+            setTimeout(() => {
+                commentElement.remove();
+                // Mettre à jour le compteur de commentaires
+                updateCommentCount();
+            }, 300);
+        }
+    }
+}
+
+function updateCommentCount() {
+    // Mettre à jour le compteur de commentaires
+    const commentCounts = document.querySelectorAll('.comments-header .fw-bold');
+    commentCounts.forEach(counter => {
+        const commentsTree = counter.closest('.comments-section').querySelector('.comments-tree');
+        const visibleComments = commentsTree.querySelectorAll('.comment-item').length;
+        counter.textContent = `${visibleComments} commentaire${visibleComments > 1 ? 's' : ''}`;
+    });
+}
+
+// Animation d'apparition du formulaire
+document.addEventListener('DOMContentLoaded', function() {
+    const formContainer = document.getElementById('answerFormContainer');
+    if (formContainer) {
+        formContainer.style.transition = 'all 0.3s ease-in-out';
+    }
+    
+    // Animation pour tous les formulaires de commentaire
+    const commentForms = document.querySelectorAll('[id^="commentForm_"]');
+    commentForms.forEach(form => {
+        form.style.transition = 'all 0.3s ease-in-out';
+    });
+});
+</script>
+
+<style>
+.prose {
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.prose p {
+    margin-bottom: 1rem;
+}
+
+.prose ul, .prose ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
+
+.prose li {
+    margin-bottom: 0.5rem;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.prose code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.prose blockquote {
+    border-left: 4px solid #007bff;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #6c757d;
+}
+
+.border-success.border-2 {
+    border-width: 2px !important;
+}
+
+.btn-group .btn {
+    font-size: 0.875rem;
+}
+
+/* Stack Overflow Style */
+.question-container {
+    border-left: 4px solid #f48024 !important;
+}
+
+.vote-cell {
+    width: 60px;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.vote-count {
+    color: #6a737c;
+    margin: 5px 0;
+    font-size: 1.1rem;
+}
+
+.upvote-btn, .downvote-btn {
+    background: none;
+    border: 1px solid #d6d9dc;
+    color: #6a737c;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.upvote-btn:hover, .downvote-btn:hover {
+    background: #f8f9f9;
+    border-color: #6a737c;
+}
+
+.upvote-btn.active {
+    background: #f48024;
+    border-color: #f48024;
+    color: white;
+}
+
+.answer-card {
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+}
+
+.answer-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.answer-card.accepted {
+    border-left-color: #5eba7d;
+    background: #f8f9f9;
+}
+
+.accepted-answer {
+    background: #5eba7d;
+    color: white;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+}
+
+.reply-btn {
+    background: #0a95ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.reply-btn:hover {
+    background: #0074cc;
+}
+
+.tag {
+    background: #e1ecf4;
+    color: #39739d;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    margin-right: 4px;
+}
+
+.user-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 3px;
+    background: #6a737c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+/* Réduction des polices principales */
+h1, h2, h3, h4, h5, h6 {
+    font-size: 1.1rem !important;
+}
+
+.prose {
+    font-size: 0.9rem !important;
+    line-height: 1.5;
+}
+
+.card-body {
+    font-size: 0.9rem !important;
+}
+
+.badge {
+    font-size: 0.7rem !important;
+}
+
+.btn-sm {
+    font-size: 0.8rem !important;
+}
+
+.text-muted {
+    font-size: 0.8rem !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .vote-cell {
+        width: 50px;
+        font-size: 0.9rem;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-size: 1rem !important;
+    }
+    
+    .prose {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* Styles pour l'arborescence des commentaires */
+.comments-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    border-left: 3px solid #e9ecef;
+}
+
+.comments-header {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+
+.comments-tree {
+    margin-left: 0;
+}
+
+.comment-item {
+    margin-bottom: 16px;
+    padding-left: 20px;
+    border-left: 2px solid #e9ecef;
+    position: relative;
+}
+
+.comment-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 8px;
+    width: 10px;
+    height: 10px;
+    background: #6c757d;
+    border-radius: 50%;
+    border: 2px solid #f8f9fa;
+}
+
+.comment-content {
+    background: white;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.comment-content:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.comment-header {
+    margin-bottom: 8px;
+}
+
+.comment-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.comment-body {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #495057;
+}
+
+.comment-body p {
+    margin-bottom: 0;
+}
+
+/* Animation pour les formulaires de commentaire */
+.comments-section,
+.comment-item {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive pour les commentaires */
+@media (max-width: 768px) {
+    .comments-section {
+        padding: 12px;
+        margin-top: 12px;
+    }
+    
+    .comment-item {
+        padding-left: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .comment-content {
+        padding: 10px;
+    }
+    
+    .comment-body {
+        font-size: 0.85rem;
+    }
+}
+</style>
+{% endblock %}

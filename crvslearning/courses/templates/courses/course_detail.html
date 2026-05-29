@@ -1,0 +1,921 @@
+{% extends "base.html" %}
+{% load static %}
+{% load payment_tags %}
+{% load course_extras %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+{% endblock %}
+
+
+<!--===================== END BLOCK CONTENT ==================-->
+
+{% block content %}
+ <!--==== LOADER PEACE ======-->
+{% include 'courses/partials/course_loader.html' %}
+
+<head>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Space Grotesk & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* ===== RESPONSIVE GLOBAL ===== */
+
+@media (max-width: 1399px){
+
+    main{
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+}
+
+
+/* ===== TABLETTE ===== */
+
+@media (max-width: 1199px){
+
+    .nav-wrapper-cyber{
+        overflow-x: auto;
+        width: 100%;
+        scrollbar-width: none;
+    }
+
+    .nav-wrapper-cyber::-webkit-scrollbar{
+        display: none;
+    }
+
+    .nav-pills-coursera{
+        flex-wrap: nowrap;
+        min-width: max-content;
+    }
+
+    .thm-card-compact,
+    .thm-stat-box{
+        border-radius: 16px;
+    }
+
+}
+
+
+/* ===== MOBILE ===== */
+
+@media (max-width: 991px){
+
+    main{
+        padding-top: 2rem !important;
+        padding-left: 0.8rem !important;
+        padding-right: 0.8rem !important;
+    }
+
+    .row.g-4.mb-5{
+        margin-top: -60px !important;
+    }
+
+    .nav-island-container{
+        display: flex !important;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: none;
+    }
+
+    .nav-island-container::-webkit-scrollbar{
+        display: none;
+    }
+
+    .nav-wrapper-cyber{
+        width: 100%;
+        min-width: max-content;
+    }
+
+    .nav-pills-coursera{
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+     .nav-island-container{
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+    }
+
+    .nav-island-container::-webkit-scrollbar{
+        display: none;
+    }
+
+    .nav-pills-coursera{
+        flex-wrap: nowrap !important;
+        gap: 6px;
+        width: max-content;
+    }
+
+    .nav-pills-coursera .nav-link{
+        font-size: 0.72rem !important;
+        padding: 7px 10px !important;
+        border-radius: 10px;
+        white-space: nowrap;
+        min-height: auto;
+    }
+
+    .nav-pill-badge{
+        font-size: 0.58rem !important;
+        padding: 2px 5px;
+        margin-left: 4px;
+    }
+    
+    .nav-pills-coursera .nav-link{
+        white-space: nowrap;
+        font-size: 0.82rem;
+        padding: 10px 14px;
+    }
+
+    .nav-pill-badge{
+        font-size: 0.65rem;
+    }
+
+    .thm-card-compact{
+        padding: 1rem !important;
+        border-radius: 16px;
+    }
+
+    .thm-stat-box{
+        padding: 1rem !important;
+    }
+
+    .thm-stat-box .val{
+        font-size: 1rem !important;
+    }
+
+}
+
+
+/* ===== RIGHT SECTION MOBILE/TABLETTE ===== */
+
+@media (max-width: 1199px){
+
+    .col-12.col-xl-4.d-none.d-xl-block{
+        display: block !important;
+        margin-top: 1rem;
+    }
+
+}
+
+
+/* ===== PETITS MOBILES ===== */
+@media (max-width: 768px){
+
+    .row.g-4.mb-5{
+        margin-top: -40px !important;
+    }
+
+    .thm-card-compact{
+        padding: 0.9rem !important;
+    }
+
+     /* retire l'espace énorme au-dessus */
+    .row.g-4.mb-5{
+        margin-top: 0 !important;
+    }
+    .overtop{
+        display: none;
+    }
+    .topover{
+        display: none;
+    }
+    .solid-widget{
+        display: none;
+    }
+    .thm-stat-box .label{
+        font-size: 0.7rem;
+    }
+
+    .thm-stat-box .val{
+        font-size: 0.9rem !important;
+    }
+
+    .nav-pills-coursera .nav-link{
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+    .koln{
+        display: none !important;
+    }
+    .nav-island-container {
+        margin-top: -100px !important;
+    }
+   
+
+}
+@media (max-width: 576px){
+
+    .row.g-4.mb-5{
+        margin-top: -40px !important;
+    }
+
+    .thm-card-compact{
+        padding: 0.9rem !important;
+    }
+
+     /* retire l'espace énorme au-dessus */
+    .row.g-4.mb-5{
+        margin-top: 0 !important;
+    }
+    .overtop{
+        display: none;
+    }
+    .topover{
+        display: none;
+    }
+    .solid-widget{
+        display: none;
+    }
+    .thm-stat-box .label{
+        font-size: 0.7rem;
+    }
+
+    .thm-stat-box .val{
+        font-size: 0.9rem !important;
+    }
+
+    .nav-pills-coursera .nav-link{
+        font-size: 0.75rem;
+        padding: 8px 12px;
+    }
+
+}
+
+        /* Conteneur principal style "Island" */
+        .nav-island-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .nav-wrapper-cyber {
+            background: #111827; /* Fond sombre proche de la photo */
+            padding: 6px;
+            border-radius: 50px; /* Très arrondi */
+            display: inline-flex;
+            gap: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid #1f2937;
+        }
+
+        /* Style des boutons (Pilules) */
+        .nav-pills-coursera .nav-link {
+            border-radius: 50px !important;
+            padding: 8px 20px !important;
+            color: #94a3b8 !important; /* Texte gris clair */
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none !important;
+            background: transparent;
+        }
+
+        /* État Hover */
+        .nav-pills-coursera .nav-link:hover {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* État Actif (Le vert fluo de la photo) */
+        .nav-pills-coursera .nav-link.active {
+            background-color: #10b981 !important; /* Vert lime fluo identique à l'image */
+            color: #000000 !important; /* Texte noir pour le contraste */
+            box-shadow: 0 0 15px rgba(190, 242, 100, 0.4);
+        }
+
+        /* Badge de notification (le petit chiffre noir dans le cercle vert) */
+        .nav-pill-badge {
+            background: rgba(0, 0, 0, 0.2);
+            color: inherit;
+            border-radius: 50%;
+            padding: 2px 7px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+
+        .nav-link.active .nav-pill-badge {
+            background: rgba(0, 0, 0, 0.9);
+            color: #bef264;
+        }
+        /* Grille Coursera x Cyber-Souveraine */
+        body {
+            background-color: #f3f4f6;
+            background-image: 
+                radial-gradient(rgba(9, 9, 11, 0.02) 1px, transparent 1px),
+                linear-gradient(to right, rgba(9, 9, 11, 0.01) 1px, transparent 1px);
+            background-size: 20px 20px, 100px 100px;
+            color: #1f2937;
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+
+        /* Coursera Card Blending */
+        .bg-bento { 
+            background: #ffffff !important;
+            border: 1px solid rgba(9, 9, 11, 0.08) !important;
+            box-shadow: 0 4px 20px -5px rgba(9, 9, 11, 0.02);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .bg-bento:hover {
+            border-color: rgba(79, 70, 229, 0.25) !important;
+            box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.06);
+        }
+
+        /* En-tête Compact Institutionnel style Coursera */
+        .coursera-hero {
+            background: linear-gradient(135deg, #09090b 0%, #111827 100%);
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .coursera-hero::before {
+            content: "";
+            position: absolute;
+            top: 0; right: 0;
+            width: 50%; height: 100%;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* VECTEURS CIRCULAIRES SUBTILS (PEACE LOGO) */
+        .vector-target {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .vector-circle-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 1px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+        .vector-circle-inner {
+            position: absolute;
+            width: 75%;
+            height: 75%;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 50%;
+        }
+
+        /* LIGNE DE SOUVERAINETÉ TRICOLORE SEGMENTÉE */
+        .national-ribbon {
+            height: 4px;
+            width: 100%;
+            display: flex;
+            position: relative;
+        }
+        .ribbon-green { background-color: #007a5e; flex: 1; }
+        .ribbon-red { 
+            background-color: #ce1126; 
+            flex: 1; 
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        .ribbon-yellow { background-color: #fcd116; flex: 1; }
+        
+        .ribbon-red::after {
+            content: "★";
+            position: absolute;
+            top: -6px;
+            color: #fcd116;
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        /* Bouton Coursera Premium Actuator */
+        .btn-coursera-premium {
+            background: #4f46e5;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            border: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-coursera-premium:hover {
+            background: #4338ca;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
+        }
+
+        /* Accordéon Pédagogique */
+        .accordion-item {
+            background: #ffffff !important;
+            border: 1px solid rgba(9, 9, 11, 0.06) !important;
+            margin-bottom: 0.75rem;
+            border-radius: 8px !important;
+            overflow: hidden;
+        }
+        .accordion-button {
+            background: #ffffff !important;
+            color: #09090b !important;
+            font-weight: 600;
+            box-shadow: none !important;
+        }
+        .accordion-button:not(.collapsed) {
+            background-color: rgba(79, 70, 229, 0.02) !important;
+            color: #4f46e5 !important;
+            border-bottom: 1px solid rgba(79, 70, 229, 0.08);
+        }
+        
+        .hover-row {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        .hover-row:hover {
+            background-color: rgba(79, 70, 229, 0.03);
+            border-left-color: #4f46e5;
+        }
+
+        /* Scanline Tactique */
+        .scanline-container::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%);
+            z-index: 2;
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Bouton Burger personnalisé */
+        .burger-trigger {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .burger-trigger:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        main{
+            width: 100vw !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= 1. EN-TÊTE COURSERA HERO COMPACT (WITH BURGER ON MOBILE) ================= -->
+     {% include 'courses/partials/header-saved19-05-2026.html' %}
+
+    <!-- BARRE TRICOLORE DE SOUVERAINETÉ -->
+    <div class="national-ribbon">
+        <div class="ribbon-green"></div>
+        <div class="ribbon-red"></div>
+        <div class="ribbon-yellow"></div>
+    </div>
+    <div class="koln" style="
+    font-family: 'Inter', system-ui, sans-serif; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 16px 24px; 
+    background: rgba(255, 255, 255, 0.4); 
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    ">
+
+    <div class="overtop" style="height: 24px; overflow: hidden; position: relative; font-weight: 700; color: #1e293b; font-size: 16px;">
+        <div style="animation: scrollUp 6s infinite;">
+        <div style="height: 24px;">Learning Overview</div>
+        <div style="height: 24px; color: #6366f1;">New Courses Added</div>
+        <div style="height: 24px;">System Status</div>
+        </div>
+    </div>
+
+    <div class="topover" style="display: flex; gap: 10px;">
+        <style>
+        @keyframes scrollUp {
+            0%, 25% { transform: translateY(0); }
+            33%, 58% { transform: translateY(-24px); }
+            66%, 91% { transform: translateY(-48px); }
+            100% { transform: translateY(0); }
+        }
+        .solid-widget {
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 8px 18px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        </style>
+
+        <div class="solid-widget">
+        <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%;"></span>
+        LMS ACTIVE
+        </div>
+        <div class="solid-widget">COURSES</div>
+        <div class="solid-widget" style="background: #0f172a; color: #f8fafc; border: none;">SEARCH DATA</div>
+    </div>
+    </div>
+    <!-- ================= 2. CONTENU PRINCIPAL DE LA PAGE ================= -->
+    <main class="py-5 px-3 px-md-5">
+        <div class="container-fluid p-0">
+            <div class="row g-4 mb-5" style="margin-top: -110px;">
+                
+                <!-- COMPOSANT GAUCHE : NAVIGATION & SYLLABUS -->
+              <div class="col-12 col-xl-8">
+                <div class="nav-island-container d-none d-md-flex">
+                    <div class="nav-wrapper-cyber">
+                        <ul class="nav nav-pills nav-pills-coursera border-0" id="courseraTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="syllabus-tab" data-bs-toggle="pill" data-bs-target="#pills-syllabus" type="button" role="tab">
+                                    Programme <span class="nav-pill-badge">All</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="reviews-tab" data-bs-toggle="pill" data-bs-target="#pills-reviews" type="button" role="tab">
+                                    Cursus <span class="nav-pill-badge">3</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="faq-tab" data-bs-toggle="pill" data-bs-target="#pills-faq" type="button" role="tab">
+                                    Ressources <span class="nav-pill-badge">5</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="courseraTabContent">
+                    
+                    <div class="tab-pane fade show active" id="pills-syllabus" role="tabpanel">
+                        {% include 'courses/partials/course_accordion.html' %}
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-reviews" role="tabpanel">
+                        <div class="card thm-card-compact p-4 border-0"> <h4 class="fw-bold text-white mb-3">Télémétrie d'apprentissage</h4>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="thm-stat-box p-3">
+                                        <div class="label mb-1">COMPLÉTION</div>
+                                        <div class="val fs-4">45% [05/12]</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="thm-stat-box p-3">
+                                        <div class="label mb-1">SCORE MOYEN</div>
+                                        <div class="val fs-4" style="color: #10b981;">85.00 / 100</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-faq" role="tabpanel">
+                        <div class="thm-card-compact p-4 text-muted small font-mono">
+                            <i class="bi bi-terminal me-2"></i> // Serveurs miroirs OK. Aucun incident répertorié sur le nœud d'apprentissage local.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+                <!-- COMPOSANT DROIT : PANNEAU LOGISTIQUE & ALLOCATION (DESKTOP ONLY) -->
+                <div class="col-12 col-xl-4 d-none d-xl-block">
+                   {% include 'courses/right-section.html' %}
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= 3. OFFCANVAS (MENU BURGER POUR MOBILE/TABLETTE) ================= -->
+    <div class="offcanvas offcanvas-end bg-light border-start text-dark d-xl-none" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel" style="width: 85vw; max-width: 400px;">
+        <div class="offcanvas-header border-bottom bg-dark text-white py-3">
+            <h5 class="offcanvas-title font-mono small fw-bold tracking-wider" id="mobileMenuLabel">// CONSOLE TACTIQUE</h5>
+            <button type="button" class="btn-close btn-close-white text-reset" data-bs-canvas="offcanvas" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-4">
+            
+            <!-- Injection de la partie droite (Logistique / Prix) à l'intérieur du Burger -->
+            <div class="card bg-white rounded-3 p-4 border shadow-sm mb-4">
+                <div class="d-flex align-items-baseline gap-1.5 mb-3">
+                    <span class="fs-2 fw-extrabold text-dark tracking-tight" style="font-weight: 800;">99.000</span>
+                    <span class="text-muted font-mono" style="font-size: 12px;">XAF</span>
+                </div>
+                <button class="btn btn-coursera-premium w-100 py-2.5 rounded-2 d-flex align-items-center justify-content-center gap-2 font-mono small">
+                    <i data-lucide="key-round" style="width: 14px;"></i> INSCRIRE LE NŒUD
+                </button>
+            </div>
+
+            <!-- Liens de navigation complémentaires ou télémétrie rapide -->
+            <div class="d-flex flex-column gap-3 font-mono text-muted small border-top pt-3">
+                <div class="d-flex align-items-center gap-2">
+                    <i data-lucide="bar-chart" style="width: 14px;"></i>
+                    <span>Score moyen actuel : 85/100</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <i data-lucide="award" style="width: 14px;"></i>
+                    <span>Certification d'État incluse</span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Init Lucide
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
+
+
+
+{% endblock content %}
+
+<!--===================== END BLOCK CONTENT ==================-->
+
+{% block extra_js %}
+<script>
+  const {children: titles} = document.querySelector(".animate-text");
+const txtsLen = titles.length;
+let index = 0;
+const textInTimer = 9000;
+const textOutTimer = 9000;
+
+function animateText() {
+  for (let i = 0; i < txtsLen; i++) {
+    titles[i].classList.remove("text-in", "text-out");
+  }
+  titles[index].classList.add("text-in");
+
+  setTimeout(function () {
+    titles[index].classList.add("text-out");
+  }, textOutTimer);
+
+  setTimeout(function () {
+    if (index == txtsLen - 1) {
+      index = 0;
+    } else {
+      index++;
+    }
+    animateText();
+  }, textInTimer);
+}
+
+window.onload = animateText;
+
+// Fonction de confirmation pour le démarrage du quiz avec SweetAlert2
+function confirmQuizStart(lessonId, questionCount, lessonTitle) {
+    const plural = questionCount > 1 ? 's' : '';
+    
+    Swal.fire({
+        title: `${lessonTitle}`,
+        html: `<div class="text-start">
+                 <p>Cette leçon contient ${questionCount} question${plural}.</p>
+                 <p class="mb-0">Voulez-vous commencer maintenant ?</p>
+              </div>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Commencer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true,
+        customClass: {
+            confirmButton: 'btn btn-primary',
+            cancelButton: 'btn btn-outline-secondary me-2'
+        },
+        buttonsStyling: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/exercices/lesson/${lessonId}/quiz/`;
+        }
+    });
+}
+
+// Fonction pour animer le cercle de progression
+function animateCircularProgress() {
+    const progressElements = document.querySelectorAll('.circular-progress');
+    
+    progressElements.forEach(progress => {
+        const percent = progress.getAttribute('data-percent');
+        const progressValue = progress.querySelector('.progress-value');
+        
+        // Mettre à jour la variable CSS avec la valeur du pourcentage
+        progress.style.setProperty('--progress-value', percent);
+        
+        // Pour les navigateurs qui ne supportent pas @property
+        if (!CSS.supports('background', 'paint(something)')) {
+            progress.style.background = `conic-gradient(
+                ${progress.style.getPropertyValue('--progress-color') || '#28a745'} ${percent}%,
+                #e9ecef 0
+            )`;
+        }
+        
+        // Animation du compteur
+        let startValue = 0;
+        const duration = 1500; // 1.5 secondes
+        const increment = percent / (duration / 16); // 60fps
+        
+        const timer = setInterval(() => {
+            startValue += increment;
+            if (startValue >= percent) {
+                startValue = percent;
+                clearInterval(timer);
+            }
+            progressValue.textContent = `${Math.round(startValue)}%`;
+        }, 16);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animer les cercles de progression
+    if (document.querySelector('.circular-progress')) {
+        animateCircularProgress();
+    }
+    // Gestion de la sidebar
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Si c'est un lien #, empêcher le comportement par défaut
+            if (this.getAttribute('href') === '#') {
+                e.preventDefault();
+                
+                // Retirer la classe active de toutes les icônes
+                document.querySelectorAll('.sidebar .icon').forEach(icon => {
+                    icon.classList.remove('active');
+                });
+                
+                // Ajouter la classe active à l'icône cliquée
+                this.classList.add('active');
+                
+                // Récupérer l'icône cliquée
+                const iconElement = this.querySelector('i');
+                const iconClass = Array.from(iconElement.classList).find(cls => cls.startsWith('bi-'));
+                
+                if (!iconClass) return;
+                
+                // Actions spécifiques pour chaque icône
+                if (iconClass === 'bi-gear') {
+                    // Afficher un message pour les paramètres
+                    showToast('Paramètres', 'Accès aux paramètres du compte', 'info');
+                }
+            } else {
+                // Pour les liens normaux, la redirection se fera automatiquement
+                // On ne fait rien ici, le comportement par défaut du navigateur s'occupe de la redirection
+            }
+        });
+    });
+    
+    // Gestion du clic sur l'icône du contenu du cours (qui n'est pas dans un lien <a>)
+    document.querySelector('.sidebar > .icon:first-child').addEventListener('click', function() {
+        // Retirer la classe active de toutes les icônes
+        document.querySelectorAll('.sidebar .icon').forEach(icon => {
+            icon.classList.remove('active');
+        });
+        
+        // Ajouter la classe active à l'icône cliquée
+        this.classList.add('active');
+        
+        // Afficher le contenu principal du cours
+        document.querySelector('.ld-tabs').style.display = 'block';
+        document.querySelector('.panel').style.display = 'block';
+    });
+
+    // Gestion du formulaire de marquage du cours comme terminé
+    document.querySelectorAll('.mark-course-completed-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const button = this.querySelector('button[type="submit"]');
+            const icon = button.querySelector('i');
+            const formData = new FormData(this);
+            
+            // Désactiver le bouton pendant la requête
+            button.disabled = true;
+            
+            // Mise à jour immédiate de l'interface utilisateur
+            const isCurrentlyCompleted = button.classList.contains('btn-success');
+            
+            // Envoyer la requête au serveur
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur réseau');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Mettre à jour l'interface utilisateur
+                    if (data.completed) {
+                        button.classList.remove('btn-outline-primary');
+                        button.classList.add('btn-success');
+                        icon.className = 'bi bi-check-circle-fill me-1';
+                        button.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Cours terminé';
+                        button.disabled = true;
+                        
+                        // Mettre à jour la barre de progression
+                        if (data.progress) {
+                            const progressBar = document.querySelector('.progress-bar');
+                            const progressText = document.querySelector('.progress-wrap .fw-bold');
+                            const progressCount = document.querySelector('.progress-wrap .small');
+                            
+                            if (progressBar && progressText && progressCount) {
+                                progressBar.style.width = `${data.progress.percent}%`;
+                                progressBar.setAttribute('aria-valuenow', data.progress.percent);
+                                progressText.textContent = `${data.progress.percent}%`;
+                                progressCount.textContent = `${data.progress.completed}/${data.progress.total} leçon${data.progress.total > 1 ? 's' : ''}`;
+                            }
+                        }
+                        
+                        showToast('Succès', data.message, 'success');
+                    } else {
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-outline-primary');
+                        icon.className = 'bi bi-circle me-1';
+                        button.innerHTML = '<i class="bi bi-circle me-1"></i> Marquer comme terminé';
+                        showToast('Succès', data.message, 'info');
+                    }
+                } else {
+                    throw new Error(data.message || 'Erreur lors de la mise à jour');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast('Erreur', error.message || 'Une erreur est survenue. Veuillez réessayer.', 'error');
+            })
+            .finally(() => {
+                if (!isCurrentlyCompleted) {
+                    button.disabled = isCurrentlyCompleted;
+                }
+            });
+        });
+    });
+    
+    // Fonction utilitaire pour afficher des notifications
+    function showToast(title, message, type = 'info') {
+        // Utiliser Toastify, SweetAlert2 ou tout autre système de notification
+        // Par exemple, avec SweetAlert2 :
+        if (typeof Swal !== 'undefined') {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
+            
+            Toast.fire({
+                icon: type,
+                title: title,
+                text: message
+            });
+        } else if (typeof toastr !== 'undefined') {
+            // Ou utiliser toastr
+            toastr[type](message, title);
+        } else {
+            // Fallback à une alerte native
+            alert(`${title}: ${message}`);
+        }
+    }
+});
+</script>
+{% endblock %}

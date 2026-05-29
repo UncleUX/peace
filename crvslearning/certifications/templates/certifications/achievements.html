@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes Réalisations{% endblock %}
+
+{% block content %}
+<!-- Loader circulaire fluide -->
+{% include 'courses/partials/course_loader.html' %}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="mb-1">Mes Réalisations</h2>
+        <p class="text-muted mb-0">Vos badges de certification par niveau</p>
+    </div>
+
+    <div class="certification-levels d-flex flex-column gap-4">
+        <!-- Niveau Débutant -->
+        <div class="level-section bg-white" data-level="Débutant">
+            <div class="d-flex flex-column h-100">
+                <h5 class="level-title text-primary mb-3">
+                    <i class="fas fa-star me-2"></i>
+                    Niveau Débutant
+                </h5>
+                <div class="flex-grow-1">
+                    {% with certs=certifications_by_level.beginner %}
+                        {% if certs %}
+                        <div class="d-flex flex-nowrap overflow-auto pb-3" style="gap: 1rem;">
+                            {% for cert in certs %}
+                            <div class="flex-shrink-0 d-flex" style="width: 200px; height: 100%;">
+                                <div class="w-100 h-100">
+                                    {% include 'certifications/_certification_card.html' with cert=cert %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-row d-flex align-items-center justify-content-center w-100">
+                            <i class="far fa-folder-open me-2"></i>Aucune certification pour ce niveau.
+                        </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Niveau Intermédiaire -->
+        <div class="level-section bg-white" data-level="Intermédiaire">
+            <div class="d-flex flex-column h-100">
+                <h5 class="level-title text-warning mb-3">
+                    <i class="fas fa-medal me-2"></i>
+                    Niveau Intermédiaire
+                </h5>
+                <div class="flex-grow-1">
+                    {% with certs=certifications_by_level.intermediate %}
+                        {% if certs %}
+                        <div class="d-flex flex-nowrap overflow-auto pb-3" style="gap: 1rem;">
+                            {% for cert in certs %}
+                            <div class="flex-shrink-0 d-flex" style="width: 200px; height: 100%;">
+                                <div class="w-100 h-100">
+                                    {% include 'certifications/_certification_card.html' with cert=cert %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-row d-flex align-items-center justify-content-center w-100">
+                            <i class="far fa-folder-open me-2"></i>Aucune certification pour ce niveau.
+                        </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Niveau Avancé -->
+        <div class="level-section bg-white" data-level="Avancé">
+            <div class="d-flex flex-column h-100">
+                <h5 class="level-title text-danger mb-3">
+                    <i class="fas fa-trophy me-2"></i>
+                    Niveau Avancé
+                </h5>
+                <div class="flex-grow-1">
+                    {% with certs=certifications_by_level.advanced %}
+                        {% if certs %}
+                        <div class="d-flex flex-nowrap overflow-auto pb-3" style="gap: 1rem;">
+                            {% for cert in certs %}
+                            <div class="flex-shrink-0 d-flex" style="width: 200px; height: 100%;">
+                                <div class="w-100 h-100">
+                                    {% include 'certifications/_certification_card.html' with cert=cert %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-row d-flex align-items-center justify-content-center w-100">
+                            <i class="far fa-folder-open me-2"></i>Aucune certification pour ce niveau.
+                        </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Fond gaming avec animation de dégradé */
+body {
+    background: linear-gradient(-45deg, #0d6efd, #0dcaf0, #0d6efd, #0dcaf0);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+.container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(13, 110, 253, 0.1);
+    z-index: -1;
+    backdrop-filter: blur(5px);
+}
+/* Section de niveau */
+.level-section {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.level-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 202, 240, 0.1) 100%);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.level-section:hover::before {
+    opacity: 1;
+}
+
+/* Couleurs spécifiques par niveau */
+.level-section[data-level="Débutant"] {
+    border-bottom: 2px solid #0d6efd;
+}
+
+.level-section[data-level="Intermédiaire"] {
+    border-bottom: 2px solid #ffc107;
+}
+
+.level-section[data-level="Avancé"] {
+    border-bottom: 2px solid #dc3545;
+}
+
+.level-section[data-level="Débutant"]:hover {
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+    transform: translateY(-2px);
+}
+
+.level-section[data-level="Intermédiaire"]:hover {
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    transform: translateY(-2px);
+}
+
+.level-section[data-level="Avancé"]:hover {
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.25);
+    transform: translateY(-2px);
+}
+
+/* Titre de niveau */
+.level-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+/* Ligne vide */
+.empty-row {
+    min-height: 160px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #6c757d;
+    font-style: italic;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed #dee2e6;
+}
+
+/* Scroll horizontal personnalisé */
+.d-flex.overflow-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.d-flex.overflow-auto::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 10px;
+}
+
+.d-flex.overflow-auto::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+/* Pour Firefox */
+@supports (scrollbar-width: thin) {
+    .d-flex.overflow-auto {
+        scrollbar-width: thin;
+        scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+}
+
+/* Conteneur de cartes */
+.flex-shrink-0 {
+    transition: all 0.3s ease;
+    min-height: 380px; /* Hauteur augmentée pour une meilleure visibilité */
+}
+
+/* Hauteur des cartes */
+.flex-shrink-0 > .w-100 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Contenu des cartes */
+.certification-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Effet de survol sur les cartes */
+.flex-shrink-0:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}

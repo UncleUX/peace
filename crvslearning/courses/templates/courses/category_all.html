@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% include 'courses/partials/course_loader.html' %}
+
+<div class="lms-main-container">
+    <header class="header-visual">
+        <div class="header-overlay">
+            <div class="container-fluid px-lg-5 h-50">
+                <div class="row h-100 align-items-center">
+                    <div class="col-lg-6">
+                        <div class="reveal-up">
+                            <span class="badge-system">PEACEv2.6 // CATALOGUE</span>
+                            <h1 class="display-5 fw-bold text-white mb-2">CRVS Academy</h1>
+                            <p class="text-white-50 mb-4">Accédez aux ressources critiques de l'État Civil tout en maîtrisant les bases et rudiments clés.</p>
+                            
+                            <div class="search-wrapper-modern">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="catSearch" placeholder="Rechercher un cours..." onkeyup="filterCategories()">
+                                <kbd class="d-none d-md-inline">search</kbd>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 d-none d-lg-flex justify-content-end">
+                        <div class="header-stats-grid">
+                            <div class="stat-box">
+                                <span class="n">{{ total_courses }}</span>
+                                <span class="l">COURS</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="n">24/7</span>
+                                <span class="l">ACCÈS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="header-bg" style="background-image: url('{% static 'img/scrub.jpg' %}');"></div>
+    </header>
+ <section class="skills-highlight py-4 border-bottom bg-white" style="width: 100vw; margin-left: -20px;">
+        <div class="container-fluid px-lg-5">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-shield-check text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">Certifié</h6><small class="text-muted">Certifications reconnues</small></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-person-video3 text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">Interactif</h6><small class="text-muted">Projets réels</small></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-infinity text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">À vie</h6><small class="text-muted">Accès illimité</small></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="skill-item">
+                        <i class="bi bi-chat-dots text-primary fs-4"></i>
+                        <div><h6 class="mb-0 fw-bold">Support</h6><small class="text-muted">Experts à l'écoute</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="container-fluid px-lg-5 content-shift">
+         <div class="section-title-box mt-5">
+            <h4 class="fw-bold mb-1">Categories disponibles</h4>
+            <p class="text-muted small">Explorez nos {{ categories.count }} Groupes spécialisées.</p>
+        </div>
+        <div class="row g-3 mt-5" id="categoryGrid">
+            {% if categories_with_stats %}
+                {% for item in categories_with_stats %}
+                <div class="col-md-4 col-lg-3 category-item" style="--delay: {{ forloop.counter }}">
+                    <div class="node-card-compact animate-in">
+                        <div class="scan-line"></div>
+                        
+                        <div class="node-status-bar {% if item.course_count > 0 %}active{% endif %}"></div>
+                        
+                        <div class="p-3 h-100 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="node-icon-wrap">
+                                    {% if item.category.image %}
+                                        <img src="{{ item.category.image.url }}" alt="{{ item.category.name }}">
+                                    {% else %}
+                                        <i class="bi bi-shield-lock"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="node-id">MOD-0{{ forloop.counter }}</span>
+                            </div>
+
+                            <h3 class="node-name">{{ item.category.name }}</h3>
+                            
+                            <div class="node-info-row mb-3">
+                                <span class="meta-pill"><i class="bi bi-layers"></i> {{ item.course_count }} modules</span>
+                                {% if item.course_count > 0 %}
+                                    <span class="meta-pill success"><i class="bi bi-check2"></i> Actif</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mt-auto">
+                                {% if item.course_count > 0 %}
+                                    <a href="{% url 'courses:category_detail' item.category.slug %}" class="btn-node-action">
+                                        Lancer le parcours <i class="bi bi-arrow-right-short"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="btn-node-action disabled" disabled>Architecture en cours...</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+
+    #categoryGrid .category-item {
+        width: 50%;
+        flex: 0 0 50%;
+    }
+
+    .node-card-compact {
+        border-radius: 14px;
+    }
+
+    .node-name {
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .meta-pill {
+        font-size: 0.65rem;
+        padding: 4px 8px;
+    }
+
+    .btn-node-action {
+        font-size: 0.72rem;
+        padding: 8px 10px;
+    }
+
+    .node-id {
+        font-size: 0.65rem;
+    }
+
+    .node-icon-wrap {
+        width: 42px;
+        height: 42px;
+    }
+
+    .node-icon-wrap img,
+    .node-icon-wrap i {
+        width: 20px;
+        height: 20px;
+        font-size: 1rem;
+    }
+
+    .node-info-row {
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .node-card-compact .p-3 {
+        padding: 0.8rem !important;
+    }
+}
+/* --- MOBILE VUE --- */
+  
+        @media (max-width: 768px) {
+     .skills-highlight{
+        display:none;
+     }
+        }
+   
+/* --- ANIMATIONS & EFFECTS --- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scanMove {
+    0% { top: -10%; opacity: 0; }
+    50% { opacity: 0.2; }
+    100% { top: 110%; opacity: 0; }
+}
+
+.animate-in {
+    opacity: 0;
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--delay) * 0.1s);
+}
+
+/* --- HEADER --- */
+.header-visual {
+    width: 100vw; position: relative; left: 50%; right: 50%; margin-left: -50vw; margin-right: -50vw;
+    height: 320px; background: #000; overflow: hidden;
+}
+.header-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.4; filter: contrast(1.2); }
+.header-overlay { position: relative; z-index: 10; height: 100%; background: linear-gradient(to top, #000, rgba(0,0,0,0.2)); }
+
+/* --- SEARCH BAR --- */
+.search-wrapper-modern {
+    background: rgba(255,255,255,0.08); backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 12px;
+    padding: 12px 20px; display: flex; align-items: center; gap: 15px; max-width: 500px;
+    transition: 0.3s;
+}
+.search-wrapper-modern:focus-within { background: rgba(255,255,255,0.15); border-color: #0077B5; }
+.search-wrapper-modern input { background: none; border: none; color: white; width: 100%; outline: none; font-size: 0.9rem; }
+.search-wrapper-modern kbd { background: rgba(255,255,255,0.2); font-size: 0.7rem; padding: 4px 8px; border-radius: 5px; color: #fff; }
+
+/* --- CARDS COMPACTES --- */
+.content-shift { margin-top: -30px; position: relative; z-index: 20; }
+
+.node-card-compact {
+    background: white; border-radius: 5px; height: 260px; position: relative;
+    border: 1px solid rgba(0,0,0,0.05); transition: all 0.4s ease; overflow: hidden;
+}
+.node-card-compact:hover { transform: translateY(-10px); border-color: #0077B5; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); }
+
+/* Ligne de Scan */
+.scan-line {
+    position: absolute; left: 0; width: 100%; height: 3px;
+    background: linear-gradient(90deg, transparent, #0077B5, transparent);
+    z-index: 1; pointer-events: none;
+    animation: scanMove 3s linear infinite;
+}
+
+.node-status-bar { height: 4px; width: 100%; background: #e9ecef; }
+.node-status-bar.active { background: #0077B5; }
+
+.node-icon-wrap { width: 45px; height: 45px; background: #f0f7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #0077B5; }
+.node-icon-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+
+.node-id { font-size: 10px; font-weight: 800; opacity: 0.3; letter-spacing: 1px; }
+.node-name { font-size: 1rem; font-weight: 800; line-height: 1.3; color: #1a1d21; }
+
+.meta-pill { font-size: 0.7rem; font-weight: 700; background: #f8f9fa; padding: 4px 10px; border-radius: 6px; color: #6c757d; display: inline-flex; align-items: center; gap: 5px; }
+.meta-pill.success { background: #e3f9eb; color: #2ecc71; }
+
+.btn-node-action {
+    width: 100%; background: #1a1d21; color: white !important; border-radius: 10px; padding: 10px;
+    font-size: 0.8rem; font-weight: 700; text-align: center; text-decoration: none; transition: 0.3s; border: none; display: block;
+}
+.btn-node-action:hover { background: #0077B5; transform: scale(1.02); }
+
+/* --- INFO GLASS CARDS --- */
+.info-card-glass { background: white; border: 1px solid rgba(0,0,0,0.05); padding: 30px; border-radius: 25px; transition: 0.3s; height: 100%; }
+.info-card-glass:hover { border-color: #0077B5; transform: scale(1.01); }
+
+/* --- STATS HEADER --- */
+.header-stats-grid { display: flex; gap: 20px; }
+.stat-box { text-align: right; border-right: 2px solid #0077B5; padding-right: 20px; }
+.stat-box .n { font-size: 2.5rem; font-weight: 900; color: white; display: block; line-height: 1; }
+.stat-box .l { font-size: 0.7rem; color: rgba(255,255,255,0.5); font-weight: 800; }
+
+.badge-system { background: #0077B5; color: white; font-size: 10px; font-weight: 900; padding: 4px 12px; border-radius: 5px; display: inline-block; margin-bottom: 15px; }
+</style>
+
+<script>
+/**
+ * Filtrage en temps réel des catégories
+ */
+function filterCategories() {
+    const input = document.getElementById('catSearch').value.toLowerCase();
+    const cards = document.getElementsByClassName('category-item');
+    
+    Array.from(cards).forEach(card => {
+        const title = card.querySelector('.node-name').innerText.toLowerCase();
+        if (title.includes(input)) {
+            card.style.display = "";
+            // On peut relancer l'animation si besoin
+            card.querySelector('.node-card-compact').style.animation = 'none';
+            card.querySelector('.node-card-compact').offsetHeight; // Trigger reflow
+            card.querySelector('.node-card-compact').style.animation = null;
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+// Support du raccourci clavier "S" ou "/" pour le focus recherche
+document.addEventListener('keydown', function(e) {
+    if (e.key === '/' || (e.key === 's' && document.activeElement.tagName !== 'INPUT')) {
+        if (document.getElementById('catSearch')) {
+            e.preventDefault();
+            document.getElementById('catSearch').focus();
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,168 @@
+/* CSS personnalisé pour django-nested-admin - Version améliorée */
+/* Amélioration du style sans casser la fonctionnalité */
+
+/* Style général pour les nested inlines */
+.nested-inline .inline-related {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin: 15px 0;
+    background: #fafafa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.nested-inline .inline-related h3,
+.nested-inline .inline-related h2 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    padding: 12px 15px;
+    margin: 0;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    border: none;
+}
+
+.nested-inline .inline-related h3 a,
+.nested-inline .inline-related h2 a {
+    color: white !important;
+    text-decoration: none;
+}
+
+.nested-inline .inline-related h3 a:hover,
+.nested-inline .inline-related h2 a:hover {
+    text-decoration: underline;
+}
+
+/* Style pour les champs dans les inlines */
+.nested-inline .form-row {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    margin: 0;
+}
+
+.nested-inline .form-row:last-child {
+    border-bottom: none;
+}
+
+.nested-inline .form-row label {
+    font-weight: 600;
+    color: #333;
+    min-width: 120px;
+    display: inline-block;
+}
+
+/* Style pour les boutons */
+.nested-inline .add-row a,
+.nested-inline .add-row a:link {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+    margin: 10px 15px;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.nested-inline .add-row a:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+}
+
+.nested-inline .delete-row a,
+.nested-inline .delete-row a:link {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white !important;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.nested-inline .delete-row a:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-1px);
+}
+
+/* Style pour les champs de fichier */
+.nested-inline input[type="file"],
+.nested-inline input[type="text"],
+.nested-inline input[type="number"],
+.nested-inline textarea,
+.nested-inline select {
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.nested-inline input[type="file"]:focus,
+.nested-inline input[type="text"]:focus,
+.nested-inline input[type="number"]:focus,
+.nested-inline textarea:focus,
+.nested-inline select:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Style pour les images */
+.nested-inline img {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin: 5px 0;
+}
+
+/* Amélioration du drag & drop */
+.ui-sortable-helper {
+    background: white;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    border: 2px solid #667eea;
+}
+
+.ui-sortable-placeholder {
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+    border: 2px dashed #667eea;
+    border-radius: 8px;
+    height: 60px;
+    margin: 10px 0;
+}
+
+/* Animation pour les sections */
+.inline-related {
+    transition: all 0.3s ease;
+}
+
+/* Style pour les erreurs de validation */
+.nested-inline .errorlist {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    margin: 5px 0;
+}
+
+.nested-inline .errorlist li {
+    list-style: none;
+    margin: 2px 0;
+}
+
+/* Style pour les champs readonly */
+.nested-inline .readonly {
+    background: #f8f9fa;
+    color: #6c757d;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}

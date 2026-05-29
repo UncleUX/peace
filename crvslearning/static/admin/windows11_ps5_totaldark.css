@@ -1,0 +1,1265 @@
+/* Thème Windows 11 + PS5 - Gris sombre COMPLET - TOUS les champs écrasés */
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #252525;
+    --bg-tertiary: #303030;
+    --bg-card: #2a2a2a;
+    --bg-input: #2a2a2a;  /* Changé de #353535 à #2a2a2a pour un gris plus foncé */
+    --border-color: #404040;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-muted: #808080;
+    --ps5-blue: #0070f3;
+    --ps5-blue-light: #4da6ff;
+    --ps5-blue-dark: #0051cc;
+    --ps5-blue-glow: rgba(0, 112, 243, 0.3);
+    --success: #0d730d;
+    --warning: #e67e00;
+    --danger: #c5282d;
+    --border-radius: 8px;
+    --border-radius-small: 4px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ÉCRASER TOUTES LES COULEURS CLAIRES */
+body, html, .body {
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Écraser TOUS les éléments possibles SAUF les champs de formulaire */
+* {
+    background-color: initial !important;
+    background: initial !important;
+    color: initial !important;
+    border-color: initial !important;
+}
+
+/* EXCEPTION: Garder les backgrounds des champs de formulaire */
+input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="tel"],
+input[type="search"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+input[type="time"],
+input[type="color"],
+input[type="range"],
+input[type="file"],
+input[type="hidden"],
+input[type="image"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+select,
+select option,
+select optgroup,
+textarea,
+.form-control,
+.form-select,
+.form-text,
+.form-label,
+.form-check,
+.form-check-input,
+.form-check-label,
+.form-floating,
+.form-group,
+.form-field,
+.form-row,
+.form-section,
+.custom-select,
+.custom-file,
+.custom-file-input,
+.custom-file-label,
+.custom-checkbox,
+.custom-radio,
+.custom-range,
+.custom-control,
+.custom-control-input,
+.custom-control-label,
+.custom-switch,
+.input-group,
+.input-group-text,
+.was-validated,
+.valid-feedback,
+.invalid-feedback,
+.form-text,
+.help-text,
+.hint,
+.description,
+.field,
+.vTextField,
+.vURLField,
+.vEmailField,
+.vPasswordField,
+.vIntegerField,
+.vBigIntegerField,
+.vSmallIntegerField,
+.vPositiveIntegerField,
+.vPositiveSmallIntegerField,
+.vFloatField,
+.vDecimalField,
+.vDurationField,
+.vTimeField,
+.vDateField,
+.vDateTimeField,
+.vSplitDateTimeField,
+.vGenericIPAddressField,
+.vFilePathField,
+.vImageField,
+.vFileField,
+.vSlugField,
+.vUUIDField,
+.vCharField,
+.vCommaSeparatedIntegerField,
+.vJSONField,
+.vXMLField,
+.vBinaryField,
+.vManyToManyField,
+.vForeignKey,
+.vOneToOneField,
+.vModelChoiceField,
+.vModelMultipleChoiceField,
+.vTypedChoiceField,
+.vTypedMultipleChoiceField,
+.vNullBooleanField,
+.vBooleanField,
+.vChoiceField,
+.vMultipleChoiceField,
+.vRegexField,
+.vIPAddressField {
+    background-color: var(--bg-input) !important;
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser TOUS les champs de formulaire TOUS types possibles */
+input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="tel"],
+input[type="search"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+input[type="time"],
+input[type="color"],
+input[type="range"],
+input[type="file"],
+input[type="hidden"],
+input[type="image"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+select,
+select option,
+select optgroup,
+textarea,
+.form-control,
+.form-select,
+.form-text,
+.form-label,
+.form-check,
+.form-check-input,
+.form-check-label,
+.form-floating,
+.form-group,
+.form-field,
+.form-row,
+.form-section,
+.custom-select,
+.custom-file,
+.custom-file-input,
+.custom-file-label,
+.custom-checkbox,
+.custom-radio,
+.custom-range,
+.custom-control,
+.custom-control-input,
+.custom-control-label,
+.custom-switch,
+.input-group,
+.input-group-text,
+.was-validated,
+.valid-feedback,
+.invalid-feedback,
+.form-text,
+.help-text,
+.hint,
+.description,
+.field,
+.widget,
+.field-input,
+.field-label,
+.field-error,
+.field-help,
+.vTextField,
+.vURLField,
+.vEmailField,
+.vPasswordField,
+.vIntegerField,
+.vBigIntegerField,
+.vSmallIntegerField,
+.vPositiveIntegerField,
+.vPositiveSmallIntegerField,
+.vFloatField,
+.vDecimalField,
+.vDurationField,
+.vTimeField,
+.vDateField,
+.vDateTimeField,
+.vSplitDateTimeField,
+.vGenericIPAddressField,
+.vFilePathField,
+.vImageField,
+.vFileField,
+.vSlugField,
+.vUUIDField,
+.vTextField,
+.vCharField,
+.vCommaSeparatedIntegerField,
+.vJSONField,
+.vXMLField,
+.vBinaryField,
+.vManyToManyField,
+.vForeignKey,
+.vOneToOneField,
+.vManyToManyField,
+.vModelChoiceField,
+.vModelMultipleChoiceField,
+.vTypedChoiceField,
+.vTypedMultipleChoiceField,
+.vNullBooleanField,
+.vBooleanField,
+.vChoiceField,
+.vMultipleChoiceField,
+.vRegexField,
+.vEmailField,
+.vURLField,
+.vSlugField,
+.vIPAddressField,
+.vGenericIPAddressField,
+.vDateField,
+.vDateTimeField,
+.vTimeField,
+.vDurationField,
+.vFloatField,
+.vDecimalField,
+.vIntegerField,
+.vBigIntegerField,
+.vSmallIntegerField,
+.vPositiveIntegerField,
+.vPositiveSmallIntegerField {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    border: 2px solid var(--border-color) !important;
+}
+
+/* Correction spécifique pour les select et options */
+select,
+select option,
+select optgroup,
+.form-select,
+.custom-select {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    border: 2px solid var(--border-color) !important;
+}
+
+/* S'assurer que les options des select sont lisibles */
+select option,
+select optgroup option,
+.form-select option,
+.custom-select option {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Correction pour les input groups */
+.input-group,
+.input-group-text {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Correction pour les textareas */
+textarea,
+.form-control textarea {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Focus states pour TOUS les champs */
+input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="url"]:focus,
+input[type="tel"]:focus,
+input[type="search"]:focus,
+input[type="date"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus,
+input[type="time"]:focus,
+input[type="color"]:focus,
+input[type="range"]:focus,
+input[type="file"]:focus,
+input[type="checkbox"]:focus,
+input[type="radio"]:focus,
+input[type="button"]:focus,
+input[type="reset"]:focus,
+input[type="submit"]:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.form-select:focus,
+.custom-select:focus,
+.custom-file-input:focus,
+.custom-control-input:focus,
+.vTextField:focus,
+.vURLField:focus,
+.vEmailField:focus,
+.vPasswordField:focus,
+.vIntegerField:focus,
+.vFloatField:focus,
+.vDateField:focus,
+.vDateTimeField:focus,
+.vTimeField:focus,
+.vChoiceField:focus,
+.vModelChoiceField:focus,
+.vForeignKey:focus {
+    background: var(--bg-tertiary) !important;
+    border-color: var(--ps5-blue) !important;
+    color: var(--text-primary) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px var(--ps5-blue-glow) !important;
+}
+
+/* Écraser les options des select et datalist */
+select option,
+select optgroup,
+datalist option,
+option {
+    background: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Écraser les checkboxes et radios TOUS types */
+input[type="checkbox"],
+input[type="radio"],
+.custom-checkbox,
+.custom-radio,
+.form-check-input,
+.custom-control-input,
+.vCheckboxInput,
+.vBooleanField {
+    background: var(--bg-input) !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked,
+.custom-checkbox:checked,
+.custom-radio:checked,
+.form-check-input:checked,
+.custom-control-input:checked,
+.vCheckboxInput:checked,
+.vBooleanField:checked {
+    background: var(--ps5-blue) !important;
+    border-color: var(--ps5-blue) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Écraser les labels TOUS types */
+label,
+legend,
+.form-label,
+.form-check-label,
+.custom-control-label,
+.field-label,
+.vLabel,
+.vFieldLabel,
+.required {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+/* Écraser les textes d'aide TOUS types */
+.help,
+.help-text,
+.hint,
+.description,
+.field-help,
+.form-text,
+.vHelpText,
+.vFieldHelpText,
+.vHelptext,
+.vDescription,
+.vFieldDescription {
+    color: var(--text-muted) !important;
+    font-size: 12px !important;
+    font-style: normal !important;
+}
+
+/* Écraser les messages d'erreur TOUS types */
+.error,
+.errorlist,
+.errornote,
+.field-error,
+.vErrorList,
+.vFieldErrorList,
+.vErrors,
+.vFieldErrors,
+.invalid-feedback,
+.form-error,
+.error-message,
+.validation-error {
+    background: rgba(197, 40, 45, 0.15) !important;
+    color: #ef5350 !important;
+    border-color: var(--danger) !important;
+    border-left: 4px solid var(--danger) !important;
+}
+
+/* Écraser les messages de succès TOUS types */
+.success,
+.success-message,
+.valid-feedback,
+.form-success,
+.validation-success,
+.vSuccessMessage {
+    background: rgba(13, 115, 13, 0.15) !important;
+    color: #4caf50 !important;
+    border-color: var(--success) !important;
+    border-left: 4px solid var(--success) !important;
+}
+
+/* Écraser TOUS les fonds blancs/clairs */
+[style*="background: white"],
+[style*="background: #fff"],
+[style*="background: #ffffff"],
+[style*="background-color: white"],
+[style*="background-color: #fff"],
+[style*="background-color: #ffffff"],
+.bg-white,
+.bg-light,
+.bg-info,
+.bg-primary,
+.bg-secondary,
+.bg-success,
+.bg-warning,
+.bg-danger,
+.alert,
+.card,
+.modal-content,
+.dropdown-menu,
+.navbar,
+.jumbotron,
+.well,
+.panel,
+.thumbnail,
+.media,
+.list-group-item,
+.nav-link,
+.nav-item,
+.tab-pane,
+.tab-content,
+.accordion,
+.accordion-item,
+.accordion-header,
+.accordion-body,
+.carousel,
+.carousel-item,
+.progress,
+.tooltip,
+.popover,
+.modal-backdrop,
+.offcanvas,
+.toast,
+.alert-dismissible,
+.badge,
+.spinner-border,
+.spinner-grow,
+.placeholder,
+.placeholder-glow,
+.placeholder-wave {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser TOUS les textes blancs */
+.text-white,
+.text-light,
+.text-info,
+.text-muted,
+.text-primary,
+.text-secondary,
+.text-success,
+.text-warning,
+.text-danger,
+h1, h2, h3, h4, h5, h6,
+p, span, div, td, th, li, a, label, legend,
+caption, small, strong, em, i, b, u {
+    color: var(--text-primary) !important;
+}
+
+/* Écraser les bordures claires */
+.border,
+.border-light,
+.border-info,
+.border-white,
+.border-primary,
+.border-secondary,
+.border-success,
+.border-warning,
+.border-danger,
+.outline,
+.outline-light,
+.outline-info,
+.outline-white {
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser TOUS les boutons */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-info,
+.btn-light,
+.btn-white,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-info,
+.btn-outline-light,
+.btn-outline-white,
+.btn-outline-success,
+.btn-outline-warning,
+.btn-outline-danger,
+.btn-link,
+.btn-group,
+.btn-toolbar,
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+button,
+.submit,
+.default,
+.button,
+.button-primary,
+.button-secondary,
+.button-info,
+.button-light,
+.button-white,
+.button-success,
+.button-warning,
+.button-danger,
+.vButton,
+.vSubmitButton,
+.vResetButton,
+.vCancelButton,
+.vSaveButton,
+.vDeleteButton {
+    background: var(--ps5-blue) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--ps5-blue) !important;
+}
+
+.btn:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover,
+input[type="submit"]:hover,
+button:hover,
+.submit:hover,
+.default:hover,
+.button:hover,
+.vButton:hover {
+    background: var(--ps5-blue-light) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--ps5-blue-light) !important;
+}
+
+/* Écraser les badges */
+.badge,
+.badge-primary,
+.badge-info,
+.badge-light,
+.badge-white,
+.badge-secondary,
+.badge-success,
+.badge-warning,
+.badge-danger {
+    background: var(--ps5-blue) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--ps5-blue) !important;
+}
+
+/* Écraser les tables */
+.table,
+.table-striped,
+.table-bordered,
+.table-hover,
+.table-responsive,
+thead,
+tbody,
+tfoot,
+tr,
+th,
+td,
+caption,
+.vTable,
+.vDataTable,
+.vListTable {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.table th,
+.table td,
+.vTable th,
+.vTable td {
+    background: var(--bg-card) !important;
+    color: var(--text-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.table thead th,
+.vTable thead th {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Écraser les cards */
+.card,
+.card-header,
+.card-body,
+.card-footer,
+.card-img,
+.card-img-top,
+.card-img-bottom,
+.card-title,
+.card-text,
+.card-subtitle,
+.card-link,
+.card-group,
+.card-deck,
+.card-columns,
+.vCard,
+.vPanel {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser les modals */
+.modal,
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer,
+.modal-title,
+.modal-backdrop,
+.modal-dialog,
+.modal-xl,
+.modal-lg,
+.modal-md,
+.modal-sm,
+.vModal {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser les dropdowns */
+.dropdown,
+.dropdown-menu,
+.dropdown-item,
+.dropdown-header,
+.dropdown-divider,
+.dropdown-toggle,
+.dropstart,
+.dropend,
+.dropup,
+.vDropdown {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: var(--bg-tertiary) !important;
+    color: var(--ps5-blue) !important;
+}
+
+/* Écraser les alerts */
+.alert,
+.alert-info,
+.alert-light,
+.alert-primary,
+.alert-secondary,
+.alert-success,
+.alert-warning,
+.alert-danger,
+.alert-dismissible,
+.alert-heading,
+.alert-link,
+.alert-text,
+.vAlert,
+.vMessage {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser les progress bars */
+.progress,
+.progress-bar,
+.progress-striped,
+.progress-bar-striped,
+.progress-bar-animated,
+.vProgress {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.progress-bar,
+.vProgressBar {
+    background: var(--ps5-blue) !important;
+}
+
+/* Écraser les list groups */
+.list-group,
+.list-group-item,
+.list-group-item-action,
+.list-group-flush,
+.list-group-horizontal,
+.vListGroup {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.list-group-item:hover,
+.list-group-item:focus {
+    background: var(--bg-tertiary) !important;
+}
+
+/* Écraser les navs */
+.nav,
+.navbar,
+.navbar-brand,
+.navbar-nav,
+.navbar-toggler,
+.navbar-collapse,
+.navbar-expand,
+.navbar-fixed,
+.navbar-sticky,
+.navbar-dark,
+.navbar-light,
+.nav,
+.nav-tabs,
+.nav-pills,
+.nav-fill,
+.nav-justified,
+.nav-link,
+.nav-item,
+.navbar-text,
+.navbar-toggler-icon,
+.vNav {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser les breadcrumbs */
+.breadcrumb,
+.breadcrumb-item,
+.breadcrumb-item+.breadcrumb-item::before,
+.vBreadcrumb {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* Écraser les paginations */
+.pagination,
+.page-link,
+.page-item,
+.page-item.disabled,
+.page-item.active,
+.pagination-lg,
+.pagination-sm,
+.pagination-centered,
+.vPagination {
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.page-link:hover,
+.page-link:focus {
+    background: var(--bg-tertiary) !important;
+    color: var(--ps5-blue) !important;
+}
+
+/* Styles spécifiques à l'admin Django */
+#header {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow) !important;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+#branding h1 a:hover {
+    color: var(--ps5-blue) !important;
+}
+
+#user-tools {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: var(--border-radius);
+    padding: 8px 16px;
+}
+
+#user-tools a {
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+#user-tools a:hover {
+    color: var(--ps5-blue) !important;
+}
+
+.nav-sidebar {
+    background: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border-color) !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-sidebar .app-list .app-item a {
+    color: var(--text-secondary) !important;
+    border-radius: var(--border-radius);
+    margin: 4px 8px;
+    padding: 12px 16px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.nav-sidebar .app-list .app-item a:hover {
+    background: rgba(0, 112, 243, 0.1) !important;
+    color: var(--ps5-blue) !important;
+    border-color: var(--ps5-blue) !important;
+    transform: translateX(2px);
+}
+
+.nav-sidebar .app-list .app-item a:before {
+    content: "⚡";
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+#content {
+    background: var(--bg-primary) !important;
+    padding: 24px;
+    min-height: calc(100vh - 60px);
+}
+
+.breadcrumbs {
+    background: var(--bg-card) !important;
+    padding: 16px 24px;
+    margin: -24px -24px 24px -24px;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.breadcrumbs a {
+    color: var(--ps5-blue) !important;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumbs a:hover {
+    color: var(--ps5-blue-light) !important;
+}
+
+.form-row {
+    background: var(--bg-card) !important;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow);
+}
+
+.deletelink {
+    background: linear-gradient(135deg, var(--danger) 0%, #9b1f1f 100%) !important;
+    color: var(--text-primary) !important;
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-block;
+    box-shadow: 0 4px 12px rgba(197, 40, 45, 0.3);
+}
+
+.deletelink:hover {
+    background: linear-gradient(135deg, #d13438 0%, var(--danger) 100%) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(197, 40, 45, 0.4);
+}
+
+#result_list {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow);
+}
+
+#result_list thead th {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    padding: 16px;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--ps5-blue) !important;
+}
+
+#result_list tbody td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+    vertical-align: middle;
+}
+
+#result_list tbody tr:hover {
+    background: rgba(0, 112, 243, 0.08) !important;
+}
+
+#result_list tbody tr:hover td {
+    color: var(--text-primary) !important;
+}
+
+#result_list tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dashboard .module {
+    background: var(--bg-card) !important;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color) !important;
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+}
+
+.dashboard .module h2 {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%) !important;
+    color: var(--text-primary) !important;
+    padding: 16px;
+    margin: 0;
+    font-weight: 600;
+    font-size: 16px;
+    border-bottom: 2px solid var(--ps5-blue) !important;
+}
+
+.dashboard .module ul {
+    padding: 16px;
+    margin: 0;
+    list-style: none;
+}
+
+.dashboard .module li {
+    margin-bottom: 8px;
+}
+
+.dashboard .module li a {
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-small);
+    transition: var(--transition);
+    display: block;
+    border: 1px solid transparent;
+}
+
+.dashboard .module li a:hover {
+    background: rgba(0, 112, 243, 0.1) !important;
+    color: var(--ps5-blue) !important;
+    border-color: var(--ps5-blue) !important;
+    transform: translateX(2px);
+}
+
+.messagelist {
+    margin: 0 0 24px 0;
+}
+
+.messagelist li {
+    padding: 16px 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 8px;
+    font-weight: 500;
+    border-left: 4px solid;
+}
+
+.messagelist li.success {
+    background: rgba(13, 115, 13, 0.15) !important;
+    color: #4caf50 !important;
+    border-left-color: var(--success);
+}
+
+.messagelist li.warning {
+    background: rgba(230, 126, 0, 0.15) !important;
+    color: #ffa726 !important;
+    border-left-color: var(--warning);
+}
+
+.messagelist li.error {
+    background: rgba(197, 40, 45, 0.15) !important;
+    color: #ef5350 !important;
+    border-left-color: var(--danger);
+}
+
+.paginator {
+    background: var(--bg-card) !important;
+    border-radius: var(--border-radius);
+    padding: 16px;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow);
+    margin-top: 16px;
+}
+
+.paginator a, .paginator .this-page {
+    padding: 8px 12px;
+    margin: 0 4px;
+    border-radius: var(--border-radius-small);
+    text-decoration: none;
+    transition: var(--transition);
+    border: 1px solid var(--border-color) !important;
+}
+
+.paginator a {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-secondary) !important;
+}
+
+.paginator a:hover {
+    background: var(--ps5-blue) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--ps5-blue) !important;
+}
+
+.paginator .this-page {
+    background: var(--ps5-blue) !important;
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    border-color: var(--ps5-blue) !important;
+}
+
+#changelist-filter {
+    background: var(--bg-card) !important;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow);
+}
+
+#changelist-filter h2 {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+#changelist-filter ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#changelist-filter li {
+    margin-bottom: 8px;
+}
+
+#changelist-filter li a {
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-small);
+    transition: var(--transition);
+    display: block;
+    border: 1px solid transparent;
+}
+
+#changelist-filter li a:hover {
+    background: rgba(0, 112, 243, 0.1) !important;
+    color: var(--ps5-blue) !important;
+    border-color: var(--ps5-blue) !important;
+}
+
+#changelist-filter li.selected a {
+    background: var(--ps5-blue) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--ps5-blue) !important;
+}
+
+.nested-inline .inline-related {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--border-radius);
+    margin: 15px 0;
+    box-shadow: var(--shadow);
+}
+
+.nested-inline .inline-related h3,
+.nested-inline .inline-related h2 {
+    background: linear-gradient(135deg, var(--ps5-blue) 0%, var(--ps5-blue-dark) 100%) !important;
+    color: var(--text-primary) !important;
+    padding: 12px 15px;
+    margin: 0;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    font-weight: 600;
+    border: none;
+}
+
+.nested-inline .form-row {
+    background: var(--bg-tertiary) !important;
+    border: none;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin: 0;
+    padding: 12px 15px;
+}
+
+.nested-inline .form-row:last-child {
+    border-bottom: none;
+}
+
+.nested-inline .add-row a,
+.nested-inline .add-row a:link {
+    background: linear-gradient(135deg, var(--ps5-blue) 0%, var(--ps5-blue-dark) 100%) !important;
+    color: var(--text-primary) !important;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block;
+    margin: 10px 15px;
+    transition: var(--transition);
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+}
+
+.nested-inline .add-row a:hover {
+    background: linear-gradient(135deg, var(--ps5-blue-light) 0%, var(--ps5-blue) 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 112, 243, 0.4);
+}
+
+.nested-inline .delete-row a,
+.nested-inline .delete-row a:link {
+    background: linear-gradient(135deg, var(--danger) 0%, #9b1f1f 100%) !important;
+    color: var(--text-primary) !important;
+    padding: 6px 12px;
+    border-radius: var(--border-radius-small);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: var(--transition);
+    border: none;
+}
+
+.nested-inline .delete-row a:hover {
+    background: linear-gradient(135deg, #d13438 0%, var(--danger) 100%) !important;
+    transform: translateY(-1px);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ps5-blue);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ps5-blue-light);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-row, .dashboard .module, #result_list {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-sidebar {
+        width: 100%;
+        position: relative;
+    }
+    
+    #content {
+        padding: 16px;
+    }
+    
+    .form-row {
+        padding: 16px;
+    }
+}

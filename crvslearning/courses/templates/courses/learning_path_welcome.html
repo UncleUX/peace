@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bienvenue dans votre parcours - CRVS Learning{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/learning-path.css' %}">
+<style>
+.welcome-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.welcome-header {
+    background: linear-gradient(135deg, #0072ce 0%, #0056b3 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 16px;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.welcome-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.welcome-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.steps-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.step-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0072ce, #0056b3);
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0072ce, #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto 1rem;
+}
+
+.step-icon {
+    font-size: 2.5rem;
+    color: #0072ce;
+    margin-bottom: 1rem;
+}
+
+.step-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.step-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.cta-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.cta-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.cta-description {
+    color: #6c757d;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-primary-large {
+    background: linear-gradient(135deg, #0072ce, #0056b3);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    box-shadow: 0 4px 6px rgba(0, 114, 206, 0.3);
+}
+
+.btn-primary-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 114, 206, 0.4);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    color: #0072ce;
+}
+
+.feature-text {
+    font-size: 0.9rem;
+    color: #495057;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .welcome-container {
+        padding: 1rem;
+    }
+    
+    .welcome-header {
+        padding: 2rem;
+    }
+    
+    .welcome-title {
+        font-size: 2rem;
+    }
+    
+    .steps-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+    <!-- Header de bienvenue -->
+    <div class="welcome-header">
+        <div class="welcome-icon">🎓</div>
+        <h1 class="welcome-title">Bienvenue dans votre parcours d'apprentissage</h1>
+        <p class="welcome-subtitle">{{ user.get_full_name|default:user.username }}, nous sommes ravis de vous accompagner dans votre formation</p>
+    </div>
+
+    <!-- Étapes du parcours -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="step-number">1</div>
+                    <div class="step-icon mb-3">🎯</div>
+                    <h3 class="step-title">Choisissez votre parcours</h3>
+                    <p class="step-description">Sélectionnez le parcours adapté à votre structure et vos objectifs professionnels</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="step-number">2</div>
+                    <div class="step-icon mb-3">📚</div>
+                    <h3 class="step-title">Suivez votre formation</h3>
+                    <p class="step-description">Progressez à votre rythme avec des cours interactifs et des exercices pratiques</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="step-number">3</div>
+                    <div class="step-icon mb-3">📊</div>
+                    <h3 class="step-title">Suivez votre progression</h3>
+                    <p class="step-description">Visualisez vos avancées, obtenez des certificats et atteignez vos objectifs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section CTA -->
+    <div class="card text-center mb-4">
+        <div class="card-body p-4">
+            <h2 class="card-title">Prêt à commencer votre parcours ?</h2>
+            <p class="card-text mb-4">
+                Découvrez nos parcours spécialisés pour chaque structure et niveau de compétence
+            </p>
+            
+            <!-- Fonctionnalités -->
+            <div class="row mb-4">
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">✨</div>
+                        <div class="feature-text">Parcours personnalisés</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">🏆</div>
+                        <div class="feature-text">Certifications reconnues</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">📱</div>
+                        <div class="feature-text">Accessibilité mobile</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">🎓</div>
+                        <div class="feature-text">Experts formateurs</div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{% url 'courses:assign_learning_path' %}" class="btn btn-primary btn-lg me-2">
+                🚀 Commencer mon parcours
+            </a>
+        </div>
+    </div>
+
+    <!-- Parcours disponibles -->
+    <div class="card text-center">
+        <div class="card-body p-4">
+            <h2 class="card-title">Découvrez nos parcours disponibles</h2>
+            <p class="card-text mb-4">
+                Des formations adaptées à chaque structure et niveau d'expertise
+            </p>
+            
+            <div class="row">
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">🏢</div>
+                        <div class="feature-text">Agent Commune</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">🏥</div>
+                        <div class="feature-text">Ministère Santé</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">📋</div>
+                        <div class="feature-text">Coordonnateur BUNEC</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">🎓</div>
+                        <div class="feature-text">Universitaire</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">🤝</div>
+                        <div class="feature-text">ONG</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">💼</div>
+                        <div class="feature-text">Consultant</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">🌐</div>
+                        <div class="feature-text">Multi-structures</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-3">
+                    <div class="d-flex align-items-center p-3 bg-light rounded">
+                        <div class="feature-icon me-3">📊</div>
+                        <div class="feature-text">Analytics</div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{% url 'courses:learning_path_comparison' %}" class="btn btn-success btn-lg">
+                📈 Comparer les parcours
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des cartes d'étapes
+    const stepCards = document.querySelectorAll('.step-card');
+    stepCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 200 * index);
+    });
+
+    // Animation des fonctionnalités
+    const featureItems = document.querySelectorAll('.feature-item');
+    featureItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, 100 * index);
+    });
+
+    // Effet de parallaxe sur le header
+    const header = document.querySelector('.welcome-header');
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const rate = scrolled * -0.5;
+        header.style.transform = `translateY(${rate}px)`;
+    });
+});
+</script>
+{% endblock %}

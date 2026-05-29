@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load extras %}
+
+{% block content %}
+<div class="container py-2">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white" style="background-image: url('{% static 'img/scrub.jpg' %}'); background-size: cover; background-position: center; background-repeat: no-repeat; position: relative;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="h4 mb-0">Quiz : {{ lesson.title }}</h4>
+                            <p class="mb-0">{{ course.title }} - Module {{ lesson.module.title }}</p>
+                        </div>
+                        
+                        <!-- Timer Chrono -->
+                        <div class="text-end">
+                            <div class="timer-display bg-dark bg-opacity-25 rounded px-3 py-2">
+                                <i class="bi bi-clock me-2"></i>
+                                <span id="timer" class="fw-bold">00:00:00</span>
+                            </div>
+                            <small class="text-white-50">Temps écoulé</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Barre de progression -->
+                    <div class="progress mt-1" style="height: 6px;">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ progress_percentage }}%"
+                             aria-valuenow="{{ current_question|add:1 }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="{{ exercises|length }}">
+                        </div>
+                    </div>
+                    <small class="text-white mt-1 d-block">
+                        Question {{ current_question|add:1 }} / {{ exercises|length }}
+                    </small>
+                </div>
+                
+                <div class="card-body">
+                    {% if current_exercise %}
+                        <form method="post" id="quiz-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="current_question" value="{{ current_question }}">
+                            
+                            <!-- Question actuelle -->
+                            <div class="card mb-2 question-container">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="bi bi-question-circle me-2"></i>
+                                        Question {{ current_question|add:1 }}
+                                    </h5>
+                                    <p class="card-text fs-5">{{ current_exercise.question }}</p>
+                                    
+                                    <div class="choices-container ms-3">
+                                        {% if current_exercise.choices.count == 2 and "Vrai" in current_exercise.choices.first.text and "Faux" in current_exercise.choices.last.text %}
+                                            <!-- Mode Vrai/Faux spécial -->
+                                            <div class="row g-1">
+                                                <div class="col-md-6">
+                                                    <div class="card h-50 border-2 choice-card border-secondary" 
+                                                         data-choice-id="{{ current_exercise.choices.first.id }}"
+                                                         onclick="selectChoice({{ current_exercise.id }}, {{ current_exercise.choices.first.id }})">
+                                                        <div class="card-body text-center p-1">
+                                                            <input class="form-check-input d-none" 
+                                                                   type="radio" 
+                                                                   name="exercise_{{ current_exercise.id }}" 
+                                                                   id="choice_{{ current_exercise.choices.first.id }}" 
+                                                                   value="{{ current_exercise.choices.first.id }}"
+                                                                   {% if user_answers|get_item:current_exercise.id == current_exercise.choices.first.id %}checked{% endif %}>
+                                                            <label class="form-check-label d-block h4 mb-0 text-success fw-bold cursor-pointer" 
+                                                                   for="choice_{{ current_exercise.choices.first.id }}"
+                                                                   style="cursor: pointer;">
+                                                                <i class="bi bi-check-circle-fill me-2"></i>VRAI
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card h-50 border-2 choice-card border-secondary" 
+                                                         data-choice-id="{{ current_exercise.choices.last.id }}"
+                                                         onclick="selectChoice({{ current_exercise.id }}, {{ current_exercise.choices.last.id }})">
+                                                        <div class="card-body text-center p-2">
+                                                            <input class="form-check-input d-none" 
+                                                                   type="radio" 
+                                                                   name="exercise_{{ current_exercise.id }}" 
+                                                                   id="choice_{{ current_exercise.choices.last.id }}" 
+                                                                   value="{{ current_exercise.choices.last.id }}"
+                                                                   {% if user_answers|get_item:current_exercise.id == current_exercise.choices.last.id %}checked{% endif %}>
+                                                            <label class="form-check-label d-block h4 mb-0 text-danger fw-bold cursor-pointer" 
+                                                                   for="choice_{{ current_exercise.choices.last.id }}"
+                                                                   style="cursor: pointer;">
+                                                                <i class="bi bi-x-circle-fill me-2"></i>FAUX
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <!-- Mode QCM normal -->
+                                            {% for choice in current_exercise.choices.all %}
+                                                <div class="form-check mb-2 p-2 border rounded choice-card {% if user_answers|get_item:current_exercise.id == choice.id %}selected{% endif %}"
+                                                     data-choice-id="{{ choice.id }}"
+                                                     onclick="selectChoice({{ current_exercise.id }}, {{ choice.id }})">
+                                                    <input class="form-check-input" 
+                                                           type="radio" 
+                                                           name="exercise_{{ current_exercise.id }}" 
+                                                           id="choice_{{ choice.id }}" 
+                                                           value="{{ choice.id }}"
+                                                           {% if user_answers|get_item:current_exercise.id == choice.id %}checked{% endif %}>
+                                                    <label class="form-check-label w-100 cursor-pointer" for="choice_{{ choice.id }}">
+                                                        {{ choice.text }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Navigation -->
+                            <div class="d-flex justify-content-between">
+                                <!-- Bouton Précédent -->
+                                {% if current_question > 0 %}
+                                    <button type="submit" name="action" value="previous" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i>Précédent
+                                    </button>
+                                {% else %}
+                                    <div></div> <!-- Espace vide pour aligner -->
+                                {% endif %}
+                                
+                                <!-- Boutons Suivant/Soumettre -->
+                                {% if has_next_question %}
+                                    <button type="submit" name="action" value="next" class="btn btn-primary">
+                                        Suivant<i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                {% else %}
+                                    <button type="submit" name="action" value="submit" class="btn btn-success">
+                                        <i class="bi bi-send-check me-2"></i>Soumettre le quiz
+                                    </button>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Navigation supplémentaire avec bouton Next toujours visible -->
+                            {% if has_next_question %}
+                                <!-- <div class="d-flex justify-content-center mt-3">
+                                    <button type="submit" name="action" value="next" class="btn btn-outline-primary">
+                                        <i class="bi bi-arrow-right me-2"></i>Question suivante
+                                    </button>
+                                </div> -->
+                            {% endif %}
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Aucun exercice disponible pour cette leçon pour le moment.
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Retour au cours
+                        </a>
+                        
+                        <!-- Mini aperçu des questions -->
+                        <div class="d-flex gap-1">
+                            {% for exercise in exercises %}
+                                <button type="button" 
+                                        class="btn btn-sm {% if forloop.counter0 == current_question %}btn-primary{% elif user_answers|get_item:exercise.id %}btn-success{% else %}btn-outline-secondary{% endif %}"
+                                        onclick="goToQuestion({{ forloop.counter0 }})"
+                                        title="Question {{ forloop.counter }}">
+                                    {{ forloop.counter }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+.choice-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    transform: scale(1);
+}
+
+.choice-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: #0d6efd !important;
+}
+
+.choice-card.selected {
+    border-color: #0d6efd !important;
+    background-color: #e7f1ff !important;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    transform: scale(1.02);
+}
+
+.choice-card.selected-true {
+    border-color: #198754 !important;
+    background-color: #d1e7dd !important;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.25);
+    transform: scale(1.05);
+}
+
+.choice-card.selected-false {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+    transform: scale(1.05);
+}
+
+.choice-card .card-body {
+    position: relative;
+}
+
+.choice-card.selected-true .card-body::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #198754;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.choice-card.selected-false .card-body::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.choice-card.selecting {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* Animations de transition entre questions */
+.question-container {
+    animation: fadeInSlide 0.4s ease-out;
+}
+
+@keyframes fadeInSlide {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Animation de la barre de progression */
+.progress-bar {
+    background: linear-gradient(90deg, #00c9ff 0%, #92fe9d 100%);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animation des boutons de navigation */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation des boutons de navigation rapide */
+.btn-sm {
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.btn-sm:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation du timer */
+.timer-display {
+    transition: all 0.3s ease;
+}
+
+.timer-display:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Animation de l'icône du timer */
+.timer-display i {
+    animation: clockPulse 2s infinite;
+}
+
+@keyframes clockPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Animation des cartes de questions */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation du chargement */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Style pour la barre de progression */
+.progress {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Timer Chrono - Utiliser le temps du serveur comme référence
+    var serverStartTime = {{ quiz_start_time|default:0 }}; // Temps du serveur en secondes
+    var serverCurrentTime = {{ current_time|default:0 }}; // Temps actuel du serveur
+    var timerElement = document.getElementById('timer');
+    
+    // Calculer le décalage entre le client et le serveur
+    var clientTime = Date.now() / 1000; // Temps client en secondes
+    var timeOffset = clientTime - serverCurrentTime;
+    
+    function updateTimer() {
+        if (serverStartTime > 0) {
+            // Calculer le temps écoulé en utilisant le temps client corrigé
+            var currentClientTime = Date.now() / 1000;
+            var adjustedServerTime = currentClientTime - timeOffset;
+            var elapsedSeconds = Math.floor(adjustedServerTime - serverStartTime);
+            
+            // S'assurer que le temps n'est pas négatif
+            if (elapsedSeconds < 0) {
+                elapsedSeconds = 0;
+            }
+            
+            // Calculer heures, minutes, secondes
+            var hours = Math.floor(elapsedSeconds / 3600);
+            var minutes = Math.floor((elapsedSeconds % 3600) / 60);
+            var seconds = elapsedSeconds % 60;
+            
+            // Formater le temps
+            var timeString = 
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+            
+            timerElement.textContent = timeString;
+            
+            // Changer la couleur selon le temps
+            if (elapsedSeconds > 300) { // Plus de 5 minutes
+                timerElement.style.color = '#ff6b6b'; // Rouge
+            } else if (elapsedSeconds > 180) { // Plus de 3 minutes
+                timerElement.style.color = '#ffd93d'; // Jaune
+            } else {
+                timerElement.style.color = '#ffffff'; // Blanc
+            }
+            
+            // Log pour débogage
+            console.log('Timer update - Elapsed:', elapsedSeconds, 'Formatted:', timeString);
+        } else {
+            // Si pas de timer, afficher 00:00:00
+            timerElement.textContent = '00:00:00';
+            console.log('No timer start time available');
+        }
+    }
+    
+    // Démarrer le timer immédiatement
+    updateTimer();
+    setInterval(updateTimer, 1000); // Mettre à jour chaque seconde
+    
+    // Restaurer la sélection précédente
+    var checkedRadio = document.querySelector('input[type="radio"]:checked');
+    if (checkedRadio) {
+        var card = document.querySelector('[data-choice-id="' + checkedRadio.value + '"]');
+        if (card) {
+            card.classList.add('selected');
+        }
+    }
+    
+    // Fonction pour sélectionner un choix
+    window.selectChoice = function(exerciseId, choiceId) {
+        console.log('Sélection:', exerciseId, choiceId);
+        
+        // Retirer la sélection de toutes les cartes pour cet exercice
+        var exerciseCards = document.querySelectorAll('[data-choice-id][onclick*="' + exerciseId + '"]');
+        exerciseCards.forEach(function(card) {
+            card.classList.remove('selected', 'selected-true', 'selected-false', 'selecting');
+        });
+        
+        // Ajouter la sélection à la carte cliquée
+        var selectedCard = document.querySelector('[data-choice-id="' + choiceId + '"]');
+        if (selectedCard) {
+            selectedCard.classList.add('selecting');
+            
+            // Déterminer si c'est Vrai/Faux
+            var isTrue = selectedCard.querySelector('.text-success');
+            
+            setTimeout(function() {
+                selectedCard.classList.remove('selecting');
+                selectedCard.classList.add('selected');
+                
+                if (isTrue) {
+                    selectedCard.classList.add('selected-true');
+                } else if (selectedCard.querySelector('.text-danger')) {
+                    selectedCard.classList.add('selected-false');
+                }
+            }, 150);
+            
+            // Cocher le radio button correspondant
+            var radioButton = selectedCard.querySelector('input[type="radio"]');
+            if (radioButton) {
+                radioButton.checked = true;
+            }
+        }
+    };
+    
+    // Fonction pour aller à une question spécifique
+    window.goToQuestion = function(questionIndex) {
+        showLoading();
+        var form = document.getElementById('quiz-form');
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'goto_question';
+        input.value = questionIndex;
+        form.appendChild(input);
+        
+        // Ajouter un délai pour l'animation
+        setTimeout(function() {
+            form.submit();
+        }, 300);
+    };
+    
+    // Afficher l'animation de chargement
+    function showLoading() {
+        var overlay = document.createElement('div');
+        overlay.className = 'loading-overlay active';
+        overlay.innerHTML = '<div class="loading-spinner"></div>';
+        document.body.appendChild(overlay);
+    }
+    
+    // Validation avant soumission finale
+    var form = document.getElementById('quiz-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            var action = e.submitter ? e.submitter.value : 'next';
+            
+            if (action === 'submit') {
+                var checkedRadio = document.querySelector('input[type="radio"]:checked');
+                if (!checkedRadio) {
+                    e.preventDefault();
+                    alert('Veuillez répondre à cette question avant de soumettre.');
+                    return false;
+                }
+            }
+            
+            // Afficher l'animation de chargement pour toutes les actions
+            if (action === 'next' || action === 'previous' || action === 'submit') {
+                showLoading();
+            }
+        });
+    }
+    
+    // Animation d'entrée au chargement de la page
+    setTimeout(function() {
+        var questionContainer = document.querySelector('.question-container');
+        if (questionContainer) {
+            questionContainer.style.opacity = '0';
+            questionContainer.style.transform = 'translateX(20px)';
+            
+            setTimeout(function() {
+                questionContainer.style.opacity = '1';
+                questionContainer.style.transform = 'translateX(0)';
+            }, 100);
+        }
+    }, 100);
+});
+</script>
+{% endblock %}

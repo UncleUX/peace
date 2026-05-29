@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Choisir mon parcours - CRVS Learning{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/learning-path.css' %}">
+<style>
+.assign-path-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.assign-path-header {
+    background: linear-gradient(135deg, #0072ce 0%, #0056b3 100%);
+    color: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.assign-path-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.assign-path-header .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.user-info {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.user-info h3 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.user-details {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #0072ce;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.user-data {
+    flex: 1;
+}
+
+.user-data p {
+    margin: 0.5rem 0;
+    color: #666;
+}
+
+.user-data strong {
+    color: #333;
+}
+
+.recommended-badge {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="assign-path-container">
+    <!-- Header -->
+    <div class="assign-path-header">
+        <h1>🎯 Choisir mon parcours d'apprentissage</h1>
+        <p class="subtitle">Sélectionnez le parcours adapté à votre structure et vos objectifs</p>
+    </div>
+
+    <!-- Informations utilisateur -->
+    <div class="user-info">
+        <h3>👤 Votre profil</h3>
+        <div class="user-details">
+            <div class="user-avatar">
+                {{ user.username|first|upper }}
+            </div>
+            <div class="user-data">
+                <p><strong>Nom :</strong> {{ user.get_full_name|default:user.username }}</p>
+                <p><strong>Email :</strong> {{ user.email }}</p>
+                <p><strong>Structure :</strong> {{ user.get_structure_display|default:"Non définie" }}</p>
+                <p><strong>Date d'inscription :</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+        {% if recommended_template %}
+        <div class="recommended-badge">
+            ⭐ Parcours recommandé : {{ recommended_template.name }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Templates disponibles -->
+    {% if templates %}
+        <div class="row">
+            {% for template in templates %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">{{ template.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <span class="badge bg-secondary">{{ template.get_structure_display }}</span>
+                            <span class="badge {% if template.level == 'beginner' %}bg-success{% elif template.level == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %} ms-1">{{ template.get_level_display }}</span>
+                        </div>
+                        
+                        <p class="card-text">{{ template.description|truncatewords:20 }}</p>
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">⏱️ {{ template.estimated_duration_weeks }} semaines</small>
+                            </div>
+                            <div class="col-6 text-end">
+                                <small class="text-muted">📚 {{ template.courses.count }} cours</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted d-block">🏷️ Catégories :</small>
+                            {% for category in template.categories.all %}
+                                <span class="badge bg-light text-dark me-1">{{ category.name }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if template.is_active %}
+                                    <span class="badge bg-success">✓ Actif</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactif</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm" onclick="showTemplateDetails({{ template.id }})">
+                                    📋 Détails
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <div class="d-grid">
+                            <button class="btn btn-primary" onclick="selectTemplate({{ template.id }}, '{{ template.name }}')">
+                                🚀 Choisir ce parcours
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Aucun template disponible -->
+        <div class="card text-center">
+            <div class="card-body p-5">
+                <div class="display-4 text-muted mb-3">📚</div>
+                <h3 class="card-title">Aucun parcours disponible</h3>
+                <p class="card-text">
+                    Aucun parcours d'apprentissage n'est disponible pour le moment. 
+                    Contactez votre administrateur pour en créer de nouveaux.
+                </p>
+                <a href="{% url 'courses:all_courses' %}" class="btn btn-outline-primary">
+                    📖 Voir tous les cours
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal Bootstrap pour les détails du template -->
+<div class="modal fade" id="templateDetailsModal" tabindex="-1" aria-labelledby="templateDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="templateDetailsModalLabel">Détails du parcours</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <!-- Le contenu sera chargé dynamiquement -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" id="modalSelectBtn">Choisir ce parcours</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Fonction pour afficher les détails du template
+function showTemplateDetails(templateId) {
+    // Charger les détails du template via AJAX
+    fetch(`/courses/learning-path/template-details/${templateId}/`)
+        .then(response => response.json())
+        .then(data => {
+            // Afficher les détails dans le modal
+            document.getElementById('modalContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>${data.name}</h4>
+                        <p>${data.description}</p>
+                        <div class="mb-3">
+                            <span class="badge bg-secondary">${data.structure}</span>
+                            <span class="badge bg-primary">${data.level}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Durée :</strong> ${data.duration_weeks} semaines
+                        </div>
+                        <div class="mb-3">
+                            <strong>Nombre de cours :</strong> ${data.course_count}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Catégories</h5>
+                        <div class="mb-3">
+                            ${data.categories.map(cat => `<span class="badge bg-light text-dark me-1">${cat}</span>`).join('')}
+                        </div>
+                        <h5>Objectifs d'apprentissage</h5>
+                        <ul>
+                            ${data.learning_outcomes.map(outcome => `<li>${outcome}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            // Configurer le bouton de sélection
+            document.getElementById('modalSelectBtn').onclick = function() {
+                selectTemplate(templateId, data.name);
+                // Fermer le modal Bootstrap
+                const modal = bootstrap.Modal.getInstance(document.getElementById('templateDetailsModal'));
+                modal.hide();
+            };
+            
+            // Afficher le modal Bootstrap
+            const modal = new bootstrap.Modal(document.getElementById('templateDetailsModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors du chargement des détails du parcours');
+        });
+}
+
+// Fonction pour sélectionner un template
+function selectTemplate(templateId, templateName) {
+    if (confirm(`Êtes-vous sûr de vouloir choisir le parcours "${templateName}" ?`)) {
+        // Envoyer le formulaire
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "courses:assign_learning_path" %}';
+        
+        // Ajouter le CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            form.appendChild(csrfToken.cloneNode(true));
+        }
+        
+        // Ajouter le template_id
+        const templateInput = document.createElement('input');
+        templateInput.type = 'hidden';
+        templateInput.name = 'template_id';
+        templateInput.value = templateId;
+        form.appendChild(templateInput);
+        
+        // Soumettre le formulaire
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Animation des cartes
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+});
+</script>
+{% endblock %}

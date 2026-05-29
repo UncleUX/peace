@@ -1,0 +1,757 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Comparer les parcours - CRVS Learning{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/learning-path.css' %}">
+<style>
+.comparison-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.comparison-header {
+    background: linear-gradient(135deg, #0072ce 0%, #0056b3 100%);
+    color: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.comparison-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.comparison-header .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.filters-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.filter-select {
+    padding: 0.75rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #0072ce;
+}
+
+.comparison-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.table-header {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-bottom: 2px solid #0072ce;
+}
+
+.table-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 200px repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1px;
+    background: #e9ecef;
+}
+
+.comparison-header-cell {
+    background: #0072ce;
+    color: white;
+    padding: 1rem;
+    font-weight: 600;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+.comparison-row {
+    display: contents;
+}
+
+.comparison-label {
+    background: #f8f9fa;
+    padding: 1rem;
+    font-weight: 600;
+    color: #333;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+}
+
+.comparison-cell {
+    background: white;
+    padding: 1rem;
+    text-align: center;
+    border-right: 1px solid #e9ecef;
+    transition: background-color 0.3s ease;
+}
+
+.comparison-cell:hover {
+    background: #f8f9fa;
+}
+
+.comparison-cell:last-child {
+    border-right: none;
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.feature-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.feature-value {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.check-icon {
+    color: #28a745;
+    font-size: 1.2rem;
+}
+
+.cross-icon {
+    color: #dc3545;
+    font-size: 1.2rem;
+}
+
+.duration-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.level-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.level-beginner {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.level-intermediate {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.level-advanced {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.structure-badge {
+    background: #f3e5f5;
+    color: #7b1fa2;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.recommended-badge {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.recomme.btn-primary-large {
+    background: linear-gradient(135deg, #0072ce, #0056b3);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    box-shadow: 0 4px 6px rgba(0, 114, 206, 0.3);
+}
+
+.btn-primary-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 114, 206, 0.4);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0072ce, #0056b3);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+    box-shadow: 0 4px 6px rgba(0, 114, 206, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 114, 206, 0.4);
+    background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+.btn-compare {
+    background: #0072ce;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-compare:hover {
+    background: #0056b3;
+}
+
+.btn-select {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-select:hover {
+    background: #218838;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.empty-state-description {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .comparison-container {
+        padding: 1rem;
+    }
+    
+    .comparison-header h1 {
+        font-size: 2rem;
+    }
+    
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .comparison-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .comparison-header-cell,
+    .comparison-label,
+    .comparison-cell {
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .comparison-row {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .comparison-label {
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+        background: #e9ecef;
+        font-weight: 700;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="comparison-container">
+    <!-- Header -->
+    <div class="comparison-header">
+        <h1>📊 Comparer les parcours d'apprentissage</h1>
+        <p class="subtitle">Trouvez le parcours parfait pour votre structure et vos objectifs</p>
+    </div>
+
+    {% if comparison_data %}
+        <!-- Filtres -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Filtres de recherche</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Structure</label>
+                        <select class="form-select" id="structureFilter">
+                            <option value="">Toutes les structures</option>
+                            <option value="commune">Commune</option>
+                            <option value="minsante">Ministère de la Santé</option>
+                            <option value="bunec">BUNEC</option>
+                            <option value="universite">Université</option>
+                            <option value="ong">ONG</option>
+                            <option value="consultant">Consultant</option>
+                            <option value="multi_structure">Multi-structures</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Niveau</label>
+                        <select class="form-select" id="levelFilter">
+                            <option value="">Tous les niveaux</option>
+                            <option value="beginner">Débutant</option>
+                            <option value="intermediate">Intermédiaire</option>
+                            <option value="advanced">Avancé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Durée maximale</label>
+                        <select class="form-select" id="durationFilter">
+                            <option value="">Toutes les durées</option>
+                            <option value="8">8 semaines maximum</option>
+                            <option value="12">12 semaines maximum</option>
+                            <option value="16">16 semaines maximum</option>
+                            <option value="20">20 semaines maximum</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Boutons d'action -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                                <i class="bi bi-funnel me-2"></i>Appliquer les filtres
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetFilters()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Réinitialiser
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="compareSelected()">
+                                <i class="bi bi-bar-chart me-2"></i>Comparer la sélection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau de comparaison -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Comparaison détaillée des parcours</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col">Caractéristiques</th>
+                                {% for item in comparison_data %}
+                                <th scope="col" class="text-center">
+                                    <div>{{ item.template.name }}</div>
+                                    <div>
+                                        <span class="badge bg-secondary">{{ item.structure }}</span>
+                                        <span class="badge {% if item.level == 'beginner' %}bg-success{% elif item.level == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %}">{{ item.level|title }}</span>
+                                    </div>
+                                    {% if item.template.name == "Agent Commune Débutant" %}
+                                    <div><span class="badge bg-warning">⭐ Recommandé</span></div>
+                                    {% endif %}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Ligne : Structure -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">🏢</span>
+                                        <span class="fw-bold">Structure cible</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">{{ item.structure }}</span>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Niveau -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">📈</span>
+                                        <span class="fw-bold">Niveau</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <span class="badge {% if item.level == 'beginner' %}bg-success{% elif item.level == 'intermediate' %}bg-warning{% else %}bg-danger{% endif %}">{{ item.level|title }}</span>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Durée -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">⏱️</span>
+                                        <span class="fw-bold">Durée</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <span class="badge bg-info">{{ item.duration_weeks }} semaines</span>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Nombre de cours -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">📚</span>
+                                        <span class="fw-bold">Nombre de cours</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <strong>{{ item.course_count }}</strong> cours
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Catégories -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">🏷️</span>
+                                        <span class="fw-bold">Catégories</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <strong>{{ item.category_count }}</strong> catégories
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Description -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">📝</span>
+                                        <span class="fw-bold">Description</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <small>{{ item.description|truncatewords:10 }}</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Certification -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">🎓</span>
+                                        <span class="fw-bold">Certification</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <span class="text-success">✓</span>
+                                    <small class="d-block">Certificat inclus</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Support -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">💬</span>
+                                        <span class="fw-bold">Support</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <span class="text-success">✓</span>
+                                    <small class="d-block">Support complet</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Accès mobile -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">📱</span>
+                                        <span class="fw-bold">Accès mobile</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <span class="text-success">✓</span>
+                                    <small class="d-block">Application mobile</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Ligne : Actions -->
+                            <tr>
+                                <th scope="row">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">🚀</span>
+                                        <span class="fw-bold">Actions</span>
+                                    </div>
+                                </th>
+                                {% for item in comparison_data %}
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'courses:assign_learning_path' %}?template_id={{ item.template.id }}" class="btn btn-success btn-sm">
+                                            Choisir
+                                        </a>
+                                        <a href="#" class="btn btn-outline-primary btn-sm" onclick="showDetails('{{ item.template.id }}'); return false;">
+                                            Détails
+                                        </a>
+                                    </div>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- État vide -->
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h2 class="empty-state-title">Aucun parcours disponible</h2>
+            <p class="empty-state-description">
+                Aucun parcours n'est disponible pour le moment. 
+                Revenez plus tard ou contactez votre administrateur.
+            </p>
+            <a href="{% url 'courses:all_courses' %}" class="btn-primary-large">
+                📚 Voir tous les cours
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation du tableau de comparaison
+    const rows = document.querySelectorAll('.comparison-row');
+    rows.forEach((row, index) => {
+        const cells = row.querySelectorAll('.comparison-cell');
+        cells.forEach((cell, cellIndex) => {
+            cell.style.opacity = '0';
+            cell.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                cell.style.opacity = '1';
+                cell.style.transform = 'translateY(0)';
+            }, 100 * index + 50 * cellIndex);
+        });
+    });
+
+    // Filtrage
+    const structureFilter = document.getElementById('structureFilter');
+    const levelFilter = document.getElementById('levelFilter');
+    const durationFilter = document.getElementById('durationFilter');
+
+    function applyFilters() {
+        const structureValue = structureFilter.value;
+        const levelValue = levelFilter.value;
+        const durationValue = durationFilter.value;
+
+        // Parcourir chaque colonne de parcours
+        const headerCells = document.querySelectorAll('thead th');
+        headerCells.forEach((headerCell, colIndex) => {
+            if (colIndex === 0) return; // Ignorer la première colonne (caractéristiques)
+            
+            // Récupérer les valeurs de cette colonne
+            const structureBadge = headerCell.querySelector('.badge.bg-secondary');
+            const levelBadge = headerCell.querySelector('.badge:not(.bg-secondary):not(.bg-warning)');
+            const structure = structureBadge ? structureBadge.textContent.trim() : '';
+            const level = levelBadge ? levelBadge.textContent.toLowerCase() : '';
+            
+            // Récupérer la durée depuis la ligne durée
+            const durationRow = document.querySelector('tr:nth-child(4)'); // Ligne durée
+            const durationCell = durationRow ? durationRow.querySelectorAll('td')[colIndex - 1] : null;
+            const durationText = durationCell ? durationCell.textContent : '';
+            const duration = parseInt(durationText) || 0;
+
+            // Vérifier si cette colonne doit être affichée
+            let showColumn = true;
+            
+            if (structureValue && structure !== structureValue) {
+                showColumn = false;
+            }
+            if (levelValue && level !== levelValue) {
+                showColumn = false;
+            }
+            if (durationValue && duration > parseInt(durationValue)) {
+                showColumn = false;
+            }
+
+            // Masquer/afficher la colonne
+            const rows = document.querySelectorAll('tbody tr, thead tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('th, td');
+                if (cells[colIndex]) {
+                    if (showColumn) {
+                        cells[colIndex].style.display = '';
+                        cells[colIndex].style.visibility = '';
+                    } else {
+                        cells[colIndex].style.display = 'none';
+                    }
+                }
+            });
+        });
+    }
+
+    structureFilter.addEventListener('change', applyFilters);
+    levelFilter.addEventListener('change', applyFilters);
+    durationFilter.addEventListener('change', applyFilters);
+});
+
+function showDetails(templateId) {
+    // Fonction pour afficher les détails d'un template
+    alert('Détails du template ' + templateId + ' - À implémenter');
+}
+
+function resetFilters() {
+    // Réinitialiser tous les filtres
+    document.getElementById('structureFilter').value = '';
+    document.getElementById('levelFilter').value = '';
+    document.getElementById('durationFilter').value = '';
+    
+    // Réafficher toutes les colonnes
+    const rows = document.querySelectorAll('tbody tr, thead tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('th, td');
+        cells.forEach(cell => {
+            cell.style.display = '';
+            cell.style.visibility = '';
+        });
+    });
+}
+
+function compareSelected() {
+    // Compter les parcours visibles
+    let visibleCount = 0;
+    const headerCells = document.querySelectorAll('thead th');
+    headerCells.forEach((headerCell, colIndex) => {
+        if (colIndex === 0) return; // Ignorer la première colonne
+        
+        const firstRowCell = document.querySelector('tbody tr td:nth-child(' + (colIndex + 1) + ')');
+        if (firstRowCell && firstRowCell.style.display !== 'none') {
+            visibleCount++;
+        }
+    });
+    
+    if (visibleCount < 2) {
+        alert('Veuillez sélectionner au moins 2 parcours à comparer en utilisant les filtres.');
+        return;
+    }
+    
+    alert('Comparaison de ' + visibleCount + ' parcours - Fonctionnalité à développer.');
+}
+</script>
+{% endblock %}

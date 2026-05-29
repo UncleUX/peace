@@ -1,0 +1,44 @@
+Algorithme de génération de l'ID de certificat
+==========================================
+
+Emplacement du code : certifications/models.py
+
+Méthode de génération :
+----------------------
+L'ID du certificat (ou code) est généré automatiquement lors de la création d'un objet Certification grâce à la méthode save().
+
+Code source :
+-----------
+class Certification(models.Model):
+    # ... autres champs ...
+    code = models.CharField(max_length=64, unique=True, db_index=True, default="", blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.code:
+            # Génère un code unique avec UUID
+            self.code = uuid.uuid4().hex
+        return super().save(*args, **kwargs)
+
+Fonctionnement :
+--------------
+1. Vérifie si un code existe déjà pour ce certificat
+2. Si aucun code n'existe, génère un UUID4 (version 4 d'UUID)
+3. Convertit cet UUID en une chaîne hexadécimale de 32 caractères avec .hex
+4. Sauvegarde ce code dans le champ 'code' du certificat
+
+Caractéristiques du code généré :
+------------------------------
+- Longueur fixe : 32 caractères hexadécimaux (0-9, a-f)
+- Unique (garanti par l'algorithme UUID v4)
+- Stocké avec un index pour des recherches rapides
+- Généré une seule fois à la création du certificat
+
+Utilisations du code :
+-------------------
+1. URL de vérification du certificat
+2. Nom du fichier PDF du certificat
+3. Identification unique du certificat dans le système
+
+Exemple de code généré :
+----------------------
+'1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p'

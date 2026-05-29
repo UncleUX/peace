@@ -1,0 +1,66 @@
+/* Styles pour le widget de sélection multiple de structures */
+
+.multiple-structures-widget {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.multiple-structures-widget .form-check {
+    display: block;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.multiple-structures-widget .form-check:hover {
+    background-color: #e9ecef;
+}
+
+.multiple-structures-widget .form-check-input {
+    margin-right: 8px;
+    transform: scale(1.1);
+}
+
+.multiple-structures-widget .form-check-label {
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+}
+
+.multiple-structures-widget .form-check-input:checked + .form-check-label {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Animation pour les cases à cocher */
+.multiple-structures-widget .form-check-input {
+    position: relative;
+    cursor: pointer;
+}
+
+.multiple-structures-widget .form-check-input:checked::before {
+    content: '✓';
+    position: absolute;
+    top: -2px;
+    left: 2px;
+    color: #007bff;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .multiple-structures-widget {
+        max-height: 200px;
+    }
+    
+    .multiple-structures-widget .form-check {
+        padding: 6px 8px;
+    }
+}

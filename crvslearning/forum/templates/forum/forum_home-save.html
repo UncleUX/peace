@@ -1,0 +1,1739 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load forum_filters %}
+
+{% block extra_css %}
+<style>
+.forum-header {
+    height: 200px;
+    width: 100%;
+    background-image: url('{% static 'img/scrub.jpg' %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    margin-bottom: 30px;
+    border-radius: 5px;
+}
+
+.forum-header-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 30px;
+}
+
+.forum-header-content {
+    text-align: left;
+    color: white;
+    z-index: 2;
+}
+
+.forum-title {
+    font-size: 2.0rem;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.forum-subtitle {
+    font-size: 1rem;
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+/* Forcer l'affichage côte à côte pour 3 colonnes */
+@media (min-width: 992px) {
+    .forum-main-row {
+        display: flex !important;
+        flex-direction: row !important;
+    }
+    
+    .forum-questions-col {
+        flex: 0 0 58.333333% !important;  /* 7/12 */
+        max-width: 58.333333% !important;
+    }
+    
+    .forum-sidebar-col {
+        flex: 0 0 25% !important;  /* 3/12 */
+        max-width: 25% !important;
+    }
+}
+
+/* Section Recommandé pour vous - Compact & Dynamique */
+.recommendations-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 1px;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendations-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.recommendations-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.recommendations-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+}
+
+.recommendation-item {
+    background: linear-gradient(145deg, #ffffff, #f8f9fa);
+    border-radius: 12px;
+
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.4s ease;
+}
+
+.recommendation-item:hover::before {
+    left: 100%;
+}
+
+.recommendation-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.recommendation-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+    transition: all 0.2s ease;
+}
+
+.recommendation-badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 12px rgba(102, 126, 234, 0.35);
+}
+
+.recommendation-title {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+    transition: all 0.2s ease;
+}
+
+.recommendation-item:hover .recommendation-title {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transform: scale(1.02);
+}
+
+.recommendation-progress {
+    height: 4px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.08);
+    overflow: hidden;
+    position: relative;
+}
+
+.recommendation-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 8px;
+    position: relative;
+    animation: progressPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+.recommendation-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: progressShimmer 1.5s infinite;
+}
+
+@keyframes progressShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.recommendation-stats {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.recommendation-stat {
+    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 3px 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #495057;
+    transition: all 0.2s ease;
+}
+
+.recommendation-stat:hover {
+    background: linear-gradient(145deg, #667eea, #764ba2);
+    color: white;
+    transform: scale(1.08);
+}
+
+.recommendation-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.recommendation-btn:hover::before {
+    width: 200px;
+    height: 200px;
+}
+
+.recommendation-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+}
+
+.refresh-btn {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+    background: rgba(255,255,255,0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.section-title {
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 1px;
+}
+
+/* Animation rapide d'apparition */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.recommendation-item {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.recommendation-item:nth-child(1) { animation-delay: 0.05s; }
+.recommendation-item:nth-child(2) { animation-delay: 0.1s; }
+.recommendation-item:nth-child(3) { animation-delay: 0.15s; }
+
+/* Responsive compact */
+@media (max-width: 768px) {
+    .recommendations-section {
+        margin: 0 -10px 1rem -10px;
+        border-radius: 12px;
+    }
+    
+    .recommendation-item {
+        margin-bottom: 0.8rem;
+        padding: 1rem !important;
+    }
+    
+    .recommendation-title {
+        font-size: 0.85rem;
+    }
+    
+    .section-title {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .recommendations-card {
+        padding: 1rem !important;
+    }
+    
+    .recommendation-item {
+        padding: 0.8rem !important;
+    }
+}
+.forum-tabs {
+    display: flex;
+    border: none;
+    padding: 0;
+    padding: 2px;
+}
+
+.forum-tabs .forum-nav-link {
+    display: inline-block;
+    padding: 5px 7px;
+    color: #000;
+    background-color: transparent !important;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    border-bottom: 1px solid #e9ecef;
+    min-width: 100px;
+    text-align: center;
+}
+
+.forum-tabs .forum-nav-link:hover {
+    color: #333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-bottom-color: rgba(102, 126, 234, 0.5);
+}
+
+.forum-tabs .forum-nav-link.active {
+
+    color:#000;
+    transform: translateY(-2px);
+    border-bottom-color: #667eea;
+}
+
+.forum-tabs .forum-nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.forum-tabs .forum-nav-link:hover::before {
+    left: 100%;
+}
+
+.forum-tabs .nav-item {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.forum-tabs .forum-nav-link i {
+    font-size: 1rem;
+    text-decoration: none !important;
+}
+
+.forum-tab-content {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.forum-tab-content .tab-pane {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Badges Instagram Style */
+.contributor-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.contributor-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.contributor-initial {
+    font-family: Arial, sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.more-badge {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border: 2px solid #fff;
+}
+
+.more-badge .contributor-initial {
+    font-size: 12px;
+}
+
+/* Gestion de l'espace pour plus de contributeurs */
+.contributors-container {
+    max-height: 60px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.contributors-container.expanded {
+    max-height: 200px;
+}
+
+.contributor-avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.contributor-badge:hover .contributor-avatar-img {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Animation d'apparition */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.contributor-badge {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.contributor-badge:nth-child(1) { animation-delay: 0.1s; }
+.contributor-badge:nth-child(2) { animation-delay: 0.2s; }
+.contributor-badge:nth-child(3) { animation-delay: 0.3s; }
+.contributor-badge:nth-child(4) { animation-delay: 0.4s; }
+.contributor-badge:nth-child(5) { animation-delay: 0.5s; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'courses/partials/course_loader.html' %}
+<!-- Header Forum -->
+<div class="forum-header">
+    <div class="forum-header-overlay">
+        <div class="logo text-white me-3">
+            <img src="{% static 'img/logo.png' %}" alt="CRVS Learning" style="border: 1px solid gray; backdrop-filter: blur(2px); background: rgba(255, 255, 255, 0.1); padding: 5px; border-radius: 8px; max-height: 80px; max-width: 80px; object-fit: contain;">
+        </div>
+        <div class="forum-header-content">
+            <h5 class="forum-title">
+                Communauté CRVS
+            </h5>
+            <small class="forum-subtitle">
+                Posez des questions, obtenez des réponses, partagez votre expertise.
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Section Recommandé pour vous -->
+<div class="recommendations-section">
+    <div class="recommendations-card">
+        <div class="card-body p-1">
+        
+            
+            <div class="row" id="recommendationsContent">
+                <!-- Module recommandé -->
+                <div class="col-md-4 ">
+                    <div class="recommendation-item h-100 p-1">
+                        <div class="d-flex align-items-center mb-1">
+                            <div class="recommendation-badge me-2">
+                                <i class="bi bi-book me-1"></i>
+                                Module
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-lightning-charge me-1"></i>
+                                Recommandé
+                            </small>
+                        </div>
+                        <h6 class="recommendation-title">Introduction à CRVS</h6>
+                        <p class="text-muted small mb-3">
+                            Découvrez les fondamentaux du système CRVS et son importance dans l'état civil moderne.
+                        </p>
+                        <div class="recommendation-progress mb-3">
+                            <div class="recommendation-progress-bar" style="width: 65%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">Progression</small>
+                            <small class="text-muted fw-bold">65%</small>
+                        </div>
+                        <a href="#" class="recommendation-btn w-100 text-white text-decoration-none">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Continuer
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Question recommandée -->
+                <div class="col-md-4 mb-3">
+                    <div class="recommendation-item h-100 p-3">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="recommendation-badge me-2" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                                <i class="bi bi-chat-dots me-1"></i>
+                                Question
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-fire me-1"></i>
+                                Populaire
+                            </small>
+                        </div>
+                        <h6 class="recommendation-title">Comment optimiser la collecte des données ?</h6>
+                        <p class="text-muted small mb-3">
+                            Découvrez les meilleures pratiques pour améliorer la qualité et la fiabilité des données...
+                        </p>
+                        <div class="recommendation-stats mb-3">
+                            <div class="recommendation-stat">
+                                <i class="bi bi-eye me-1"></i>234
+                            </div>
+                            <div class="recommendation-stat">
+                                <i class="bi bi-chat me-1"></i>12
+                            </div>
+                            <div class="recommendation-stat">
+                                <i class="bi bi-hand-thumbs-up me-1"></i>45
+                            </div>
+                        </div>
+                        <a href="#" class="recommendation-btn w-100 text-white text-decoration-none" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                            <i class="bi bi-arrow-right me-2"></i>
+                            Voir la question
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Ressource recommandée -->
+                <div class="col-md-4 mb-3">
+                    <div class="recommendation-item h-100 p-3">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="recommendation-badge me-2" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                                <i class="bi bi-file-text me-1"></i>
+                                Ressource
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-sparkles me-1"></i>
+                                Nouveau
+                            </small>
+                        </div>
+                        <h6 class="recommendation-title">Guide pratique CRVS</h6>
+                        <p class="text-muted small mb-3">
+                            Un guide complet sur l'implémentation et la gestion des systèmes CRVS modernes.
+                        </p>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="recommendation-stat">
+                                <i class="bi bi-file-pdf me-1"></i>
+                                PDF
+                            </span>
+                            <span class="recommendation-stat">
+                                <i class="bi bi-clock me-1"></i>
+                                15 min
+                            </span>
+                            <span class="recommendation-stat">
+                                <i class="bi bi-download me-1"></i>
+                                1.2k
+                            </span>
+                        </div>
+                        <a href="#" class="recommendation-btn w-100 text-white text-decoration-none" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                            <i class="bi bi-download me-2"></i>
+                            Télécharger
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation par tabs -->
+<div class="container-fluide">
+    <ul class="forum-tabs" id="forumTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="forum-nav-link active" id="questions-tab" data-bs-toggle="tab" data-bs-target="#questions" type="button" role="tab" aria-controls="questions" aria-selected="true">
+                <i class="bi bi-chat-dots me-2"></i>
+                Aperçu
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="forum-nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab" aria-controls="resources" aria-selected="false">
+                <i class="bi bi-book me-2"></i>
+                Ressources
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="forum-nav-link" id="members-tab" data-bs-toggle="tab" data-bs-target="#members" type="button" role="tab" aria-controls="members" aria-selected="false">
+                <i class="bi bi-people me-2"></i>
+                Membres
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="forum-nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">
+                <i class="bi bi-bar-chart me-2"></i>
+                Statistiques
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="forumTabContent">
+        <div class="tab-pane fade show active" id="questions" role="tabpanel" aria-labelledby="questions-tab">
+            <div class="container-fluid px-2 mt-2 ">
+                <div class="row main">
+                    <!-- Sidebar -->
+                    <div class="col-md-2" style="max-height: 80vh; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #e9ecef #f8f9fa;">
+                        <!-- Navigation rapide -->
+                        <div class="card border-0 mb-4">
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'forum:home' %}" class="btn btn-sm text-start" style="box-shadow: none; border: none; border-left: 3px solid #007bff; background: transparent; color: #007bff; border-radius: 0; transition: all 0.3s ease; cursor: pointer; transform: translateX(0);">
+                                        <i class="bi bi-house me-2"></i>
+                                        Accueil
+                                    </a>
+                                    <a href="#" class="btn btn-sm text-start" style="box-shadow: none; border: none; border-left: 3px solid #28a745; background: transparent; color: #28a745; border-radius: 0; transition: all 0.3s ease; cursor: pointer; transform: translateX(0);">
+                                        <i class="bi bi-bookmark me-2"></i>
+                                        Mes questions
+                                    </a>
+                                    <a href="#" class="btn btn-sm text-start" style="box-shadow: none; border: none; border-left: 3px solid #17a2b8; background: transparent; color: #17a2b8; border-radius: 0; transition: all 0.3s ease; cursor: pointer; transform: translateX(0);">
+                                        <i class="bi bi-chat-dots me-2"></i>
+                                        Mes réponses
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <!-- Filtrer par tags -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="bi bi-tags me-2"></i>
+                                        Tags
+                                    </h6>
+                                    <div class="tag-cloud">
+                                        {% for tag in popular_tags %}
+                                            <a href="?search={{ tag.name }}" class="badge bg-light text-dark text-decoration-none me-1 mb-1">
+                                                {{ tag.name }} ({{ tag.count }})
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Filtres modules -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="bi bi-book me-2"></i>
+                                        Filtres modules
+                                    </h6>
+                                    <div class="list-group list-group-flush">
+                                        {% for course in courses %}
+                                            <a href="?course={{ course.id }}" class="list-group-item list-group-item-action border-0 px-0">
+                                                <i class="bi bi-journal-bookmark me-2"></i>
+                                                {{ course.title }}
+                                                <span class="badge bg-secondary float-end">{{ course.question_count }}</span>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Questions populaires -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="bi bi-fire me-2"></i>
+                                        Questions populaires
+                                    </h6>
+                                    <div class="list-group list-group-flush">
+                                        {% for question in popular_questions %}
+                                            <a href="{{ question.get_absolute_url }}" class="list-group-item list-group-item-action border-0 px-0">
+                                                <small class="d-block text-truncate">
+                                                    {{ question.title }}
+                                                </small>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-eye me-1"></i>{{ question.views_count }}
+                                                    <i class="bi bi-chat me-1"></i>{{ question.question_answers.count }}
+                                                </small>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Questions récentes -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">
+                                        <i class="bi bi-clock me-2"></i>
+                                        Questions récentes
+                                    </h6>
+                                    <div class="list-group list-group-flush">
+                                        {% for question in recent_questions %}
+                                            <a href="{{ question.get_absolute_url }}" class="list-group-item list-group-item-action border-0 px-0">
+                                                <small class="d-block text-truncate">
+                                                    {{ question.title }}
+                                                </small>
+                                                <small class="text-muted">
+                                                    {{ question.created_at|date:"d M" }}
+                                                </small>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenu principal -->
+                    <div class="col-md-7 bg-white p-3">
+                        <!-- Top Contributors Instagram Style -->
+                        <div class="row mb-2 p-2" style="border-bottom: 1px solid #e9ecef;">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <small class="mb-0 me-3">
+                                            <i class="bi bi-people-fill me-2"></i>
+                                            Top Contributors
+                                        </small>
+                                        <div class="d-flex flex-wrap contributors-container" id="contributorsContainer">
+                                            {% for contributor in global_top_contributors|slice:":5" %}
+                                                <div class="contributor-badge me-2" data-username="{{ contributor.user.username }}">
+                                                    {% if contributor.user.profile.avatar %}
+                                                        <img src="{{ contributor.user.profile.avatar.url }}" alt="{{ contributor.user.username }}" class="contributor-avatar-img" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                                    {% else %}
+                                                        <span class="contributor-initial">
+                                                            {{ contributor.user.username|slice:':1'|upper }}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                            {% if global_top_contributors|length > 5 %}
+                                                <div class="contributor-badge more-badge">
+                                                    <span class="contributor-initial">
+                                                        +{{ global_top_contributors|length|add:"-5" }}
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if global_top_contributors|length > 5 %}
+                                        <button class="btn btn-sm btn-outline-primary" onclick="toggleMoreContributors()">
+                                            Voir plus
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row main">
+                            <!-- Colonne milieu - Questions -->
+                            <div class="count">
+                                <!-- Bouton pour ouvrir/fermer les filtres -->
+                                <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded" style="border-bottom: 1px solid #e9ecef;">
+                                    <div class="d-flex align-items-center">
+                                        <h6 class="mb-0">
+                                            {{ questions.count }} Question{{ questions.count|pluralize }} 
+                                        </h6>
+                                        <span class="">
+                                        
+                                        </span>
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filterSection" aria-expanded="false" aria-controls="filterSection">
+                                        <i class="bi bi-funnel me-1"></i>
+                                        Filtres
+                                        <i class="bi bi-chevron-down ms-1" id="filterIcon"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Barre de recherche et filtres (cachée par défaut) -->
+                                <div class="collapse" id="filterSection">
+                                    <div class="card border-0 shadow-sm mb-4">
+                                        <div class="card-body p-3">
+                                            <form method="get" class="row g-2 align-items-center">
+                                                <div class="col-md-5">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text bg-light border-0">
+                                                            <i class="bi bi-search text-muted"></i>
+                                                        </span>
+                                                        <input type="text" name="search" class="form-control border-0 bg-light" 
+                                                            placeholder="Rechercher une question..." 
+                                                            value="{{ search_query }}">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="col-md-3">
+                                                    <select name="category" class="form-select form-select-sm border-0 bg-light">
+                                                        <option value="">Toutes catégories</option>
+                                                        {% for category in categories %}
+                                                            <option value="{{ category.id }}" 
+                                                                    {% if category.id == selected_category %}selected{% endif %}>
+                                                                {{ category.name }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="col-md-2">
+                                                    <select name="sort" class="form-select form-select-sm border-0 bg-light">
+                                                        <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Récent</option>
+                                                        <option value="popular" {% if sort == 'popular' %}selected{% endif %}>Populaire</option>
+                                                        <option value="unanswered" {% if sort == 'unanswered' %}selected{% endif %}>Sans réponse</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="col-md-2">
+                                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                        <i class="bi bi-funnel me-1"></i>
+                                                        Filtrer
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            
+                                
+                                <!-- Bouton poser une question -->
+                                <div class="text-end mb-2">
+                                    <a href="{% url 'forum:create_question' %}" class="btn btn-primary" style="font-size: 13px;">
+                                        <i class="bi bi-plus-circle me-2"></i>
+                                        Poser votre question
+                                    </a>
+                                </div>
+                                
+                                <!-- Liste des questions -->
+                                <div class="questions-list">
+                                    {% for question in questions %}
+                                        <div class="card mb-3 hover-lift {% if question.is_closed %}bg-light{% endif %}" style="border-radius: 0; box-shadow: none; border: none; border-bottom: 1px solid #e9ecef;">
+                                            <div class="card-body p-3">
+                                                <div class="row align-items-center">
+                                                    <!-- Badge utilisateur -->
+                                                    <div class="col-auto me-3">
+                                                        <div class="user-avatar-badge" data-username="{{ question.author.username }}" style="
+                                                            width: 60px;
+                                                            height: 60px;
+                                                            border-radius: 50%;
+                                                            background-color: #007bff;
+                                                            color: white;
+                                                            border: 1px solid white;
+                                                            display: flex;
+                                                            align-items: center;
+                                                            justify-content: center;
+                                                            font-weight: bold;
+                                                            font-size: 24px;
+                                                            text-transform: uppercase;
+                                                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                                        ">
+                                                            {{ question.author.username|slice:':1'|upper }}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Colonne gauche - Statistiques -->
+                                                    <div class="col-auto text-center me-3">
+                                                        <div class="text-center mb-2">
+                                                            <div class="text-muted small">votes</div>
+                                                            <div class="fw-bold {% if question.total_votes > 0 %}text-primary{% else %}text-muted{% endif %}">
+                                                                {{ question.total_votes }}
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-center mb-2">
+                                                            <div class="text-muted small">réponses</div>
+                                                            <div class="fw-bold {% if question.question_answers.count > 0 %}text-success{% else %}text-muted{% endif %}">
+                                                                {{ question.question_answers.count }}
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-center">
+                                                            <div class="text-muted small">vues</div>
+                                                            <div class="fw-bold">{{ question.views_count }}</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Colonne principale - Contenu -->
+                                                    <div class="col">
+                                                        <!-- En-tête avec statut -->
+                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                            <!-- Tags en haut -->
+                                                            <div class="flex-grow-1">
+                                                                {% for tag in question.tags|split:"," %}
+                                                                    <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            
+                                                            <!-- Statut de la question -->
+                                                            <div class="ms-2">
+                                                                {% if question.is_closed %}
+                                                                    <span class="badge bg-danger">
+                                                                        <i class="bi bi-lock me-1"></i>
+                                                                        Fermée
+                                                                    </span>
+                                                                {% endif %}
+                                                                {% if question.is_validated %}
+                                                                    <span class="badge bg-success">
+                                                                        <i class="bi bi-check-circle me-1"></i>
+                                                                        Validée
+                                                                    </span>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Titre -->
+                                                        <h5 class="h6 mb-2 {% if question.is_closed %}text-muted{% endif %}">
+                                                            <a href="{{ question.get_absolute_url }}" class="text-decoration-none {% if question.is_closed %}text-muted{% else %}text-dark{% endif %}">
+                                                                {{ question.title }}
+                                                            </a>
+                                                        </h5>
+                                                        
+                                                        <!-- Description -->
+                                                        {% if question.content %}
+                                                            <p class="text-muted small mb-2">
+                                                                {{ question.content|striptags|truncatechars:180 }}
+                                                            </p>
+                                                        {% endif %}
+                                                        
+                                                        <!-- Métadonnées -->
+                                                        <div class="text-muted small">
+                                                            <i class="bi bi-person me-1"></i>{{ question.author.username }}
+                                                            <i class="bi bi-clock me-1"></i>{{ question.created_at|date:"d M Y" }}
+                                                            {% if question.category %}
+                                                                <span class="badge ms-2" 
+                                                                    style="background-color: {{ question.category.color }}; color: white;">
+                                                                    {{ question.category.name }}
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if question.is_closed %}
+                                                                <span class="text-danger ms-2">
+                                                                    <i class="bi bi-lock me-1"></i>
+                                                                    Question fermée
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% empty %}
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body text-center py-5">
+                                                <i class="bi bi-chat-dots text-muted" style="font-size: 3rem;"></i>
+                                                <h4 class="mt-3">Aucune question trouvée</h4>
+                                                <p class="text-muted">
+                                                    {% if search_query %}
+                                                        Aucune question ne correspond à votre recherche.
+                                                    {% else %}
+                                                        Soyez le premier à poser une question !
+                                                    {% endif %}
+                                                </p>
+                                                {% if not search_query %}
+                                                    <a href="{% url 'forum:create_question' %}" class="btn btn-primary mt-3">
+                                                        <i class="bi bi-plus-circle me-2"></i>
+                                                        Poser une question
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Colonne droite - Encadré -->
+                            <div class="col-md-3">
+                                <!-- Statistiques
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">
+                                        
+                                    
+                                            </h6>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-outline-primary active" data-period="all">
+                                                    Total
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary" data-period="week">
+                                                    Semaine
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary" data-period="month">
+                                                    Mois
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-md-4 mb-3">
+                                                <div class="stat-item" data-type="questions" data-period="all">
+                                                    <i class="bi bi-question-circle text-primary fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ total_questions|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">questions</small>
+                                                </div>
+                                                <div class="stat-item d-none" data-type="questions" data-period="week">
+                                                    <i class="bi bi-question-circle text-primary fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ questions_this_week|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">cette semaine</small>
+                                                </div>
+                                                <div class="stat-item d-none" data-type="questions" data-period="month">
+                                                    <i class="bi bi-question-circle text-primary fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ questions_this_month|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">ce mois</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <div class="stat-item" data-type="answers" data-period="all">
+                                                    <i class="bi bi-chat-dots text-success fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ total_answers|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">réponses</small>
+                                                </div>
+                                                <div class="stat-item d-none" data-type="answers" data-period="week">
+                                                    <i class="bi bi-chat-dots text-success fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ answers_this_week|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">cette semaine</small>
+                                                </div>
+                                                <div class="stat-item d-none" data-type="answers" data-period="month">
+                                                    <i class="bi bi-chat-dots text-success fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ answers_this_month|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">ce mois</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <div class="stat-item" data-type="users" data-period="all">
+                                                    <i class="bi bi-people text-info fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ total_users|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">utilisateurs</small>
+                                                </div>
+                                                <div class="stat-item d-none" data-type="users" data-period="week">
+                                                    <i class="bi bi-people text-info fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ users_this_week|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">cette semaine</small>
+                                                </div>
+                                                <div class="stat-item d-none" data-type="users" data-period="month">
+                                                    <i class="bi bi-people text-info fs-3 mb-2"></i>
+                                                    <h3 class="fw-bold mb-1">{{ users_this_month|default:"0"|intcomma }}</h3>
+                                                    <small class="text-muted">ce mois</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <div class="card border-0 shadow-sm mb-4 bg-warning">
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold text-primary">
+                                                Comment poser une question ?
+                                            </h6>
+                                            <ul class="small text-muted">
+                                                <li>Soyez clair et précis dans votre titre</li>
+                                                <li>Développez votre question dans le contenu</li>
+                                                <li>Ajoutez des tags pertinents</li>
+                                                <li>Choisissez la bonne catégorie</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold text-success">
+                                                Bonnes pratiques
+                                            </h6>
+                                            <ul class="small text-muted">
+                                                <li>Recherchez avant de poser</li>
+                                                <li>Soyez courtois et respectueux</li>
+                                                <li>Merci aux contributeurs</li>
+                                                <li>Validez les réponses utiles</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="text-center">
+                                            <a href="{% url 'forum:create_question' %}" class="btn btn-info btn-sm">
+                                                <i class="bi bi-plus-circle me-2"></i>
+                                                Poser ma première question
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">
+                                            <i class="bi bi-fire me-2"></i>
+                                            Activité récente
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for question in recent_questions|slice:":3" %}
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="me-2">
+                                                    <i class="bi bi-chat-dots text-warning"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <a href="{{ question.get_absolute_url }}" class="text-decoration-none small fw-bold">
+                                                        {{ question.title|truncatewords:8 }}
+                                                    </a>
+                                                    <div class="text-muted small">
+                                                        {{ question.created_at|date:"d M H:i" }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% empty %}
+                                            <p class="text-muted small text-center">
+                                                Aucune activité récente
+                                            </p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="members" role="tabpanel" aria-labelledby="members-tab">
+            <div class="container-fluid px-2 mt-2">
+                <div class="row">
+                    <!-- Sidebar -->
+                    <div class="col-md-2 " style="max-height: 80vh; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: #e9ecef #f8f9fa;">
+                        <!-- Navigation rapide -->
+                        <div class="card border-0 mb-4">
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'forum:home' %}" class="btn btn-sm text-start" style="box-shadow: none; border: none; border-left: 3px solid #007bff; background: transparent; color: #007bff; border-radius: 0; transition: all 0.3s ease; cursor: pointer; transform: translateX(0);">
+                                        <i class="bi bi-house me-2"></i>
+                                        Accueil
+                                    </a>
+                                    <a href="#" class="btn btn-sm text-start" style="box-shadow: none; border: none; border-left: 3px solid #28a745; background: transparent; color: #28a745; border-radius: 0; transition: all 0.3s ease; cursor: pointer; transform: translateX(0);">
+                                        <i class="bi bi-bookmark me-2"></i>
+                                        Mes questions
+                                    </a>
+                                    <a href="#" class="btn btn-sm text-start" style="box-shadow: none; border: none; border-left: 3px solid #17a2b8; background: transparent; color: #17a2b8; border-radius: 0; transition: all 0.3s ease; cursor: pointer; transform: translateX(0);">
+                                        <i class="bi bi-chat-dots me-2"></i>
+                                        Mes réponses
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistiques membres -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-people me-2"></i>
+                                    Statistiques
+                                </h6>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <small>Total membres</small>
+                                    <small class="fw-bold">{{ total_members }}</small>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <small>Actifs aujourd'hui</small>
+                                    <small class="fw-bold text-success">{{ active_today }}</small>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <small>Nouveaux cette semaine</small>
+                                    <small class="fw-bold text-info">{{ new_this_week }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenu principal membres -->
+                    <div class="col-md-7 bg-white p-3">
+                        <!-- En-tête membres -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">
+                                <i class="bi bi-people me-2"></i>
+                                Membres de la communauté
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-secondary" id="gridViewBtn" onclick="showGridView()">
+                                    <i class="bi bi-grid me-1"></i>
+                                    Grille
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" id="listViewBtn" onclick="showListView()">
+                                    <i class="bi bi-list me-1"></i>
+                                    Liste
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Vue Grille -->
+                        <div id="gridView" class="members-grid-view">
+                            <div class="row g-3">
+                                {% for member_data in all_members %}
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="card border-0 shadow-sm mb-3 hover-lift">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                {% if member_data.user.profile.avatar %}
+                                                    <img src="{{ member_data.user.profile.avatar.url }}" alt="{{ member_data.user.username }}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                                {% else %}
+                                                    <div class="user-avatar-badge mx-auto" data-username="{{ member_data.user.username }}" style="
+                                                        width: 80px;
+                                                        height: 80px;
+                                                        border-radius: 50%;
+                                                        background-color: #007bff;
+                                                        color: white;
+                                                        display: flex;
+                                                        align-items: center;
+                                                        justify-content: center;
+                                                        font-weight: bold;
+                                                        font-size: 32px;
+                                                        text-transform: uppercase;
+                                                        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                                                    ">
+                                                        {{ member_data.user.username|slice:':1'|upper }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <h6 class="mb-1">{{ member_data.user.get_full_name|default:member_data.user.username }}</h6>
+                                            <small class="text-muted d-block mb-2">@{{ member_data.user.username }}</small>
+                                            <div class="d-flex justify-content-center gap-3 mb-2">
+                                                <small><strong>{{ member_data.questions_count }}</strong> questions</small>
+                                                <small><strong>{{ member_data.answers_count }}</strong> réponses</small>
+                                                {% if member_data.comments_count %}
+                                                <small><strong>{{ member_data.comments_count }}</strong> commentaires</small>
+                                                {% endif %}
+                                            </div>
+                                            <div class="d-flex justify-content-center gap-2 mb-2">
+                                                {% if member_data.is_active_today %}
+                                                    <span class="badge bg-success">Actif</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Inactif</span>
+                                                {% endif %}
+                                                {% if member_data.validated_answers > 0 %}
+                                                    <span class="badge bg-warning">Expert</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="d-flex justify-content-center">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-trophy me-1"></i>
+                                                    {{ member_data.score }} points
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <div class="text-center py-5">
+                                        <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                                        <h5 class="mt-3">Aucun membre trouvé</h5>
+                                        <p class="text-muted">Soyez le premier à rejoindre la communauté !</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Vue Liste -->
+                        <div id="listView" class="members-list-view" style="display: none;">
+                            <div class="list-group list-group-flush">
+                                {% for member_data in all_members %}
+                                <div class="list-group-item border-0 shadow-sm mb-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            {% if member_data.user.profile.avatar %}
+                                                <img src="{{ member_data.user.profile.avatar.url }}" alt="{{ member_data.user.username }}" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="user-avatar-badge" data-username="{{ member_data.user.username }}" style="
+                                                    width: 50px;
+                                                    height: 50px;
+                                                    border-radius: 50%;
+                                                    background-color: #007bff;
+                                                    color: white;
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: center;
+                                                    font-weight: bold;
+                                                    font-size: 20px;
+                                                    text-transform: uppercase;
+                                                ">
+                                                    {{ member_data.user.username|slice:':1'|upper }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col">
+                                            <h6 class="mb-1">{{ member_data.user.get_full_name|default:member_data.user.username }}</h6>
+                                            <small class="text-muted">@{{ member_data.user.username }}</small>
+                                        </div>
+                                        <div class="col-auto">
+                                            <div class="d-flex gap-3 align-items-center">
+                                                <div class="text-center">
+                                                    <small class="d-block text-muted">Questions</small>
+                                                    <strong>{{ member_data.questions_count }}</strong>
+                                                </div>
+                                                <div class="text-center">
+                                                    <small class="d-block text-muted">Réponses</small>
+                                                    <strong>{{ member_data.answers_count }}</strong>
+                                                </div>
+                                                <div class="text-center">
+                                                    <small class="d-block text-muted">Points</small>
+                                                    <strong>{{ member_data.score }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <div class="d-flex gap-2">
+                                                {% if member_data.is_active_today %}
+                                                    <span class="badge bg-success">Actif</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Inactif</span>
+                                                {% endif %}
+                                                {% if member_data.validated_answers > 0 %}
+                                                    <span class="badge bg-warning">Expert</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-5">
+                                    <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                                    <h5 class="mt-3">Aucun membre trouvé</h5>
+                                    <p class="text-muted">Soyez le premier à rejoindre la communauté !</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav class="mt-4">
+                            <ul class="pagination pagination-sm justify-content-center">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Suivant</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    
+                    <!-- Sidebar droite -->
+                    <div class="col-md-3">
+                        <!-- Top contributeurs -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-trophy me-2"></i>
+                                    Top contributeurs
+                                </h6>
+                                <div class="list-group list-group-flush">
+                                    {% for member_data in top_contributors %}
+                                    <div class="list-group-item border-0 px-0 d-flex align-items-center">
+                                        <div class="me-3">
+                                            {% if member_data.user.profile.avatar %}
+                                                <img src="{{ member_data.user.profile.avatar.url }}" alt="{{ member_data.user.username }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            {% else %}
+                                                <div class="user-avatar-badge" data-username="{{ member_data.user.username }}" style="
+                                                    width: 40px;
+                                                    height: 40px;
+                                                    border-radius: 50%;
+                                                    background-color: #28a745;
+                                                    color: white;
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: center;
+                                                    font-weight: bold;
+                                                    font-size: 16px;
+                                                    text-transform: uppercase;
+                                                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                                ">
+                                                    {{ member_data.user.username|slice:':1'|upper }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-0">{{ member_data.user.get_full_name|default:member_data.user.username }}</h6>
+                                            <small class="text-muted">{{ member_data.score }} points</small>
+                                        </div>
+                                        <span class="badge bg-warning">🏆</span>
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-center py-3">
+                                        <small class="text-muted">Aucun contributeur pour le moment</small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Activité récente -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="bi bi-clock me-2"></i>
+                                    Activité récente
+                                </h6>
+                                <div class="list-group list-group-flush">
+                                    {% for activity in recent_activities %}
+                                    <div class="list-group-item border-0 px-0">
+                                        <small class="text-muted d-block">
+                                            <i class="bi {{ activity.icon }} me-1"></i>
+                                            {{ activity.timestamp|timesince }} ago
+                                        </small>
+                                        <small>
+                                            <strong>{{ activity.user.get_full_name|default:activity.user.username }}</strong> 
+                                            {{ activity.content }}
+                                        </small>
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-center py-3">
+                                        <small class="text-muted">Aucune activité récente</small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+            <!-- Contenu des statistiques -->
+        </div>
+    </div>
+</div>
+
+<!--ici-->
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Pagination du forum">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&category={{ selected_category }}">
+                                    <i class="bi bi-chevron-left"></i>
+                                    Précédent
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}&search={{ search_query }}&category={{ selected_category }}">{{ num }}</a>
+                            </li>
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&category={{ selected_category }}">
+                                    Suivant
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.hover-lift {
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent !important;
+}
+
+.hover-lift:hover {
+    transform: translateX(3px);
+    background-color: #f8f9fa;
+    border-left: 3px solid #007bff !important;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.tag-cloud .badge:hover {
+    background-color: #007bff !important;
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+.list-group-item {
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    padding-left: 0.5rem !important;
+}
+
+/* Animation du chevron */
+#filterIcon {
+    transition: transform 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .col-auto {
+        margin-right: 0 !important;
+        margin-bottom: 1rem;
+    }
+    
+    .text-center .d-flex {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+    }
+    
+    .text-center .text-center {
+        margin-bottom: 0 !important;
+    }
+}
+</style>
+
+<script>
+// Fonctions pour changer la vue des membres
+function showGridView() {
+    document.getElementById('gridView').style.display = 'block';
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('gridViewBtn').className = 'btn btn-sm btn-outline-secondary';
+    document.getElementById('listViewBtn').className = 'btn btn-sm btn-outline-primary';
+}
+
+function showListView() {
+    document.getElementById('gridView').style.display = 'none';
+    document.getElementById('listView').style.display = 'block';
+    document.getElementById('gridViewBtn').className = 'btn btn-sm btn-outline-primary';
+    document.getElementById('listViewBtn').className = 'btn btn-sm btn-outline-secondary';
+}
+
+// Simple toggle pour le filtre
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButton = document.querySelector('[data-bs-target="#filterSection"]');
+    const filterSection = document.getElementById('filterSection');
+    const filterIcon = document.getElementById('filterIcon');
+    
+    if (filterButton && filterSection && filterIcon) {
+        filterButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Toggle de la classe collapse
+            if (filterSection.classList.contains('show')) {
+                filterSection.classList.remove('show');
+                filterIcon.style.transform = 'rotate(0deg)';
+                filterButton.setAttribute('aria-expanded', 'false');
+            } else {
+                filterSection.classList.add('show');
+                filterIcon.style.transform = 'rotate(180deg)';
+                filterButton.setAttribute('aria-expanded', 'true');
+            }
+        });
+    }
+    
+    // Couleurs dynamiques pour les badges utilisateurs
+    const avatarColors = {
+        'a': '#FF6B6B', 'b': '#4ECDC4', 'c': '#45B7D1', 'd': '#96CEB4', 'e': '#FFEAA7',
+        'f': '#DDA0DD', 'g': '#98D8C8', 'h': '#F7DC6F', 'i': '#BB8FCE', 'j': '#85C1E2',
+        'k': '#F8B739', 'l': '#52B788', 'm': '#F72585', 'n': '#7209B7', 'o': '#3A0CA3',
+        'p': '#4361EE', 'q': '#4CC9F0', 'r': '#F72585', 's': '#7209B7', 't': '#3A0CA3',
+        'u': '#4361EE', 'v': '#4CC9F0', 'w': '#FF6B6B', 'x': '#4ECDC4', 'y': '#45B7D1', 'z': '#96CEB4'
+    };
+
+    // Appliquer les couleurs aux badges utilisateurs
+    document.querySelectorAll('.user-avatar-badge').forEach(badge => {
+        const username = badge.getAttribute('data-username');
+        if (username) {
+            const firstLetter = username.charAt(0).toLowerCase();
+            const color = avatarColors[firstLetter] || '#007bff';
+            badge.style.backgroundColor = color;
+        }
+    });
+    
+    // Filtres pour les statistiques
+    const periodButtons = document.querySelectorAll('[data-period]');
+    periodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Retirer la classe active de tous les boutons
+            periodButtons.forEach(btn => btn.classList.remove('active'));
+            // Ajouter la classe active au bouton cliqué
+            this.classList.add('active');
+            
+            const period = this.getAttribute('data-period');
+            
+            // Masquer toutes les statistiques
+            document.querySelectorAll('.stat-item').forEach(item => {
+                item.classList.add('d-none');
+            });
+            
+            // Afficher les statistiques pour la période sélectionnée
+            document.querySelectorAll(`[data-period="${period}"]`).forEach(item => {
+                item.classList.remove('d-none');
+            });
+        });
+    });
+    
+    // Suppression du code dupliqué - les couleurs sont déjà appliquées ci-dessus
+    
+    // Appliquer les couleurs aux badges de contributeurs
+    document.querySelectorAll('.contributor-badge').forEach(badge => {
+        const username = badge.getAttribute('data-username');
+        if (username) {
+            const firstLetter = username.charAt(0).toLowerCase();
+            const color = avatarColors[firstLetter] || '#007bff';
+            badge.style.backgroundColor = color;
+        }
+    });
+    
+    // Gérer l'affichage de plus de contributeurs
+    function toggleMoreContributors() {
+        const container = document.getElementById('contributorsContainer');
+        if (container) {
+            container.classList.toggle('expanded');
+        }
+    }
+    
+    // Fonction pour actualiser les recommandations
+    function refreshRecommendations() {
+        const content = document.getElementById('recommendationsContent');
+        const button = event.target;
+        
+        // Animation de rotation du bouton
+        button.querySelector('i').style.animation = 'spin 1s linear';
+        
+        // Simulation de chargement
+        content.style.opacity = '0.5';
+        
+        setTimeout(() => {
+            // Réinitialiser l'animation
+            button.querySelector('i').style.animation = '';
+            content.style.opacity = '1';
+            
+            // Ici vous pourriez faire un appel AJAX pour charger de nouvelles recommandations
+            console.log('Recommandations actualisées');
+        }, 1000);
+    }
+    
+    // Animation de rotation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

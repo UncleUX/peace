@@ -1,0 +1,38 @@
+<!-- Loader Terminal -->
+<div class="terminal-loader-overlay" id="terminalLoader">
+    <div class="terminal-loader">
+        <div class="terminal-header">
+            <div class="terminal-title">CRVS Admin Terminal v2.1.0</div>
+            <div class="terminal-buttons">
+                <div class="terminal-button close"></div>
+                <div class="terminal-button minimize"></div>
+                <div class="terminal-button maximize"></div>
+            </div>
+        </div>
+        <div class="terminal-body">
+            <div class="terminal-line">
+                <span class="terminal-prompt">admin@crvs:~$</span> 
+                <span class="terminal-command">initializing system...</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">admin@crvs:~$</span> 
+                <span class="terminal-command">loading modules...</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output">✓ Authentication module loaded</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output">✓ Database connection established</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">admin@crvs:~$</span> 
+                <span class="terminal-command">starting dashboard...</span>
+                <span class="terminal-cursor"></span>
+            </div>
+            <div class="terminal-progress">
+                <div class="terminal-progress-bar"></div>
+                <div class="terminal-progress-text">0%</div>
+            </div>
+        </div>
+    </div>
+</div>

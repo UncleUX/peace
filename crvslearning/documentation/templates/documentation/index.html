@@ -1,0 +1,2053 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRVSlearning Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #0072ce;
+    --primary-hover: #005ba1;
+    --secondary: #2d2d2d;
+    --dark: #121212;
+    --light: #f5f5f5;
+    --border: #2d2d2d;
+    --code-bg: #1a1a1a;
+    --code-text: #e5e7eb;
+    --card-bg: #1f1f1f;
+    --text: #e5e5e5;
+    --text-muted: #a0a0a0;
+    --success: #00c853;
+    --warning: #ffab00;
+    --danger: #ff3d00;
+    --max-width: 1800px;
+    --header-height: 70px;
+    --sidebar-width: 320px;
+    --content-padding: 50px;
+    --border-radius: 8px;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: #000000;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-top: 0;
+    margin: 0;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #b3141a;
+}
+
+a[data-page].active {
+    color: #ffffff !important;
+    font-weight: 600;
+    position: relative;
+    background: rgba(0, 114, 206, 0.2);
+    border-left: 3px solid var(--primary);
+}
+
+a[data-page].active:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    border-radius: 0 3px 3px 0;
+}
+
+/* Header */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.header-inner {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--header-height);
+}
+
+.logo {
+    font-weight: 900;
+    font-size: 1.3rem;
+    color: #ffffff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo:before {
+    content: '📚';
+    font-size: 1.5rem;
+}
+
+.search {
+    flex: 1;
+    max-width: 500px;
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+    position: relative;
+}
+
+.search input {
+    flex: 1;
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px 0 0 6px;
+    outline: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.search input:focus {
+    border-color: #0072ce;
+    box-shadow: 0 0 0 2px rgba(0, 114, 206, 0.2);
+}
+
+.search button {
+    padding: 0 16px;
+    height: 36px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search button:hover { 
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.search input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Particles Container */
+#particles-js {
+    position: fixed;
+    width: var(--sidebar-width);
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Main Layout */
+.layout {
+    display: flex;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+    min-height: calc(100vh - var(--header-height));
+}
+
+/* Sidebar */
+aside {
+    width: var(--sidebar-width);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px 20px;
+    background: rgba(10, 10, 10, 0.2);
+    backdrop-filter: blur(5px) saturate(180%);
+    -webkit-backdrop-filter: blur(5px) saturate(180%);
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 90;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+aside::-webkit-scrollbar {
+    width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+aside::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 3px;
+}
+
+aside h4 {
+    margin: 35px 0 15px 0;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #6b7280;
+    cursor: pointer;
+    letter-spacing: 1px;
+    font-weight: 700;
+    padding: 0 15px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+aside h4:after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-left: 15px;
+}
+
+aside ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+aside li {
+    margin: 8px 0;
+    position: relative;
+}
+
+aside a {
+    color: #b0b0b0;
+    font-size: 15px;
+    font-weight: 500;
+    display: block;
+    padding: 10px 15px;
+    border-radius: 6px;
+    transition: var(--transition);
+    margin: 2px 0;
+}
+
+aside a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateX(3px);
+}
+
+/* Main Content */
+main {
+    flex: 1;
+    padding: 40px 50px;
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    overflow-y: auto;
+    background: rgba(0, 30, 60, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    z-index: 1;
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
+}
+
+main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 60, 120, 0.2) 0%, rgba(0, 30, 60, 0.4) 100%);
+    z-index: -1;
+}
+
+main h1 {
+    font-size: 42px;
+    margin: 0 0 25px 0;
+    color: #ffffff;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+main h1:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 80px;
+    height: 4px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+main h2 {
+    margin: 60px 0 25px;
+    padding-bottom: 15px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 32px;
+    position: relative;
+    letter-spacing: -0.3px;
+}
+
+main h2:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 50px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+main h3 {
+    margin: 45px 0 20px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    position: relative;
+    padding-left: 15px;
+}
+
+main h3:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+main p, main li {
+    color: #e0e0e0;
+    line-height: 1.8;
+    margin-bottom: 1.2em;
+    font-weight: 400;
+    font-size: 16px;
+}
+
+.meta {
+    color: #6b7280;
+    font-size: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+}
+
+.note {
+    border-left: 4px solid var(--primary);
+    background: rgba(0, 114, 206, 0.1);
+    padding: 20px;
+    margin: 30px 0;
+    font-size: 15px;
+    border-radius: 0 8px 8px 0;
+    color: #e0e0e0;
+    position: relative;
+    overflow: hidden;
+}
+
+.note:before {
+    content: 'ℹ️';
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 20px;
+    opacity: 0.3;
+}
+
+.note p {
+    margin-left: 30px;
+}
+
+pre {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    padding: 20px;
+    overflow-x: auto;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 30px 0;
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', monospace;
+    border-left: 4px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+code {
+    font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', monospace;
+    background: rgba(0, 114, 206, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #5db0ff;
+    border: 1px solid rgba(0, 114, 206, 0.3);
+}
+
+/* Footer */
+footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 25px 20px;
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    margin-top: auto;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+/* Responsive Design */
+@media (max-width: 1440px) {
+    :root {
+        --max-width: 100%;
+        --content-padding: 30px;
+    }
+    
+    .header-inner,
+    .layout {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+}
+
+@media (max-width: 1200px) {
+    :root {
+        --sidebar-width: 260px;
+    }
+    
+    main {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 992px) {
+    :root {
+        --sidebar-width: 280px;
+    }
+    
+    .search input {
+        width: 200px;
+    }
+    
+    main {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    aside {
+        position: fixed;
+        left: 0;
+        top: var(--header-height);
+        height: calc(100vh - var(--header-height));
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 90;
+        background: #fff;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    aside.visible {
+        transform: translateX(0);
+    }
+    
+    .header-inner {
+        padding: 12px 20px;
+    }
+    
+    .search {
+        display: none;
+    }
+    
+    main {
+        padding: 25px 20px;
+        margin-left: 0;
+    }
+    
+    .overlay {
+        display: none;
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 80;
+    }
+    
+    .overlay.visible {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --header-height: 56px;
+    }
+    
+    .header-inner {
+        padding: 10px 15px;
+    }
+    
+    .logo {
+        font-size: 18px;
+    }
+    
+    main {
+        padding: 20px 15px;
+    }
+    
+    main h1 {
+        font-size: 28px;
+    }
+    
+    main h2 {
+        font-size: 24px;
+    }
+    
+    pre {
+        padding: 15px;
+        font-size: 13px;
+    }
+}
+</style>
+</head>
+<body>
+<header>
+<div class="header-inner">
+    <div class="logo">CRVSlearning Documentation</div>
+    <div class="search">
+        <input type="text" placeholder="Rechercher dans la documentation…" />
+        <button type="button" aria-label="Rechercher">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="currentColor"/>
+            </svg>
+        </button>
+    </div>
+</div>
+</header>
+<div class="overlay" id="overlay"></div>
+<div id="particles-js"></div>
+<div class="layout">
+<aside id="sidebar">
+<h4>Getting Started</h4>
+<ul>
+<li><a href="#" data-page="overview">Overview</a></li>
+<li><a href="#" data-page="requirements">System Requirements</a></li>
+<li><a href="#" data-page="installation">Installation</a></li>
+</ul>
+<h4 id="pm-toggle">Prise en main ▸</h4>
+<ul id="pmenu" style="display:none; padding-left:15px;">
+<li><a href="#" data-page="course">Création des cours</a></li>
+<li><a href="#" data-page="module">Création d'un module</a></li>
+<li><a href="#" data-page="lesson">Création d'une lesson</a></li>
+<li><a href="#" data-page="video">Ajout de vidéos à une lesson</a></li>
+</ul>
+<h4>Gestion du compte</h4>
+<ul>
+<li><a href="#" data-page="login_apprenants">Accès à l'espace apprenants</a></li>
+<li><a href="#" data-page="chaine_formateur">Accès à la chaine du formateur</a></li>
+<li><a href="#" data-page="profile">Modifier le profil</a></li>
+</ul>
+<h4>Reference</h4>
+<ul>
+<li><a href="#" data-page="cli">CLI Commands</a></li>
+<li><a href="#" data-page="troubleshooting">Troubleshooting</a></li>
+</ul>
+</aside>
+<main id="content">
+</main>
+</div>
+<footer>
+© 2026 CRVSlearning. All rights reserved.
+</footer>
+<!-- Particules.js -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+// Initialisation des particules
+particlesJS('particles-js', {
+    particles: {
+        number: { 
+            value: 80, 
+            density: { 
+                enable: true, 
+                value_area: 400 
+            } 
+        },
+        color: { 
+            value: '#0072ce' 
+        },
+        shape: { 
+            type: 'circle' 
+        },
+        opacity: {
+            value: 0.8,
+            random: true,
+            anim: { 
+                enable: true, 
+                speed: 1, 
+                opacity_min: 0.2, 
+                sync: false 
+            }
+        },
+        size: {
+            value: 4,
+            random: true,
+            anim: { 
+                enable: true, 
+                speed: 2, 
+                size_min: 1, 
+                sync: false 
+            }
+        },
+        line_linked: {
+            enable: true,
+            distance: 100,
+            color: '#0072ce',
+            opacity: 0.4,
+            width: 1.5
+        },
+        move: {
+            enable: true,
+            speed: 2,
+            direction: 'none',
+            random: true,
+            straight: false,
+            out_mode: 'bounce',
+            bounce: true,
+            attract: { 
+                enable: true, 
+                rotateX: 600, 
+                rotateY: 1200 
+            }
+        }
+    },
+    interactivity: {
+        detect_on: 'window',
+        events: {
+            onhover: { 
+                enable: true, 
+                mode: 'grab' 
+            },
+            onclick: { 
+                enable: true, 
+                mode: 'push' 
+            },
+            resize: true
+        },
+        modes: {
+            grab: { 
+                distance: 200, 
+                line_linked: { 
+                    opacity: 1 
+                } 
+            },
+            push: { 
+                particles_nb: 6 
+            }
+        }
+    },
+    retina_detect: true,
+    config_demo: {
+        hide_card: false,
+        background_color: '#000000',
+        background_image: '',
+        background_position: '50% 50%',
+        background_repeat: 'no-repeat',
+        background_size: 'cover'
+    }
+});
+
+// Gestion du redimensionnement de la fenêtre
+window.addEventListener('resize', () => {
+    // Code de redimensionnement si nécessaire
+});
+
+const pages = {};
+
+pages.overview = `
+<h1 class="mb-4">CRVSlearning - Plateforme de Formation pour les Acteurs de l'État Civil</h1>
+
+<h3>Vue d'Ensemble</h3>
+<p>
+  <strong>CRVSlearning</strong> est une plateforme e-learning innovante spécialement conçue pour le renforcement des capacités des professionnels de l'état civil.
+  Notre solution numérique s'adapte aux besoins spécifiques des acteurs du secteur, en offrant une formation complète et certifiante.
+</p>
+
+<h3>Modalités d'Apprentissage</h3>
+
+<h5>1. Mode Asynchrone</h5>
+<ul>
+  <li>Accès 24h/24 aux ressources pédagogiques</li>
+  <li>Cours enregistrés et documents téléchargeables</li>
+  <li>Exercices d'auto-évaluation</li>
+  <li>Progression à son rythme</li>
+</ul>
+
+<h5>2. Mode Synchrone</h5>
+<ul>
+  <li>Classes virtuelles en direct avec des experts</li>
+  <li>Sessions de questions-réponses en temps réel</li>
+  <li>Travaux pratiques supervisés</li>
+  <li>Échanges entre pairs</li>
+</ul>
+
+<h3>Caractéristiques Clés</h3>
+<ul>
+  <li><strong>Pédagogie Progressive</strong> : Parcours de formation évolutifs, du niveau débutant à avancé</li>
+  <li><strong>Interactivité</strong> : Quiz, études de cas et mises en situation réelles</li>
+  <li><strong>Certification</strong> : Attestations reconnues par les instances compétentes</li>
+  <li><strong>Accessibilité</strong> : Interface intuitive adaptée aux différents niveaux de compétence numérique</li>
+</ul>
+
+<h3>Bénéfices pour les Utilisateurs</h3>
+<ul>
+  <li>Flexibilité totale dans l'organisation de la formation</li>
+  <li>Accès à des ressources actualisées en permanence</li>
+  <li>Suivi personnalisé de la progression</li>
+  <li>Reconnaissance officielle des compétences acquises</li>
+</ul>
+
+<h3>Public Cible</h3>
+<ul>
+  <li>Agents et officiers d'état civil</li>
+  <li>Formateurs et encadreurs</li>
+  <li>Responsables de centres d'état civil</li>
+  <li>Élèves et étudiants en administration publique</li>
+  <li>Professionnels du secteur souhaitant se perfectionner</li>
+</ul>
+
+<h3>Notre Engagement</h3>
+<p>
+  CRVSlearning s'engage à fournir une formation de qualité, accessible à tous les acteurs de l'état civil,
+  afin de contribuer à l'amélioration continue des services d'état civil à travers une formation professionnelle
+  adaptée aux réalités du terrain.
+</p>
+`;
+
+
+pages.requirements = `
+<h1 class="mb-4">System Requirements</h1>
+
+<p>
+  Cette section décrit l’ensemble des prérequis techniques nécessaires pour déployer et utiliser la plateforme
+  <strong>CRVSlearning</strong> dans des conditions optimales de performance, de sécurité et de stabilité.
+</p>
+
+<h3>Plateformes Supportées</h3>
+<ul>
+  <li><strong>Windows</strong> (10, 11, Windows Server)</li>
+  <li><strong>macOS</strong> (Intel et Apple Silicon)</li>
+  <li><strong>Linux</strong> (Ubuntu, Debian, CentOS, etc.)</li>
+</ul>
+
+<h3>Navigateurs Web Supportés</h3>
+<ul>
+  <li><strong>Google Chrome</strong></li>
+  <li><strong>Mozilla Firefox</strong></li>
+  <li><strong>Microsoft Edge</strong></li>
+  <li><strong>Apple Safari</strong></li>
+</ul>
+
+<h3>Configuration Matérielle Recommandée</h3>
+<ul>
+  <li><strong>Processeur (CPU)</strong> : 8 cœurs minimum (16 cœurs recommandés)</li>
+  <li><strong>Mémoire (RAM)</strong> : 16 GB minimum (32 GB recommandés)</li>
+  <li><strong>Stockage</strong> : 500 GB minimum (SSD fortement recommandé)</li>
+</ul>
+
+<h3>Logiciels et Outils Requis</h3>
+<ul>
+  <li><strong>Python</strong> : version 3.10 ou supérieure</li>
+  <li><strong>Docker</strong></li>
+  <li><strong>Docker Compose</strong></li>
+  <li><strong>Git</strong></li>
+</ul>
+
+<h3>Exigences Réseau</h3>
+<ul>
+  <li>Connexion Internet stable recommandée</li>
+  <li>Bande passante minimale : 10 Mbps (100 Mbps recommandés pour environnement multi-utilisateurs)</li>
+  <li>Latence réseau faible pour les sessions synchrones (visioconférence)</li>
+  <li>Ouverture des ports nécessaires (ex : 80, 443, et ports internes Docker)</li>
+  <li>Accès Internet sortant requis pour les mises à jour et téléchargements d’images</li>
+</ul>
+
+<h3>Exigences de Sécurité</h3>
+<ul>
+  <li>Utilisation obligatoire du protocole <strong>HTTPS</strong></li>
+  <li>Certificat SSL/TLS valide</li>
+  <li>Pare-feu configuré pour limiter l’accès aux services</li>
+  <li>Gestion stricte des comptes utilisateurs et des rôles</li>
+  <li>Sauvegardes régulières et sécurisées des données</li>
+  <li>Mises à jour régulières du système et des conteneurs</li>
+</ul>
+
+<h3>Prérequis Système Complémentaires</h3>
+<ul>
+  <li>Support de la virtualisation activé</li>
+  <li>Ports réseau disponibles pour les services</li>
+</ul>
+
+<h3>Bonnes Pratiques Recommandées</h3>
+<ul>
+  <li>Utilisation d’un serveur ou d’une machine dédiée</li>
+  <li>Surveillance continue des ressources système</li>
+  <li>Journalisation et audit des accès</li>
+</ul>
+`;
+
+
+pages.installation = `
+<h1 class="mb-4">Installation</h1>
+
+<p>
+  Cette section décrit la procédure complète pour déployer la plateforme <strong>CRVSlearning</strong>
+  sur un serveur ou une machine virtuelle en utilisant <strong>Docker</strong> et <strong>Docker Compose</strong>.
+  Le déploiement est entièrement automatisé via un script officiel.
+</p>
+
+<hr>
+
+<h3>1. Prérequis Avant Installation</h3>
+<ul>
+  <li>Un serveur ou une machine virtuelle sous Linux, Windows ou macOS</li>
+  <li>Docker et Docker Compose installés et fonctionnels</li>
+  <li>Git installé</li>
+  <li>Connexion Internet stable</li>
+  <li>Accès administrateur (root ou sudo)</li>
+</ul>
+
+<hr>
+
+<h3>2. Déploiement Automatique</h3>
+<p>
+  Sur votre serveur ou votre VM, exécutez la commande suivante pour lancer l’installation automatique :
+</p>
+
+<pre><code>curl -fsSL https://raw.githubusercontent.com/UncleUX/crvstrainings/main/crvslearning/deploy/deploy.sh | sh</code></pre>
+
+<p>
+  Ce script va automatiquement :
+</p>
+<ul>
+  <li>Télécharger les fichiers nécessaires</li>
+  <li>Construire les images Docker</li>
+  <li>Démarrer l’ensemble des services</li>
+  <li>Configurer l’environnement de base</li>
+</ul>
+
+<hr>
+
+<h3>3. Vérification de l’Installation</h3>
+
+<p>Après le déploiement, vérifiez que les conteneurs sont bien en cours d’exécution :</p>
+
+<pre><code>docker ps</code></pre>
+
+<p>Vérifiez également les images Docker installées :</p>
+
+<pre><code>docker images</code></pre>
+
+<p>
+Pour surveiller l’utilisation des ressources et s’assurer que tous les services fonctionnent correctement :
+</p>
+
+<pre><code>docker stats --all</code></pre>
+
+<hr>
+
+<h3>4. Accès à la Plateforme</h3>
+<p>
+Une fois l’installation terminée, la plateforme est accessible via :
+</p>
+<ul>
+  <li><strong>http://ADRESSE_DU_SERVEUR</strong> (sans SSL)</li>
+  <li><strong>https://ADRESSE_DU_SERVEUR</strong> (avec SSL recommandé)</li>
+</ul>
+
+<hr>
+
+<h3>5. Configuration du SSL (HTTPS)</h3>
+<p>
+Si vous déployez CRVSlearning sur un serveur disposant d’un nom de domaine, il est fortement recommandé
+d’activer le <strong>HTTPS</strong> via un certificat SSL/TLS.
+</p>
+
+<h5>Option A : Génération du certificat via Docker (Certbot)</h5>
+
+<pre><code>docker run --rm -v /etc/letsencrypt:/etc/letsencrypt certbot/certbot certonly</code></pre>
+
+<h5>Option B : Installation via le système (apt)</h5>
+
+<pre><code>sudo apt update
+sudo apt install certbot python3-certbot-nginx</code></pre>
+
+<p>
+Après génération du certificat, assurez-vous que le <strong>reverse proxy Nginx</strong> est correctement configuré
+pour utiliser les certificats SSL.
+</p>
+
+<hr>
+
+<h3>6. Commandes Utiles d’Administration</h3>
+
+<ul>
+  <li>Arrêter les services : <pre><code>docker compose down</code></pre></li>
+  <li>Démarrer les services : <pre><code>docker compose up -d</code></pre></li>
+  <li>Voir les logs : <pre><code>docker compose logs -f</code></pre></li>
+  <li>Redémarrer les services : <pre><code>docker compose restart</code></pre></li>
+</ul>
+
+<hr>
+
+<h3>7. Bonnes Pratiques</h3>
+<ul>
+  <li>Effectuer des sauvegardes régulières des données</li>
+  <li>Surveiller l’utilisation CPU, RAM et disque</li>
+  <li>Mettre à jour régulièrement le système et les images Docker</li>
+  <li>Sécuriser l’accès au serveur (pare-feu, SSH, mots de passe forts)</li>
+</ul>
+
+<div class="alert alert-info mt-4">
+  <strong>Note :</strong> Pour un déploiement en production à grande échelle (national ou multi-centres),
+  il est recommandé d’utiliser une infrastructure dédiée ou cloud avec supervision et sauvegardes automatisées.
+</div>
+`;
+
+
+pages.course = `
+<h1 class="mb-2">Guide de Création d'un Cours sur la Plateforme</h1>
+<div class="text-muted mb-4">Dernière mise à jour : 05/01/2026</div>
+
+<p>
+Ce guide décrit en détail le processus complet de création, configuration, publication et maintenance
+d’un cours sur la plateforme <strong>CRVSlearning</strong>.
+</p>
+
+<hr>
+
+<h2>1. Préparation Initiale</h2>
+<ul>
+  <li><strong>Vérification des accès</strong> : disposer d’un compte avec les droits formateur ou administrateur</li>
+  <li><strong>Préparation du contenu</strong> :
+    <ul>
+      <li>Plan détaillé du cours</li>
+      <li>Objectifs pédagogiques clairs</li>
+      <li>Supports (PDF, présentations)</li>
+      <li>Ressources multimédias (images, vidéos)</li>
+      <li>Exercices et évaluations</li>
+    </ul>
+  </li>
+</ul>
+
+<img src="{% static '/images/prepcours.png' %}" class="img-fluid rounded border my-3" alt="Préparation du cours" style="height: 500px">
+
+<hr>
+
+<h2>2. Accès à l'Interface d'Administration</h2>
+<ol>
+  <li>Connectez-vous à votre compte</li>
+  <li>Accédez au tableau de bord administrateur ou à votre espace formateur</li>
+  <li>Cliquez sur <strong>Créer un cours</strong> ou <strong>Ajouter un cours</strong></li>
+</ol>
+
+<img src="{% static '/images/accescreationcours.png' %}" class="img-fluid rounded border my-3" alt="Préparation du cours" style="height: 500px">
+
+<hr>
+
+<h2>3. Création du Cours</h2>
+<p>Remplissez les informations de base :</p>
+<ul>
+  <li><strong>Titre du cours</strong></li>
+  <li><strong>Slug</strong> (URL-friendly)</li>
+  <li><strong>Description complète</strong></li>
+  <li><strong>Objectifs d’apprentissage</strong></li>
+  <li><strong>Public cible</strong></li>
+  <li><strong>Niveau de difficulté</strong></li>
+  <li><strong>Image de couverture</strong></li>
+</ul>
+
+<img src="{% static '/images/creationcours.png' %}" class="img-fluid rounded border my-3" alt="Préparation du cours" style="height: 500px">
+<hr>
+
+<h2>4. Configuration du Cours</h2>
+<h5>Paramètres généraux</h5>
+<ul>
+  <li>Catégories et sous-catégories</li>
+  <li>Mots-clés pour la recherche</li>
+  <li>Langue du cours</li>
+  <li>Durée estimée</li>
+  <li>Prérequis éventuels</li>
+</ul>
+
+<h5>Options d’accès</h5>
+<ul>
+  <li>Public ou privé</li>
+  <li>Gratuit ou restreint</li>
+  <li>Période d’accès</li>
+  <li>Statut : brouillon / publié</li>
+  <li>Date de publication</li>
+</ul>
+
+<img src="staticfiles/img/course_step_4.png" class="img-fluid rounded border my-3" alt="Configuration du cours">
+
+<hr>
+
+<h2>5. Structure du Cours</h2>
+<h5>Sections / Modules</h5>
+<ul>
+  <li>Cliquez sur <strong>Ajouter une section</strong></li>
+  <li>Donnez un titre à chaque module</li>
+  <li>Réorganisez par glisser-déposer</li>
+</ul>
+
+<h5>Leçons / Contenus</h5>
+<ul>
+  <li>Texte enrichi</li>
+  <li>Vidéos</li>
+  <li>PDF et documents</li>
+  <li>Présentations</li>
+  <li>Liens externes</li>
+  <li>Quiz et devoirs</li>
+</ul>
+
+<img src="staticfiles/img/course_step_5.png" class="img-fluid rounded border my-3" alt="Structure du cours">
+
+<hr>
+
+<h2>6. Multimédia et Ressources</h2>
+<ul>
+  <li>Téléversement d’images optimisées</li>
+  <li>Ajout de vidéos (hébergées ou intégrées)</li>
+  <li>Ajout de documents complémentaires</li>
+  <li>Modèles et ressources téléchargeables</li>
+</ul>
+
+<img src="staticfiles/img/course_step_6.png" class="img-fluid rounded border my-3" alt="Ajout des ressources">
+
+<hr>
+
+<h2>7. Évaluations</h2>
+<h5>Types de questions</h5>
+<ul>
+  <li>Questions à choix multiples</li>
+  <li>Vrai / Faux</li>
+  <li>Questions ouvertes</li>
+  <li>Cas pratiques</li>
+</ul>
+
+<h5>Paramètres d’évaluation</h5>
+<ul>
+  <li>Seuil de réussite</li>
+  <li>Nombre de tentatives autorisées</li>
+  <li>Feedback automatique ou personnalisé</li>
+</ul>
+
+<img src="staticfiles/img/course_step_7.png" class="img-fluid rounded border my-3" alt="Configuration des quiz">
+
+<hr>
+
+<h2>8. Sauvegarde, Test et Publication</h2>
+<ol>
+  <li>Enregistrer comme <strong>brouillon</strong></li>
+  <li>Utiliser l’<strong>aperçu</strong> pour tester la navigation</li>
+  <li>Vérifier tout le contenu</li>
+  <li>Publier immédiatement ou planifier la publication</li>
+  <li>Notifier les apprenants si nécessaire</li>
+</ol>
+
+<img src="staticfiles/img/course_step_8.png" class="img-fluid rounded border my-3" alt="Publication du cours">
+
+<hr>
+
+<h2>9. Suivi et Mise à Jour</h2>
+<ul>
+  <li>Analyse des statistiques d’utilisation</li>
+  <li>Collecte des retours des apprenants</li>
+  <li>Mise à jour régulière du contenu</li>
+  <li>Maintenance des ressources</li>
+</ul>
+
+<hr>
+
+<h2>Bonnes Pratiques</h2>
+<ul>
+  <li>Structure claire : une idée par module</li>
+  <li>Multimédia équilibré : texte, images, vidéos</li>
+  <li>Évaluations progressives</li>
+  <li>Mise à jour régulière du contenu</li>
+  <li>Accessibilité : sous-titres, textes alternatifs, clarté visuelle</li>
+</ul>
+
+<hr>
+
+<h2>Support</h2>
+<p>
+Pour toute difficulté ou question, veuillez contacter l’équipe support ou l’administrateur de la plateforme.
+</p>
+`;
+
+// pages.chaine_formateur = `
+
+// `;
+
+
+pages.login_apprenants = `
+<h1 class="mb-3">Accès à la Plateforme pour les Apprenants</h1>
+
+<p>
+Ce guide explique étape par étape comment les apprenants peuvent accéder à la plateforme <strong>CRVSlearning</strong>,
+naviguer dans l'interface, utiliser les fonctionnalités et assurer la sécurité de leur compte.
+</p>
+
+<hr>
+
+<h2>1. Accès à la Plateforme</h2>
+
+<h3>Pour les Nouveaux Utilisateurs</h3>
+<ol>
+  <li><strong>Inscription :</strong>
+    <ul>
+      <li>Cliquez sur "S'inscrire" ou "Créer un compte"</li>
+      <li>Remplissez le formulaire avec vos informations personnelles</li>
+      <li>Vérifiez votre adresse email via le lien reçu</li>
+    </ul>
+  </li>
+  <li><strong>Première Connexion :</strong>
+    <ul>
+      <li>Rendez-vous sur la page de connexion</li>
+      <li>Entrez vos identifiants (email et mot de passe)</li>
+      <li>Complétez votre profil si nécessaire</li>
+    </ul>
+  </li>
+</ol>
+
+<h3>Pour les Utilisateurs Existants</h3>
+<ol>
+  <li><strong>Connexion :</strong>
+    <ul>
+      <li>Accédez à la page de connexion</li>
+      <li>Saisissez votre email et mot de passe</li>
+      <li>Option "Se souvenir de moi" disponible</li>
+    </ul>
+  </li>
+  <li><strong>Récupération de Compte :</strong>
+    <ul>
+      <li>Cliquez sur "Mot de passe oublié ?"</li>
+      <li>Saisissez votre email pour réinitialisation</li>
+      <li>Suivez les instructions reçues par email</li>
+    </ul>
+  </li>
+</ol>
+
+<hr>
+
+<h2>2. Navigation dans l'Interface</h2>
+
+<h3>Tableau de Bord Principal</h3>
+<ul>
+  <li><strong>Cours en cours :</strong> Suivi de votre progression</li>
+  <li><strong>Nouveaux cours :</strong> Suggestions basées sur vos intérêts</li>
+  <li><strong>Échéances :</strong> Dates importantes et échéances</li>
+</ul>
+
+<h3>Menu Principal</h3>
+<ul>
+  <li><strong>Catalogue :</strong> Parcourir tous les cours disponibles</li>
+  <li><strong>Mes Cours :</strong> Accès à vos formations en cours</li>
+  <li><strong>Progression :</strong> Suivi de votre avancement</li>
+  <li><strong>Certificats :</strong> Téléchargement des attestations</li>
+  <li><strong>Profil :</strong> Gestion de vos informations</li>
+</ul>
+
+<hr>
+
+<h2>3. Fonctionnalités Clés</h2>
+
+<h3>Pendant les Cours</h3>
+<ul>
+  <li>Lecture de contenu : Navigation fluide entre les modules</li>
+  <li>Multimédia : Lecture des vidéos, téléchargement des supports</li>
+  <li>Exercices pratiques : Accès aux activités</li>
+  <li>Notes personnelles : Prise de notes intégrée</li>
+</ul>
+
+<h3>Interaction</h3>
+<ul>
+  <li>Forum : Échanges avec les autres apprenants</li>
+  <li>Messagerie : Contact avec les formateurs</li>
+  <li>Commentaires : Retours sur les leçons</li>
+</ul>
+
+<hr>
+
+<h2>4. Support Technique</h2>
+
+<h3>Aide en Ligne</h3>
+<ul>
+  <li>FAQ : Réponses aux questions courantes</li>
+  <li>Tutoriels : Guides d'utilisation détaillés</li>
+  <li>Chat en direct : Support technique en temps réel</li>
+</ul>
+
+<h3>Accessibilité</h3>
+<ul>
+  <li>Options : Taille du texte, contraste</li>
+  <li>Mobile : Application ou version responsive</li>
+  <li>Hors ligne : Téléchargement des contenus pour consultation sans connexion</li>
+</ul>
+
+<hr>
+
+<h2>5. Bonnes Pratiques</h2>
+
+<h3>Sécurité</h3>
+<ul>
+  <li>Ne jamais partager vos identifiants</li>
+  <li>Déconnexion après utilisation sur appareils partagés</li>
+  <li>Mise à jour régulière du mot de passe</li>
+</ul>
+
+<h3>Optimisation</h3>
+<ul>
+  <li>Utiliser les navigateurs recommandés</li>
+  <li>Connexion Internet stable</li>
+  <li>Mise à jour du navigateur pour éviter les incompatibilités</li>
+</ul>
+
+<hr>
+
+<h2>6. Illustrations</h2>
+<div class="row">
+  <div class="col-md-4 text-center my-2">
+    <img src="staticfiles/img/login_step_1.png" class="img-fluid rounded border" alt="Page d'inscription">
+    <div class="text-muted mt-1">Page d'inscription</div>
+  </div>
+  <div class="col-md-4 text-center my-2">
+    <img src="staticfiles/img/login_step_2.png" class="img-fluid rounded border" alt="Page de connexion">
+    <div class="text-muted mt-1">Page de connexion</div>
+  </div>
+  <div class="col-md-4 text-center my-2">
+    <img src="staticfiles/img/login_step_3.png" class="img-fluid rounded border" alt="Tableau de bord">
+    <div class="text-muted mt-1">Tableau de bord</div>
+  </div>
+</div>
+`;
+
+
+pages.chaine_formateur = `
+<h1 class="mb-3">Chaîne du Formateur</h1>
+
+<p>
+Cette section explique comment un formateur peut gérer ses cours, suivre ses apprenants,
+utiliser les outils de communication et gérer la certification sur <strong>CRVSlearning</strong>.
+</p>
+
+<hr>
+
+<h2>1. Accès à la Chaîne du Formateur</h2>
+
+<h3>Connexion</h3>
+<ul>
+  <li>Accédez à la page de connexion</li>
+  <li>Utilisez vos identifiants formateur</li>
+  <li>Sélectionnez "Espace Formateur" après connexion</li>
+</ul>
+
+<h3>Tableau de Bord</h3>
+<ul>
+  <li>Vue d'ensemble de vos cours</li>
+  <li>Statistiques d'engagement</li>
+  <li>Notifications importantes</li>
+</ul>
+
+<img src="staticfiles/img/teacher_dashboard.png" class="img-fluid rounded border my-3" alt="Tableau de bord formateur">
+
+<hr>
+
+<h2>2. Gestion des Cours</h2>
+
+<h3>Création de Cours</h3>
+<ul>
+  <li>Bouton "Nouveau cours"</li>
+  <li>Formulaire de création complet</li>
+  <li>Options de publication et planification</li>
+</ul>
+
+<h3>Organisation du Contenu</h3>
+<ul>
+  <li>Structure modulaire du cours</li>
+  <li>Gestion des sections</li>
+  <li>Ordre et hiérarchie des leçons</li>
+</ul>
+
+<img src="staticfiles/img/course_management.png" class="img-fluid rounded border my-3" alt="Gestion des cours">
+
+<hr>
+
+<h2>3. Gestion des Apprenants</h2>
+
+<h3>Inscription</h3>
+<ul>
+  <li>Import de listes d'apprenants</li>
+  <li>Distribution de codes d'accès</li>
+  <li>Création de groupes et cohortes</li>
+</ul>
+
+<h3>Suivi</h3>
+<ul>
+  <li>Progression individuelle et collective</li>
+  <li>Résultats des évaluations</li>
+  <li>Temps passé sur la plateforme</li>
+</ul>
+
+<img src="staticfiles/img/student_tracking.png" class="img-fluid rounded border my-3" alt="Suivi des apprenants">
+
+<hr>
+
+<h2>4. Outils de Communication</h2>
+
+<h3>Messagerie</h3>
+<ul>
+  <li>Envoi de messages groupés ou individuels</li>
+  <li>Réponses aux questions des apprenants</li>
+  <li>Partage de fichiers joints</li>
+</ul>
+
+<h3>Forums</h3>
+<ul>
+  <li>Gestion des discussions</li>
+  <li>Modération des contenus</li>
+  <li>Catégorisation par sujet ou module</li>
+</ul>
+
+<img src="staticfiles/img/communication_tools.png" class="img-fluid rounded border my-3" alt="Outils de communication">
+
+<hr>
+
+<h2>5. Évaluation et Certification</h2>
+
+<h3>Création d'Évaluations</h3>
+<ul>
+  <li>Banque de questions réutilisables</li>
+  <li>Paramètres de notation</li>
+  <li>Feedback personnalisé</li>
+</ul>
+
+<h3>Délivrance de Certificats</h3>
+<ul>
+  <li>Modèles personnalisables</li>
+  <li>Paramètres d’obtention des certificats</li>
+  <li>Téléchargement et suivi</li>
+</ul>
+
+<img src="staticfiles/img/evaluation_certification.png" class="img-fluid rounded border my-3" alt="Évaluation et certificats">
+
+<hr>
+
+<h2>6. Analyse et Rapports</h2>
+
+<h3>Tableaux de Bord</h3>
+<ul>
+  <li>Taux de complétion des cours</li>
+  <li>Performances globales et individuelles</li>
+  <li>Détection des difficultés et points faibles</li>
+</ul>
+
+<h3>Export de Données</h3>
+<ul>
+  <li>Formats standards (CSV, Excel, PDF)</li>
+  <li>Personnalisation des rapports</li>
+  <li>Planification des exports automatiques</li>
+</ul>
+
+<img src="staticfiles/img/reports.png" class="img-fluid rounded border my-3" alt="Analyse et rapports">
+
+<hr>
+
+<h2>7. Paramètres Avancés</h2>
+
+<h3>Personnalisation</h3>
+<ul>
+  <li>Apparence de la chaîne et des cours</li>
+  <li>Règles de publication</li>
+  <li>Options de confidentialité et accès</li>
+</ul>
+
+<h3>Intégrations</h3>
+<ul>
+  <li>Connexion avec outils externes</li>
+  <li>API pour échanges automatisés</li>
+  <li>Plugins et extensions disponibles</li>
+</ul>
+
+<hr>
+
+<h2>8. Support et Formation</h2>
+
+<h3>Ressources</h3>
+<ul>
+  <li>Guides détaillés</li>
+  <li>Tutoriels vidéo</li>
+  <li>FAQ complète</li>
+</ul>
+
+<h3>Assistance</h3>
+<ul>
+  <li>Support technique réactif</li>
+  <li>Communauté de formateurs</li>
+  <li>Mises à jour régulières et notifications</li>
+</ul>
+
+<img src="staticfiles/img/support.png" class="img-fluid rounded border my-3" alt="Support et formation">
+`;
+
+pages.profile = `
+<h1 class="mb-3">Gestion du Profil Utilisateur</h1>
+
+<p>
+Ce guide explique comment les apprenants et formateurs peuvent gérer leur profil sur <strong>CRVSlearning</strong>,
+modifier leurs informations personnelles, gérer la sécurité et configurer les notifications.
+</p>
+
+<hr>
+
+<h2>1. Accès à la Page de Profil</h2>
+<ol>
+  <li>Connectez-vous à votre compte avec vos identifiants</li>
+  <li>Cliquez sur votre photo de profil en haut à droite</li>
+  <li>Sélectionnez <strong>"Mon Profil"</strong> dans le menu déroulant</li>
+</ol>
+
+<img src="staticfiles/img/profile_access.png" class="img-fluid rounded border my-3" alt="Accès au profil">
+
+<hr>
+
+<h2>2. Modification des Informations Personnelles</h2>
+
+<h3>Onglet "Informations Personnelles"</h3>
+<ul>
+  <li><strong>Photo de profil :</strong>
+    <ul>
+      <li>Cliquez sur l'icône appareil photo</li>
+      <li>Sélectionnez une image depuis votre appareil</li>
+      <li>Recadrez si nécessaire</li>
+      <li>Validez le téléchargement</li>
+    </ul>
+  </li>
+  <li><strong>Informations de base :</strong>
+    <ul>
+      <li>Prénom et nom</li>
+      <li>Adresse email (confirmation requise)</li>
+      <li>Téléphone</li>
+      <li>Date de naissance</li>
+      <li>Genre</li>
+    </ul>
+  </li>
+</ul>
+
+<img src="staticfiles/img/profile_personal_info.png" class="img-fluid rounded border my-3" alt="Informations personnelles">
+
+<hr>
+
+<h2>3. Modification du Mot de Passe</h2>
+<ol>
+  <li>Cliquez sur l'onglet <strong>"Sécurité"</strong></li>
+  <li>Remplissez les champs :
+    <ul>
+      <li>Ancien mot de passe</li>
+      <li>Nouveau mot de passe</li>
+      <li>Confirmation du nouveau mot de passe</li>
+    </ul>
+  </li>
+  <li>Validez la modification</li>
+</ol>
+
+<img src="staticfiles/img/profile_password.png" class="img-fluid rounded border my-3" alt="Modification mot de passe">
+
+<hr>
+
+<h2>4. Préférences de Notification</h2>
+<ul>
+  <li><strong>Types de notifications :</strong>
+    <ul>
+      <li>Emails de rappel</li>
+      <li>Notifications de nouveaux cours</li>
+      <li>Alertes de messages</li>
+      <li>Mises à jour du système</li>
+    </ul>
+  </li>
+  <li><strong>Fréquence :</strong>
+    <ul>
+      <li>Immédiates</li>
+      <li>Quotidiennes</li>
+      <li>Hebdomadaires</li>
+      <li>Désactivées</li>
+    </ul>
+  </li>
+</ul>
+
+<img src="staticfiles/img/profile_notifications.png" class="img-fluid rounded border my-3" alt="Préférences de notification">
+
+<hr>
+
+<h2>5. Paramètres de Confidentialité</h2>
+<ul>
+  <li><strong>Visibilité du profil :</strong> Public / Membres uniquement / Privé</li>
+  <li><strong>Partage d'informations :</strong>
+    <ul>
+      <li>Autoriser le suivi</li>
+      <li>Afficher les statistiques</li>
+      <li>Partager les résultats</li>
+    </ul>
+  </li>
+</ul>
+
+<img src="staticfiles/img/profile_privacy.png" class="img-fluid rounded border my-3" alt="Paramètres de confidentialité">
+
+<hr>
+
+<h2>6. Signature Électronique</h2>
+<ul>
+  <li>Téléverser une signature au format PNG ou JPG</li>
+  <li>Taille maximale : 2MB</li>
+  <li>Dimensions recommandées : 300x150px</li>
+</ul>
+
+<img src="staticfiles/img/profile_signature.png" class="img-fluid rounded border my-3" alt="Signature électronique">
+
+<hr>
+
+<h2>7. Sauvegarde des Modifications</h2>
+<ul>
+  <li>Cliquez sur le bouton <strong>"Enregistrer"</strong> en bas de page</li>
+  <li>Confirmation par email pour les changements critiques</li>
+  <li>Annulation des modifications non enregistrées</li>
+</ul>
+
+<hr>
+
+<h2>8. Vérification des Modifications</h2>
+<ul>
+  <li>Déconnexion / Connexion pour s'assurer que les changements ont été pris en compte</li>
+  <li>Vérification de l'email en cas de modification de l'adresse</li>
+</ul>
+
+<hr>
+
+<h2>9. Problèmes Courants</h2>
+<ul>
+  <li><strong>Photo de profil qui ne s'affiche pas :</strong>
+    <ul>
+      <li>Vérifiez le format et la taille</li>
+      <li>Réessayez avec une autre image</li>
+      <li>Videz le cache du navigateur</li>
+    </ul>
+  </li>
+  <li><strong>Modifications non enregistrées :</strong>
+    <ul>
+      <li>Vérifiez votre connexion Internet</li>
+      <li>Assurez-vous d'avoir cliqué sur "Enregistrer"</li>
+      <li>Contactez le support si le problème persiste</li>
+    </ul>
+  </li>
+</ul>
+
+<hr>
+
+<h2>10. Sécurité</h2>
+<ul>
+  <li>Ne partagez jamais vos identifiants</li>
+  <li>Déconnectez-vous après utilisation sur un appareil partagé</li>
+  <li>Changez régulièrement votre mot de passe</li>
+</ul>
+
+<img src="staticfiles/img/profile_security.png" class="img-fluid rounded border my-3" alt="Sécurité du profil">
+`;
+
+pages.module = `
+<h1 class="mb-3">Création d'un Module sur CRVSlearning</h1>
+
+<p>
+Ce guide explique comment créer et gérer un module au sein d'un cours sur <strong>CRVSlearning</strong>,
+depuis l'accès à l'interface jusqu'à la publication et le suivi.
+</p>
+
+<hr>
+
+<h2>1. Accès à l'Interface de Création</h2>
+<ol>
+  <li>Connectez-vous à votre compte formateur</li>
+  <li>Accédez à la page de gestion de votre cours</li>
+  <li>Cliquez sur <strong>"Ajouter un module"</strong> dans la section "Structure du cours"</li>
+</ol>
+
+<img src="staticfiles/img/module_access.png" class="img-fluid rounded border my-3" alt="Accès création module">
+
+<hr>
+
+<h2>2. Configuration de Base du Module</h2>
+
+<h3>Informations Principales</h3>
+<ul>
+  <li><strong>Titre du module</strong> : Nom clair et descriptif</li>
+  <li><strong>Description</strong> : Brève présentation du contenu</li>
+  <li><strong>Objectifs d'apprentissage</strong> : Compétences à acquérir</li>
+  <li><strong>Durée estimée</strong> : Temps requis pour compléter le module</li>
+</ul>
+
+<h3>Paramètres d'Accès</h3>
+<ul>
+  <li><strong>Prérequis</strong> : Modules à compléter avant d’accéder à celui-ci</li>
+  <li><strong>Disponibilité</strong> : Date de publication</li>
+  <li><strong>Accès</strong> : Immédiat ou selon conditions</li>
+</ul>
+
+<img src="staticfiles/img/module_basic_config.png" class="img-fluid rounded border my-3" alt="Configuration de base du module">
+
+<hr>
+
+<h2>3. Structure du Contenu</h2>
+
+<h3>Organisation</h3>
+<ol>
+  <li><strong>Leçons :</strong>
+    <ul>
+      <li>Titre et description</li>
+      <li>Type de contenu : texte, vidéo, PDF, etc.</li>
+      <li>Durée estimée</li>
+    </ul>
+  </li>
+  <li><strong>Ressources :</strong>
+    <ul>
+      <li>Fichiers à télécharger</li>
+      <li>Liens externes</li>
+      <li>Bibliographie</li>
+    </ul>
+  </li>
+  <li><strong>Évaluations :</strong>
+    <ul>
+      <li>Quiz formatifs</li>
+      <li>Exercices pratiques</li>
+      <li>Devoirs notés</li>
+    </ul>
+  </li>
+</ol>
+
+<img src="staticfiles/img/module_structure.png" class="img-fluid rounded border my-3" alt="Structure du contenu">
+
+<hr>
+
+<h2>4. Multimédia et Ressources</h2>
+
+<h3>Types de Fichiers Acceptés</h3>
+<ul>
+  <li>Vidéos : MP4, WebM, liens YouTube/Vimeo</li>
+  <li>Documents : PDF, PowerPoint, Word</li>
+  <li>Images : JPG, PNG, GIF</li>
+  <li>Audio : MP3, WAV</li>
+</ul>
+
+<h3>Bonnes Pratiques</h3>
+<ul>
+  <li>Optimiser les fichiers pour le web</li>
+  <li>Utiliser des noms de fichiers clairs</li>
+  <li>Vérifier les droits d'utilisation</li>
+</ul>
+
+<img src="staticfiles/img/module_resources.png" class="img-fluid rounded border my-3" alt="Multimédia et ressources">
+
+<hr>
+
+<h2>5. Paramètres Avancés</h2>
+
+<h3>Suivi de Progression</h3>
+<ul>
+  <li>Achèvement automatique</li>
+  <li>Validation par l'apprenant</li>
+  <li>Validation par le formateur</li>
+</ul>
+
+<h3>Options d'Affichage</h3>
+<ul>
+  <li>Ordre des leçons</li>
+  <li>Navigation libre ou séquentielle</li>
+  <li>Affichage du sommaire</li>
+</ul>
+
+<hr>
+
+<h2>6. Sauvegarde et Publication</h2>
+
+<h3>Avant Publication</h3>
+<ul>
+  <li>Vérifiez l'orthographe et la grammaire</li>
+  <li>Testez tous les liens et médias</li>
+  <li>Vérifiez la compatibilité mobile</li>
+</ul>
+
+<h3>Options de Publication</h3>
+<ul>
+  <li>Enregistrer comme brouillon</li>
+  <li>Planifier la publication</li>
+  <li>Publier immédiatement</li>
+</ul>
+
+<img src="staticfiles/img/module_publish.png" class="img-fluid rounded border my-3" alt="Sauvegarde et publication">
+
+<hr>
+
+<h2>7. Gestion des Droits</h2>
+
+<h3>Droits d'Auteur</h3>
+<ul>
+  <li>Spécifiez la licence</li>
+  <li>Mentionnez les sources</li>
+  <li>Respectez le droit d'auteur</li>
+</ul>
+
+<h3>Partage et Réutilisation</h3>
+<ul>
+  <li>Paramètres de visibilité</li>
+  <li>Options de partage</li>
+  <li>Droits de modification</li>
+</ul>
+
+<hr>
+
+<h2>8. Accessibilité</h2>
+
+<h3>Normes à Respecter</h3>
+<ul>
+  <li>Sous-titres pour les vidéos</li>
+  <li>Textes alternatifs pour les images</li>
+  <li>Contraste des couleurs</li>
+  <li>Navigation au clavier</li>
+</ul>
+
+<hr>
+
+<h2>9. Tests et Validation</h2>
+
+<h3>Vérifications Finales</h3>
+<ul>
+  <li>Testez sur différents appareils</li>
+  <li>Vérifiez les temps de chargement</li>
+  <li>Assurez la cohérence pédagogique</li>
+</ul>
+
+<h3>Retours</h3>
+<ul>
+  <li>Bêta-testeurs</li>
+  <li>Correction des erreurs</li>
+  <li>Améliorations suggérées</li>
+</ul>
+
+<hr>
+
+<h2>10. Maintenance</h2>
+
+<h3>Mises à Jour</h3>
+<ul>
+  <li>Révision périodique</li>
+  <li>Actualisation des informations</li>
+  <li>Ajout de contenu complémentaire</li>
+</ul>
+
+<h3>Support</h3>
+<ul>
+  <li>Documentation pour les utilisateurs</li>
+  <li>FAQ</li>
+  <li>Contact du support technique</li>
+</ul>
+
+<img src="staticfiles/img/module_maintenance.png" class="img-fluid rounded border my-3" alt="Maintenance du module">
+`;
+
+pages.video = `
+<h1 class="mb-3">Ajout et Gestion de Vidéos dans une Leçon</h1>
+
+<p>
+Ce guide explique comment ajouter des vidéos à une leçon sur <strong>CRVSlearning</strong>,
+configurer les options de lecture, l'accessibilité et les interactions, et publier la vidéo.
+</p>
+
+<hr>
+
+<h2>1. Accès à l'Éditeur de Vidéo</h2>
+<ol>
+  <li>Sélectionnez la leçon cible</li>
+  <li>Cliquez sur <strong>"Ajouter du contenu"</strong></li>
+  <li>Choisissez <strong>"Vidéo"</strong> comme type de contenu</li>
+</ol>
+
+<img src="staticfiles/img/video_editor.png" class="img-fluid rounded border my-3" alt="Éditeur de vidéo">
+
+<hr>
+
+<h2>2. Options d'Importation</h2>
+
+<h3>Méthodes d'Ajout</h3>
+<ul>
+  <li>Téléversement direct depuis votre appareil</li>
+  <li>Lien externe (YouTube, Vimeo, etc.)</li>
+  <li>Bibliothèque de médias (si disponible)</li>
+</ul>
+
+<h3>Formats Acceptés</h3>
+<ul>
+  <li>Vidéos : MP4, WebM, MOV</li>
+  <li>Taille maximale : 2 Go</li>
+  <li>Codec recommandé : H.264</li>
+</ul>
+
+<hr>
+
+<h2>3. Configuration de la Vidéo</h2>
+
+<h3>Métadonnées</h3>
+<ul>
+  <li>Titre : Nom clair et descriptif</li>
+  <li>Description : Résumé du contenu</li>
+  <li>Durée : Remplissage automatique</li>
+  <li>Miniature : Téléverser une image personnalisée</li>
+</ul>
+
+<h3>Paramètres de Lecture</h3>
+<ul>
+  <li>Lecture automatique : Oui/Non</li>
+  <li>Boucle : Lecture en continu</li>
+  <li>Contrôles : Activer/désactiver</li>
+  <li>Vitesse de lecture : Options disponibles</li>
+</ul>
+
+<img src="staticfiles/img/video_settings.png" class="img-fluid rounded border my-3" alt="Configuration de la vidéo">
+
+<hr>
+
+<h2>4. Accessibilité</h2>
+
+<h3>Sous-titres</h3>
+<ul>
+  <li>Format : SRT, VTT</li>
+  <li>Langue : Sélection</li>
+  <li>Ajout d'un fichier de sous-titres</li>
+</ul>
+
+<h3>Transcription</h3>
+<ul>
+  <li>Téléverser un fichier texte</li>
+  <li>Éditer la transcription en ligne</li>
+  <li>Synchronisation avec la vidéo</li>
+</ul>
+
+<hr>
+
+<h2>5. Options Avancées</h2>
+
+<h3>Chapitres</h3>
+<ul>
+  <li>Ajouter des marqueurs de chapitres</li>
+  <li>Points clés : marqueurs temporels</li>
+  <li>Navigation entre les sections</li>
+</ul>
+
+<h3>Interactions</h3>
+<ul>
+  <li>Quiz intégrés dans la vidéo</li>
+  <li>Liens cliquables pendant la lecture</li>
+  <li>Fenêtres contextuelles d'information</li>
+</ul>
+
+<hr>
+
+<h2>6. Prévisualisation et Test</h2>
+
+<h3>Lecture de Test</h3>
+<ul>
+  <li>Vérifiez la qualité vidéo</li>
+  <li>Testez les sous-titres</li>
+  <li>Vérifiez les interactions</li>
+</ul>
+
+<h3>Compatibilité</h3>
+<ul>
+  <li>Test sur différents appareils</li>
+  <li>Vérification des temps de chargement</li>
+  <li>Affichage responsive</li>
+</ul>
+
+<img src="staticfiles/img/video_preview.png" class="img-fluid rounded border my-3" alt="Prévisualisation de la vidéo">
+
+<hr>
+
+<h2>7. Bonnes Pratiques</h2>
+
+<h3>Optimisation</h3>
+<ul>
+  <li>Résolution : 1080p recommandé</li>
+  <li>Débit binaire : 5-10 Mbps pour 1080p</li>
+  <li>Format : MP4 avec H.264</li>
+</ul>
+
+<h3>Accessibilité</h3>
+<ul>
+  <li>Sous-titres pour tous les contenus parlés</li>
+  <li>Description audio pour les éléments visuels</li>
+  <li>Transcription textuelle complète</li>
+</ul>
+
+<hr>
+
+<h2>8. Publication</h2>
+
+<h3>Paramètres de Visibilité</h3>
+<ul>
+  <li>Publique : visible par tous</li>
+  <li>Privé : uniquement pour les inscrits</li>
+  <li>Masqué : non listé</li>
+</ul>
+
+<h3>Partage</h3>
+<ul>
+  <li>Lien direct</li>
+  <li>Code d'intégration</li>
+  <li>Réseaux sociaux</li>
+</ul>
+
+<hr>
+
+<h2>9. Analyse</h2>
+
+<h3>Statistiques</h3>
+<ul>
+  <li>Nombre de vues</li>
+  <li>Taux de rétention</li>
+  <li>Interactions</li>
+</ul>
+
+<h3>Retours</h3>
+<ul>
+  <li>Commentaires</li>
+  <li>Notes</li>
+  <li>Signaler un problème</li>
+</ul>
+
+<hr>
+
+<h2>10. Support</h2>
+
+<h3>Problèmes Courants</h3>
+<ul>
+  <li>Lecture : vérifier le format et le codec</li>
+  <li>Sous-titres : vérifier le format et la synchronisation</li>
+  <li>Qualité : vérifier la résolution et le débit</li>
+</ul>
+
+<h3>Assistance</h3>
+<ul>
+  <li>Documentation</li>
+  <li>Forum d'aide</li>
+  <li>Support technique</li>
+</ul>
+
+<img src="staticfiles/img/video_support.png" class="img-fluid rounded border my-3" alt="Support vidéo">
+`;
+
+
+
+
+
+
+const content = document.getElementById('content');
+const links = document.querySelectorAll('aside a[data-page]');
+
+document.addEventListener('DOMContentLoaded', function() {
+    content.innerHTML = pages.overview;
+    
+    // Marquer le lien comme actif
+    const defaultLink = document.querySelector('a[data-page="overview"]');
+    if (defaultLink) {
+        defaultLink.classList.add('active');
+    }
+    
+    // Gestion des clics sur les liens
+    links.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const page = link.dataset.page;
+            if(pages[page]){
+                content.innerHTML = pages[page];
+                // Mettre à jour la classe active
+                links.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    // Gestion du menu déroulant
+    document.getElementById('pm-toggle').addEventListener('click', () => {
+        const menu = document.getElementById('pmenu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
+});
+</script>
+</body>
+</html>

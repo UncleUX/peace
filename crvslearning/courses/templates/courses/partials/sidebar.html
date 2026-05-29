@@ -1,0 +1,54 @@
+
+<style>
+  .sidebar {
+        /* background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px); */
+        border-radius: 7px;
+        height: fit-content;
+        padding: 16px 8px;
+        display: flex;
+        width: 60px;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: sticky;
+        top: 150px;
+        margin-right: 10px;
+        z-index: 100;
+    }
+
+    .sidebar .icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 5px;
+        display: grid;
+        place-items: center;
+        color: #e0e0e0;
+        cursor: pointer;
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        position: relative;
+        text-decoration: none;
+    }
+
+    .sidebar .icon.active {
+        background: linear-gradient(135deg, #0072ce, #00439c);
+        color: #fff;
+        border-color: #00a4ff;
+    }
+       @media (max-width: 768px) {
+            .sidebar{
+                display:none;
+            }
+            }
+</style>
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="icon active" title="Contenu du cours"><i class="bi bi-paperclip"></i></div>
+  <a href="{% url 'users:dashboard' %}" class="icon" title="Tableau de bord"><i class="bi bi-grid"></i></a>
+  <a href="{% url 'users:profile' %}" class="icon" title="Mon profil"><i class="bi bi-person"></i></a>
+  <a href="#" class="icon" id="settings-btn" title="Paramètres"><i class="bi bi-gear"></i></a>
+</div>

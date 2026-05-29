@@ -1,0 +1,356 @@
+{% load static %}
+
+<!-- Styles Spécifiques au Bloc Hero (Esthétique Souveraine & Glassmorphism) -->
+<style scoped>
+  .hero-wrapper {
+    background-image: url('{% static "img/scrub.jpg" %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+  }
+  .course-hero {
+    position: relative;
+    padding: 2.5rem 0;
+    z-index: 1;
+  }
+  .hero-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(10, 25, 47, 0.85) 0%, rgba(0, 67, 156, 0.7) 100%);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+  }
+  .evaluation-badge {
+    font-size: 2.5rem;
+    padding: 8px 12px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+  }
+  .course-title {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .course-desc {
+    font-size: 0.85rem;
+    max-width: 700px;
+    opacity: 0.9;
+  }
+  .instructor-avatar-img, .instructor-avatar-placeholder {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.2);
+    transition: transform 0.2s ease;
+  }
+  .instructor-avatar-img:hover, .instructor-avatar-placeholder:hover {
+    transform: scale(1.05);
+  }
+  .instructor-avatar-placeholder {
+    font-size: 13px;
+    font-weight: bold;
+  }
+  /* Style des Boutons d'Action */
+  .meta-actions .btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+  }
+  .btn-enrolled-status {
+    background: rgba(40, 167, 69, 0.15) !important;
+    border: 1px solid rgba(40, 167, 69, 0.4) !important;
+    color: #28a745 !important;
+    opacity: 1 !important;
+  }
+  .btn-action-trigger {
+    background: #0072ce;
+    border: 1px solid #0072ce;
+    color: #fff;
+  }
+  .btn-action-trigger:hover {
+    background: #00569d;
+    border-color: #00569d;
+    color: #fff;
+  }
+  .btn-mark-completed-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+  }
+  .btn-mark-completed-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+  .btn-mark-completed-toggle.completed {
+    background: #28a745;
+    border-color: #28a745;
+    color: #fff;
+  }
+  /* Badge Catégorie Bento */
+  .category-pill-box {
+    position: relative;
+    display: inline-block;
+    margin-top: 1rem;
+  }
+  .category-pill-box img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .category-pill-badge {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #0072ce, #00439c);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(0, 114, 206, 0.3);
+  }
+</style>
+
+<!-- Corps du Composant Hero -->
+<div class="container-fluid hero-wrapper rounded shadow-sm">
+  <div class="hero-overlay"></div>
+  <div class="container">
+    <section class="course-hero">
+      <div class="position-relative">
+        
+        {% if has_passed_evaluation %}
+        <div class="evaluation-badge text-center">
+          <i class="bi bi-award-fill" style="color: #ffd700;"></i>
+        </div>
+        {% endif %}
+        
+        <!-- En-tête Titre -->
+        <div class="d-flex align-items-center mb-2">
+          <div class="course-title-section">
+            <h2 class="course-title text-white mb-0">{{ course.title }}</h2>
+          </div>
+        </div>
+        
+        <!-- Description courte -->
+        <p class="course-desc text-white mb-3">{{ course.description|truncatechars:180 }}</p>
+        
+        <!-- Zone Métadonnées et Actions (Flexbox Hybride) -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-2 border-top border-wide" style="border-color: rgba(255,255,255,0.1) !important;">
+          
+          <!-- Bloc Instructeur & Communauté -->
+          <div class="d-flex align-items-center">
+            <div class="instructor-avatar me-2">
+              {% if course.created_by.get_full_name %}
+                {% if course.created_by.avatar %}
+                  <img src="{{ course.created_by.avatar.url }}" alt="{{ course.created_by.get_full_name }}" 
+                       class="rounded-circle instructor-avatar-img"
+                       onclick="window.open('{{ course.created_by.get_full_name|default:\'#\' }}', '_blank')">
+                {% else %}
+                  <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white instructor-avatar-placeholder" 
+                       onclick="window.open('{{ course.created_by.get_full_name|default:\'#\' }}', '_blank')">
+                    {{ course.created_by.get_full_name|slice:":1"|upper }}
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white instructor-avatar-placeholder" 
+                     onclick="window.open('#', '_blank')">
+                  {{ course.created_by.username|slice:":1"|upper }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="instructor-details">
+              <div class="instructor-name text-white fw-semibold" style="cursor: pointer; font-size: 0.9rem;"
+                   onclick="window.open('{{ course.created_by.get_full_name|default:\'#\' }}', '_blank')">
+                {{ course.created_by.get_full_name|default:course.created_by.username }}
+              </div>
+              <div class="enrollment-count text-white-50" style="font-size: 0.8rem;">
+                <i class="bi bi-people-fill me-1"></i>{{ course.enrollments.count }} inscrit{{ course.enrollments.count|pluralize }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloc Boutons d'inscription contextuels -->
+          <div class="meta-actions d-flex align-items-center gap-2">
+            {% if is_enrolled %}
+              <button class="btn btn-enrolled-status" disabled>
+                <i class="bi bi-check-circle-fill me-1"></i> Inscrit(e)
+              </button>
+              <form method="post" action="{% url 'courses:mark_course_completed' course.id %}" class="mark-course-completed-form m-0">
+                {% csrf_token %}
+                <button type="button" 
+                        class="btn btn-mark-completed-toggle {% if is_course_completed %}completed{% endif %}"
+                        data-completed="{% if is_course_completed %}true{% else %}false{% endif %}">
+                  <i class="bi {% if is_course_completed %}bi-check-circle-fill{% else %}bi-circle{% endif %} me-1"></i>
+                  <span>{% if is_course_completed %}Terminé{% else %}Marquer terminé{% endif %}</span>
+                </button>
+              </form>
+            {% else %}
+              {% if user.role == 'trainer' %}
+                <button class="btn btn-action-trigger" onclick="showTrainerEnrollmentAlert()">
+                  <i class="bi bi-person-plus me-1"></i> S'inscrire
+                </button>
+              {% else %}
+                <button class="btn btn-action-trigger" onclick="showLearnerEnrollmentAlert()">
+                  <i class="bi bi-person-plus me-1"></i> S'inscrire
+                </button>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Bloc Catégorie (Positionnement Bento) -->
+        {% if course.category and course.category.image %}
+        <div class="category-pill-box">
+          <img src="{{ course.category.image.url }}" alt="{{ course.category.name }}">
+          <div class="category-pill-badge">
+            {{ course.category.name }}
+          </div>
+        </div>
+        {% endif %}
+        
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Logique Applicative & Modales Douces (SweetAlert2) -->
+<script>
+// Gestionnaire d'achèvement de cours unifié
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-mark-completed-toggle');
+    if (!btn) return;
+    
+    var form = btn.closest('.mark-course-completed-form');
+    var isCompleted = btn.getAttribute('data-completed') === 'true';
+    
+    if (!isCompleted && form) {
+        btn.setAttribute('data-completed', 'true');
+        btn.classList.add('completed');
+        btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i><span>Terminé</span>';
+        form.submit();
+    }
+});
+
+function showTrainerEnrollmentAlert() {
+    Swal.fire({
+        title: 'Accès non autorisé',
+        html: 'En tant que <strong>formateur</strong>, vous ne pouvez pas vous inscrire aux cours de ce catalogue.<br><br>Votre rôle est d\'administrer les formations.',
+        icon: 'warning',
+        iconColor: '#ff6b6b',
+        confirmButtonText: 'J\'ai compris',
+        confirmButtonColor: '#0072ce',
+        backdrop: 'rgba(10, 25, 47, 0.5)'
+    });
+}
+
+function showLearnerEnrollmentAlert() {
+    var courseTitle = "{{ course.title|escapejs }}";
+    var totalLessons = {{ course.get_total_lessons|default:0 }};
+    var totalMinutes = {{ course.get_total_duration|default:0 }};
+    var displayHours = Math.floor(totalMinutes / 60);
+    var displayMinutes = totalMinutes % 60;
+    var timeDisplay = displayHours + 'h' + (displayMinutes > 0 ? displayMinutes + 'min' : '');
+    
+    var htmlContent = `
+        <div style="text-align: left; line-height: 1.6;">
+            <p><strong>Formation :</strong> \${courseTitle}</p>
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid rgba(0,0,0,0.08);">
+            <div class="d-flex justify-content-between gap-3 flex-wrap" style="margin: 15px 0;">
+                <div style="flex: 1; min-width: 200px;">
+                    <p class="mb-2"><strong>Objectifs d'apprentissage :</strong></p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #4a5568;">
+                        <li>Maîtrise des concepts cadres clés</li>
+                        <li>Intégration des meilleures pratiques métiers</li>
+                        <li>Études de cas réels applicatifs</li>
+                    </ul>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <p class="mb-2"><strong>Structure du module :</strong></p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.85rem; color: #4a5568;">
+                        <li><strong>\${totalLessons}</strong> leçons structurées</li>
+                        <li><strong>\${timeDisplay}</strong> de charge d'étude</li>
+                        <li>Délivrance d'une attestation</li>
+                    </ul>
+                </div>
+            </div>
+            <hr style="margin: 15px 0; border: none; border-top: 1px solid rgba(0,0,0,0.08);">
+            <p style="color: #28a745; font-weight: 600; text-align: center; margin: 0;">Voulez-vous valider votre parcours d'inscription ?</p>
+        </div>
+    `;
+    
+    Swal.fire({
+        title: 'Confirmation d\'inscription',
+        html: htmlContent,
+        icon: 'info',
+        iconColor: '#0072ce',
+        showCancelButton: true,
+        confirmButtonText: 'Confirmer l\'inscription',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        backdrop: 'rgba(10, 25, 47, 0.4)',
+        width: '640px'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            fetch('{% url "courses:enroll_course" course.id %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'csrfmiddlewaretoken={{ csrf_token }}'
+            })
+            .then(function(response) {
+                if (!response.ok) throw new Error('Network response failure');
+                
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Inscription validée',
+                    showConfirmButton: false,
+                    timer: 3500,
+                    timerProgressBar: true
+                });
+                
+                var actionsContainer = document.querySelector('.meta-actions');
+                if (actionsContainer) {
+                    actionsContainer.innerHTML = `
+                        <button class="btn btn-enrolled-status" disabled>
+                            <i class="bi bi-check-circle-fill me-1"></i> Inscrit(e)
+                        </button>
+                        <form method="post" action="{% url 'courses:mark_course_completed' course.id %}" class="mark-course-completed-form m-0">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                            <button type="button" class="btn btn-mark-completed-toggle" data-completed="false">
+                                <i class="bi bi-circle me-1"></i>
+                                <span>Marquer terminé</span>
+                            </button>
+                        </form>
+                    `;
+                }
+            })
+            .catch(function(error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur système',
+                    text: 'Une anomalie est survenue pendant la transaction d\'inscription.',
+                    confirmButtonColor: '#dc3545'
+                });
+            });
+        }
+    });
+}
+</script>

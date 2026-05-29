@@ -1,0 +1,1966 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Création de cours - CRVSLearning{% endblock %}
+
+{% block extra_head %}
+<!-- CSS supplémentaire pour le formulaire -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="{% static 'courses/css/course_creation.css' %}" rel="stylesheet">
+<style>
+    /* Style des alertes */
+    .alert {
+        border-radius: 4px;
+        border: none;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .alert-success {
+        background: rgba(46, 213, 115, 0.1);
+        color: #2ed573;
+        border-left: 4px solid #2ed573;
+    }
+    
+    .alert .btn-close {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+    
+    .alert h5 {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    /* Style de la navigation */
+    .nav-pills {
+        position: relative;
+        z-index: 3;
+        background: rgba(13, 71, 161, 0.8) !important;
+        border-radius: 15px;
+        padding: 15px;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(79, 195, 247, 0.3);
+        margin-bottom: -20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Ajustement du conteneur principal */
+    .card-body {
+        position: relative;
+        overflow: visible;
+        padding-top: 0;
+    }
+    
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    /* Ajustement du contenu principal */
+    .container-fluid.py-5 {
+        background: rgba(15, 32, 39, 0.9) !important;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(79, 195, 247, 0.2);
+    }
+    
+    /* Style pour les champs de formulaire */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="file"],
+    textarea,
+    select,
+    .form-control,
+    .form-select {
+        border-radius: 4px !important;
+    }
+    
+    /* Style pour les boutons du formulaire */
+    .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-warning, .btn-info, .btn-light, .btn-dark, .add-module-btn, .add-lesson-btn, .add-video-btn {
+        border-radius: 4px !important;
+        padding: 0.5rem 1rem !important;
+        font-weight: 500 !important;
+        transition: all 0.3s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: 1px solid rgba(79, 195, 247, 0.3) !important;
+        background: rgba(13, 71, 161, 0.1) !important;
+        color: #4fc3f7 !important;
+        text-shadow: 0 0 5px rgba(79, 195, 247, 0.5) !important;
+        box-shadow: 0 0 10px rgba(79, 195, 247, 0.2) !important;
+        margin: 0.2rem 0 !important;
+        font-size: 0.8rem !important;
+    }
+    
+    /* Style au survol pour tous les boutons */
+    .btn:hover, .btn-primary:hover, .btn-secondary:hover, .btn-success:hover, 
+    .btn-danger:hover, .btn-warning:hover, .btn-info:hover, .btn-light:hover, 
+    .btn-dark:hover, .add-module-btn:hover, .add-lesson-btn:hover, .add-video-btn:hover {
+        background: rgba(13, 71, 161, 0.3) !important;
+        border-color: #4fc3f7 !important;
+        color: #fff !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(79, 195, 247, 0.4) !important;
+    }
+    
+    /* Style actif/click */
+    .btn:active, .btn-primary:active, .btn-secondary:active, .btn-success:active, 
+    .btn-danger:active, .btn-warning:active, .btn-info:active, .btn-light:active, 
+    .btn-dark:active, .add-module-btn:active, .add-lesson-btn:active, .add-video-btn:active {
+        transform: translateY(0) !important;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Style spécifique pour les boutons d'ajout (module, leçon, vidéo) */
+    .add-module-btn, .add-lesson-btn, .add-video-btn, .btn-add, [class*='btn-add-'] {
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 0 10px rgba(79, 195, 247, 0.3) !important;
+        background: rgba(33, 150, 243, 0.1) !important;
+        border: 1px solid rgba(33, 150, 243, 0.3) !important;
+        color: #2196f3 !important;
+        text-shadow: 0 0 5px rgba(33, 150, 243, 0.5) !important;
+        margin: 0.2rem 0 !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 4px !important;
+        transition: all 0.3s ease !important;
+        background: rgba(30, 30, 40, 0.6) !important;
+        color: #e0e0e0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 5px !important;
+        padding: 0.5rem 1rem !important;
+        font-weight: 500 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.5rem;
+        font-size: 0.875rem !important;
+    }
+    
+    .add-module-btn:hover, .add-lesson-btn:hover, .add-video-btn:hover, 
+    .btn-add:hover, [class*='btn-add-']:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(79, 195, 247, 0.4) !important;
+        background: rgba(50, 50, 70, 0.8) !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    /* Style pour l'icône dans les boutons d'ajout */
+    /* Animation de bordure gaming */
+    .add-module-btn::before, .add-lesson-btn::before, .add-video-btn::before,
+    .btn-add::before, [class*='btn-add-']::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        z-index: -1;
+        background: linear-gradient(45deg, #4fc3f7, #4f6bf7, #b84ff7, #f74fc4);
+        background-size: 400% 400%;
+        border-radius: 6px;
+        opacity: 0;
+        transition: 0.5s;
+        animation: gradient 3s ease infinite;
+    }
+    
+    .add-module-btn:hover::before, .add-lesson-btn:hover::before, .add-video-btn:hover::before,
+    .btn-add:hover::before, [class*='btn-add-']:hover::before {
+        opacity: 1;
+    }
+    
+    @keyframes gradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .add-module-btn i, .add-lesson-btn i, .add-video-btn i,
+    .btn-add i, [class*='btn-add-'] i {
+        font-size: 0.75rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .add-module-btn:hover i, .add-lesson-btn:hover i, .add-video-btn:hover i,
+    .btn-add:hover i, [class*='btn-add-']:hover i {
+        transform: scale(1.2);
+    }
+    
+    /* Style pour les cartes */
+    .card {
+        border-radius: 4px !important;
+        overflow: hidden;
+    }
+    
+    /* Style pour les onglets de navigation */
+    .nav-pills .nav-link {
+        border-radius: 5px !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Données des modules existants (si édition)
+let existingModules = [];
+{% if modules_json %}
+    existingModules = {{ modules_json|safe }};
+{% endif %}
+// Vérifier s'il y a un message à afficher
+{% if messages %}
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for message in messages %}
+            Swal.fire({
+                title: '{{ message.tags|title }}',
+                text: '{{ message|escapejs }}',
+                icon: '{{ message.tags }}',
+                confirmButtonColor: '{% if message.tags == "success" %}#0072ce{% else %}#dc3545{% endif %}',
+                confirmButtonText: 'OK',
+                {% if message.tags == 'success' %}
+                timer: 3000,
+                timerProgressBar: true,
+                willClose: () => {
+                    // Rediriger vers la page de gestion des cours après la fermeture
+                    window.location.href = '{% url "courses:manage" %}';
+                }
+                {% endif %}
+            });
+        {% endfor %}
+    });
+{% endif %}
+</script>
+// Gestion du téléchargement de la miniature avec glisser-déposer et prévisualisation
+document.addEventListener('DOMContentLoaded', function() {
+    const thumbnailInput = document.getElementById('id_thumbnail');
+    const thumbnailLabel = document.querySelector('.thumbnail-upload-label');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeThumbnailBtn = document.getElementById('removeThumbnail');
+
+    // Gestion du clic sur la zone de dépôt
+    thumbnailLabel.addEventListener('click', function(e) {
+        e.stopPropagation();
+        thumbnailInput.click();
+    });
+
+    // Gestion du changement de fichier
+    thumbnailInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+
+    // Gestion du glisser-déposer
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        thumbnailLabel.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        thumbnailLabel.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        thumbnailLabel.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        thumbnailLabel.style.borderColor = 'var(--ps5-blue)';
+        thumbnailLabel.style.backgroundColor = 'rgba(0, 114, 206, 0.1)';
+    }
+
+    function unhighlight() {
+        thumbnailLabel.style.borderColor = 'var(--ps5-gray-light)';
+        thumbnailLabel.style.backgroundColor = '';
+    }
+
+    // Gestion du dépôt de fichier
+    thumbnailLabel.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        thumbnailInput.files = files;
+        handleFiles(files);
+    });
+
+    // Afficher la prévisualisation de l'image
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.classList.remove('d-none');
+                    previewContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                };
+                reader.readAsDataURL(file);
+            } else {
+                Swal.fire({
+                    title: 'Format non supporté',
+                    text: 'Veuillez sélectionner une image valide (JPG, PNG, GIF).',
+                    icon: 'error',
+                    confirmButtonColor: 'var(--ps5-blue)'
+                });
+            }
+        }
+    }
+
+    // Supprimer la miniature
+    removeThumbnailBtn.addEventListener('click', function() {
+        thumbnailInput.value = '';
+        previewContainer.classList.add('d-none');
+    });
+
+    // Validation de la taille du fichier (max 5MB)
+    thumbnailInput.addEventListener('change', function() {
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (this.files[0] && this.files[0].size > maxSize) {
+            Swal.fire({
+                title: 'Fichier trop volumineux',
+                text: 'La taille maximale autorisée est de 5 Mo.',
+                icon: 'error',
+                confirmButtonColor: 'var(--ps5-blue)'
+            });
+            this.value = '';
+            previewContainer.classList.add('d-none');
+        }
+    });
+});
+{% endblock extra_scripts %}
+
+{% block content %}
+
+          
+</script>
+
+{% load static %}
+
+<style>
+    /* Image de fond PS5 */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('{% static '/img/ps5-audio.jpg' %}') no-repeat center center fixed;
+        background-size: cover;
+        opacity: 0.1;
+        z-index: -1;
+    }
+    
+    /* Assurer que le contenu est au-dessus du fond */
+    body {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        z-index: 1;
+         background: url('{% static '/img/ps5-audio.jpg' %}') no-repeat center center fixed !important;
+    }
+    
+    /* Import de la police Montserrat depuis Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
+    
+    /* Application de Orbitron pour les titres et Montserrat pour le texte */
+    body {
+        font-family: 'Montserrat', sans-serif;
+    }
+    
+    /* Style Glassmorphisme avec effet jeu vidéo */
+     .nav-link {
+        color: #e0e0e0 !important;
+        padding: 2.4rem 1.25rem;
+        height: 70px;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        background: rgba(30, 30, 40, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+     .nav-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+    
+     .nav-link:hover::before {
+        left: 100%;
+    }
+    
+    .nav-link.active {
+        background: linear-gradient(135deg, rgba(0, 114, 206, 0.8), rgba(0, 80, 180, 0.8)) !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 20px rgba(0, 114, 206, 0.5);
+        transform: translateY(-2px);
+    }
+    
+     .nav-link:hover:not(.active) {
+        background: rgba(50, 50, 70, 0.7) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Style pour la barre latérale */
+    .d-flex.flex-column {
+        background: linear-gradient(145deg, rgba(20, 25, 40, 0.9), rgba(30, 35, 50, 0.95)) !important;
+        border-radius: 10px;
+        padding: 2rem 1.5rem !important;
+        margin: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Effet de lueur au survol */
+    .nav-pills .nav-link i {
+        transition: all 0.3s ease;
+    }
+    
+    .nav-pills .nav-link:hover i {
+        color: #4fc3f7;
+        text-shadow: 0 0 10px rgba(79, 195, 247, 0.7);
+    }
+    
+    .nav-pills .nav-link.active i {
+        color: #ffffff;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+    
+    /* Style du conteneur d'onglets avec effet de flou */
+    .tab-content {
+        background: rgba(15, 32, 39, 0.8) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 2.5rem 2rem 2rem 2rem;
+        border-radius: 8px;
+        margin: -30px 0 2rem 0;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(79, 195, 247, 0.3);
+        position: relative;
+        z-index: 2;
+        color: #ffffff; /* Couleur de texte blanche */
+    }
+    
+    /* Amélioration de la visibilité du texte */
+    .tab-content, 
+    .tab-content label,
+    .tab-content p,
+    .tab-content div:not(.btn):not(.badge) {
+        color: #ffffff !important;
+    }
+    
+    /* Application de Montserrat aux éléments d'interface */
+    .btn, .nav-link, .form-control, .form-select, .form-label, .card, .tab-content, body {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 400;
+    }
+    
+    /* Style des titres avec Orbitron */
+    h1, h2, h3, h4, h5, h6,
+    .section-header h3,
+    .module-header h5,
+    .nav-link,
+    .btn {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    
+    /* Ajustement spécifique pour le titre principal */
+    h1 {
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+    
+    /* Style spécifique pour les boutons gaming */
+    .btn-gaming {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Style des liens de navigation */
+    .nav-pills .nav-link {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 500;
+        font-size: 0.9rem;
+        letter-spacing: 0.3px;
+        text-transform: none;
+        padding: 1rem 1.25rem;
+    }
+    
+    /* Amélioration de la lisibilité */
+    .form-control, .form-select {
+        font-size: 0.95rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.4rem;
+        font-size: 0.9rem;
+    }
+    
+    .tab-content h3, 
+    .tab-content h4, 
+    .tab-content h5, 
+    .tab-content h6 {
+        color: #ffffff !important;
+    }
+    
+    /* Style des champs de formulaire dans le conteneur */
+    .tab-content .form-control,
+    .tab-content .form-select,
+    .tab-content input[type="text"],
+    .tab-content input[type="email"],
+    .tab-content input[type="password"],
+    .tab-content input[type="number"],
+    .tab-content textarea,
+    .tab-content select {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff !important;
+    }
+    
+    /* Style des placeholders */
+    .tab-content ::placeholder {
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    /* Suppression du fond blanc du conteneur principal */
+    body {
+        background-color: transparent !important;
+    }
+    
+    .container.py-5 {
+        background-color: transparent !important;
+        padding: 2rem 0 !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    .card {
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+    
+    /* Styles pour les modules - Interface PS5 */
+    .module-card {
+        background: rgba(30, 30, 40, 0.8) !important;
+        border: 1px solid rgba(79, 195, 247, 0.2);
+        margin-bottom: 1rem;
+        
+    }
+    
+    .module-header {
+        padding: 0.75rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-bottom: 1px solid rgba(79, 195, 247, 0.1);
+    }
+    
+    .module-header input[type="text"] {
+        background: rgba(0, 0, 0, 0.4) !important;
+        border: 1px solid rgba(79, 195, 247, 0.3) !important;
+        color: #fff !important;
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        padding: 0.4rem 0.75rem !important;
+        height: 36px !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .module-header input[type="text"]::placeholder {
+        color: rgba(255, 255, 255, 0.4) !important;
+        font-weight: 400 !important;
+    }
+    
+    .module-header input[type="text"]:focus {
+        background: rgba(0, 0, 0, 0.6) !important;
+        border-color: rgba(79, 195, 247, 0.5) !important;
+        box-shadow: 0 0 0 0.2rem rgba(79, 195, 247, 0.1) !important;
+    }
+    
+    .module-body {
+        padding: 1rem !important;
+        background: rgba(15, 32, 39, 0.7) !important;
+    }
+    
+    .module-body .form-control,
+    .module-body .form-select,
+    .module-body textarea {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(79, 195, 247, 0.2) !important;
+        color: #fff !important;
+        border-radius: 0 !important;
+    }
+    
+    .module-body textarea {
+        min-height: 80px;
+    }
+    
+    /* Style pour la section Informations générales du cours */
+    .section-card {
+        background: rgba(30, 30, 40, 0.8) !important;
+        border: 1px solid rgba(79, 195, 247, 0.2);
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-header {
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-bottom: 1px solid rgba(79, 195, 247, 0.1);
+    }
+    
+    .section-header h3, .section-header h4, .section-header h5 {
+        color: #fff !important;
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    .section-body {
+        padding: 1.25rem !important;
+        background: rgba(15, 32, 39, 0.7) !important;
+    }
+    
+    .section-body .form-control,
+    .section-body .form-select,
+    .section-body textarea,
+    .section-body .select2-selection {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(79, 195, 247, 0.2) !important;
+        color: #fff !important;
+        border-radius: 0 !important;
+    }
+    
+    .section-body .form-control:focus,
+    .section-body .form-select:focus,
+    .section-body textarea:focus {
+        background: rgba(0, 0, 0, 0.5) !important;
+        border-color: rgba(79, 195, 247, 0.5) !important;
+        box-shadow: 0 0 0 0.2rem rgba(79, 195, 247, 0.1) !important;
+    }
+    
+    .section-body .form-label {
+        color: rgba(255, 255, 255, 0.8) !important;
+        margin-bottom: 0.4rem;
+    }
+    
+    .section-body ::placeholder {
+        color: rgba(255, 255, 255, 0.4) !important;
+    }
+    
+    /* Style pour la section Informations générales du cours */
+    #info .section-card {
+        background: rgba(30, 35, 50, 0.8) !important;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(79, 195, 247, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    #info .section-header h3 {
+        font-size: 1.1rem !important;
+        color: #4fc3f7;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+        font-weight: 600;
+    }
+    
+    #info .form-label {
+        font-size: 0.85rem !important;
+        color: #e0e0e0;
+        margin-bottom: 0.4rem;
+        font-weight: 500;
+    }
+    
+    #info .form-control,
+    #info .form-select,
+    #info .select2-container .select2-selection {
+        background-color: rgba(20, 25, 40, 0.6) !important;
+        border: 1px solid rgba(79, 195, 247, 0.2) !important;
+        color: #ffffff !important;
+        font-size: 0.85rem !important;
+        padding: 0.5rem 0.75rem !important;
+        border-radius: 4px !important;
+    }
+    
+    #info .form-control:focus,
+    #info .form-select:focus,
+    #info .select2-container--focus .select2-selection {
+        border-color: #4fc3f7 !important;
+        box-shadow: 0 0 0 0.2rem rgba(79, 195, 247, 0.25) !important;
+    }
+    
+    #info .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #ffffff !important;
+        line-height: 1.5 !important;
+    }
+    
+    #info .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: #ffffff transparent transparent transparent;
+    }
+</style>
+<style>
+    .box div{
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background-color: transparent;
+        border: 4px solid rgba(255, 254, 254, 0.562);
+        top: 0;
+        z-index: 3;
+    }
+    .box div:nth-child(1){
+        top: 10%;
+        left: 41%;
+        animation: animate 10s linear infinite; 
+    }
+     .box div:nth-child(2){
+        top: 70%;
+        left: 50%;
+        animation: animate 7s linear infinite; 
+    }
+    .box div:nth-child(3){
+        top: 10%;
+        left: 6%;
+        animation: animate 9s linear infinite; 
+    }
+    .box div:nth-child(4){
+        top: 20%;
+        left: 60%;
+        animation: animate 10s linear infinite; 
+    }   
+    .box div:nth-child(5){
+        top: 67%;
+        left: 10%;
+        animation: animate 6s linear infinite; 
+    }   
+    .box div:nth-child(6){
+        top: 80%;
+        left: 70%;
+        animation: animate 12s linear infinite; 
+    }   
+    .box div:nth-child(7){
+        top: 60%;
+        left: 80%;
+        animation: animate 15s linear infinite; 
+    }           
+    .box div:nth-child(8){
+        top: 32%;
+        left: 25%;
+        animation: animate 16s linear infinite; 
+    }           
+    .box div:nth-child(9){
+        top: 90%;
+        left: 80%;
+        animation: animate 9s linear infinite; 
+    }  
+    .box div:nth-child(10){
+        top: 20%;
+        left: 80%;
+        animation: animate 5s linear infinite; 
+    }          
+    .box div:nth-child(11){
+        top: 50%;
+        left: 40%;
+        animation: animate 11s linear infinite; 
+    }  
+    @keyframes animate{
+        0%{
+            transform: scale(0) translateY(0) translateX(0);
+            opacity:1;
+        }
+        100%{
+            transform: scale(1.3) translateY(-90px) translateX(360deg);
+            opacity:0;
+        }
+    }
+</style>
+<div class="box">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+<!-- Messages -->
+{% if messages %}
+<div class="container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+        {% if message.tags == 'success' %}
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">Succès !</h5>
+                    {{ message }}
+                </div>
+            </div>
+        {% else %}
+            {{ message }}
+        {% endif %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container px-4 position-relative">
+    <!-- Titre Course Settings avec icône -->
+    <div class="position-absolute" style="top: 20px; left: 40px; z-index: 10;">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-cog me-3" style="font-size: 1.8rem; color: #4fc3f7; text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);"></i>
+            <h1 class="text-white fw-bold m-0" style="font-size: 1.8rem; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                Course Settings
+            </h1>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card shadow-lg" style="border: 1px solid rgba(79, 195, 247, 0.3); border-radius: 5px; overflow: hidden; margin-top: 80px;">
+                <!-- <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">{% if course %}Modification du cours{% else %}Création d'un nouveau cours{% endif %}</h2>
+                </div> -->
+                <div class="card-body">
+                    <form id="courseForm" method="post" enctype="multipart/form-data" action="{% if course %}{% url 'courses:course_edit' course.id %}{% else %}{% url 'courses:unified_course_creation' %}{% endif %}">
+                        {% csrf_token %}
+                        
+                        <!-- Navigation verticale -->
+                    <div class="row">
+                        <div class="col-md-3 col-lg-4">
+                            <div class="d-flex flex-column flex-shrink-0 p-5" style="background: transparent !important; box-shadow: none;">
+                                <ul class="nav nav-pills flex-column mb-auto" id="courseTabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active w-100 text-start" id="info-tab" data-bs-toggle="pill" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="true">
+                                            <i class="fas fa-info-circle me-2"></i>Informations du cours
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link w-100 text-start" id="modules-tab" data-bs-toggle="pill" data-bs-target="#modules" type="button" role="tab" aria-controls="modules" aria-selected="false">
+                                            <i class="fas fa-layer-group me-2"></i>Modules & Leçons
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link w-100 text-start" id="preview-tab" data-bs-toggle="pill" data-bs-target="#preview" type="button" role="tab" aria-controls="preview" aria-selected="false">
+                                            <i class="fas fa-check-circle me-2"></i>Aperçu & Validation
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-9 col-lg-8" style="position: relative; z-index: 10; margin-top: -80px;">
+                        
+                        <!-- Contenu des onglets -->
+                        <div class="tab-content" id="courseTabsContent" style="margin-top: 0;">
+                            <!-- Onglet 1: Informations -->
+                            <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                                <div class="section-card">
+                                    <div class="section-header">
+                                        <h3 class="h5 mb-0">Informations générales du cours</h3>
+                                    </div>
+                                    <div class="section-body">
+                                        <!-- Fieldset pour les informations générales -->
+                                        <fieldset class="mb-4 p-3 border rounded-3" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+                                            <legend class="float-none w-auto px-2" style="font-size: 0.9rem; color: #4fc3f7;">
+                                                <i class="fas fa-info-circle me-1"></i>Informations générales
+                                            </legend>
+                                            
+                                            <div class="mb-3">
+                                                <label for="id_title" class="form-label">Titre du cours *</label>
+                                                <input type="text" class="form-control" id="id_title" name="title" value="{{ course.title|default:'' }}" required>
+                                            </div>
+                                            
+                                            <div class="mb-0">
+                                                <label for="id_description" class="form-label">Description du cours *</label>
+                                                <textarea class="form-control" id="id_description" name="description" rows="3" required>{{ course.description|default:'' }}</textarea>
+                                            </div>
+                                        </fieldset>
+                                        
+                                        <!-- Fieldset pour les détails du cours -->
+                                        <fieldset class="mb-4 p-3 border rounded-3" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+                                            <legend class="float-none w-auto px-2" style="font-size: 0.9rem; color: #4fc3f7;">
+                                                <i class="fas fa-cog me-1"></i>Détails du cours
+                                            </legend>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="id_category" class="form-label">Catégorie *</label>
+                                                    <select class="form-select select2" id="id_category" name="category" required>
+                                                        <option value="" disabled>{% if not course.category %}selected{% endif %}>Sélectionnez une catégorie</option>
+                                                        {% for category in categories %}
+                                                            <option value="{{ category.id }}" {% if course.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6 mb-0">
+                                                    <label for="id_language" class="form-label">Langue *</label>
+                                                    <select class="form-select" id="id_language" name="language" required>
+                                                        <option value="fr" {% if course.language == 'fr' %}selected{% endif %}>Français</option>
+                                                        <option value="en" {% if course.language == 'en' %}selected{% endif %}>Anglais</option>
+                                                        <option value="es" {% if course.language == 'es' %}selected{% endif %}>Espagnol</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        
+                                        <!-- Fieldset pour la miniature -->
+                                        <fieldset class="mb-4 p-3 border rounded-3" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+                                            <legend class="float-none w-auto px-2" style="font-size: 0.9rem; color: #4fc3f7;">
+                                                <i class="fas fa-image me-1"></i>Miniature du cours
+                                            </legend>
+                                            
+                                            <div class="mb-0">
+                                                <div class="thumbnail-upload-container position-relative">
+                                                    <input type="file" class="form-control d-none" id="id_thumbnail" name="thumbnail" accept="image/*">
+                                                    <label for="id_thumbnail" class="thumbnail-upload-label d-flex flex-column align-items-center justify-content-center p-4 border-2 border-dashed rounded-3" style="border-color: var(--ps5-gray-light); cursor: pointer;">
+                                                        <i class="fas fa-cloud-upload-alt mb-2" style="font-size: 2rem; color: var(--ps5-blue-light);"></i>
+                                                        <span class="text-center">Glissez-déposez votre image ici ou <span class="text-primary">parcourir</span></span>
+                                                        <small class="text-muted mt-2">Recommandé : 1280×720px • JPG, PNG, GIF</small>
+                                                    </label>
+                                                    <div id="thumbnailPreview" class="mt-3 text-center">
+                                                        <div id="previewContainer" class="{% if not course.thumbnail %}d-none{% endif %}">
+                                                            {% if course.thumbnail %}
+                                                            <img id="imagePreview" src="{{ course.thumbnail.url }}" alt="Aperçu de la miniature" class="img-thumbnail" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 2px solid var(--ps5-gray-light);">
+                                                            <button type="button" id="removeThumbnail" class="btn btn-sm btn-outline-danger mt-2">
+                                                                <i class="fas fa-trash me-1"></i> Supprimer
+                                                            </button>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                
+                                <!-- Bouton Suivant -->
+                                <div class="d-flex justify-content-end mt-4">
+                                    <button type="button" class="nav-links data-next-tab="modules-tab">
+                                        Suivant <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Onglet 2: Modules -->
+                    <div class="tab-pane fade" id="modules" role="tabpanel" aria-labelledby="modules-tab">
+                        <!-- Section principale des modules -->
+                        <div class="section-card" style="background: rgba(30, 35, 50, 0.8) !important; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(79, 195, 247, 0.2); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+                            <!-- En-tête de la section -->
+                            <div class="section-header d-flex justify-content-between align-items-center" style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(79, 195, 247, 0.3);">
+                                <h3 class="h5 mb-0" style="font-size: 1.1rem !important; color: #4fc3f7; font-weight: 600;">
+                                    <i class="fas fa-layer-group me-2"></i>Gestion des modules
+                                </h3>
+                                <button type="button" class="btn btn-sm btn-primary add-module-btn d-flex align-items-center" id="addModuleBtn" style="background: rgba(79, 195, 247, 0.2) !important; color: #4fc3f7 !important; border: 1px solid rgba(79, 195, 247, 0.5) !important; border-radius: 4px !important; padding: 0.25rem 0.75rem !important; font-size: 0.85rem !important;">
+                                    <i class="fas fa-plus me-1"></i>
+                                </button>
+                            </div>
+                            <div class="section-body">
+                                <fieldset class="mb-4 p-3 border rounded-3" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+                                    <legend class="float-none w-auto px-2" style="font-size: 0.9rem; color: #4fc3f7;">
+                                        <i class="fas fa-plus-circle me-1"></i>Ajouter un module
+                                    </legend>
+                                    <div id="modulesContainer">
+                                        <!-- Les modules seront ajoutés ici dynamiquement -->
+                                        <!-- <div class="text-center text-muted py-5" id="noModulesMessage">
+                                            <i class="fas fa-layer-group fa-3x mb-3"></i>
+                                            <p>Commencez par ajouter votre premier module</p>
+                                        </div> -->
+                                    </div>
+                                </fieldset>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="list-group" id="moduleList">
+                                            <!-- Liste des modules pour la navigation -->
+                                            <!-- <div class="list-group-item text-muted text-center py-4" id="noModulesLessonsMessage">
+                                                <i class="fas fa-inbox fa-2x mb-3"></i>
+                                                <p class="mb-0">Aucun module disponible</p>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div id="lessonsContainer">
+                                            <!-- Le contenu des leçons sera chargé ici -->
+                                            <div class="text-center text-muted py-5">
+                                                <i class="fas fa-book-open fa-3x mb-3"></i>
+                                                <p>Créez un module pour gérer ses leçons</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary prev-tab" data-prev-tab="info-tab">
+                                        <i class="fas fa-arrow-left me-2"></i> Précédent
+                                    </button>
+                                    <button type="button" class="btn btn-primary next-tab" data-next-tab="preview-tab">
+                                        Suivant <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Onglet 3: Aperçu et validation -->
+                    <div class="tab-pane fade" id="preview" role="tabpanel" aria-labelledby="preview-tab">
+                        <div class="section-card" style="background: rgba(30, 35, 50, 0.8) !important; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(79, 195, 247, 0.2); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+                            <div class="section-header" style="margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(79, 195, 247, 0.3);">
+                                <h3 class="h5 mb-0" style="font-size: 1.1rem !important; color: #4fc3f7; font-weight: 600;">
+                                    <i class="fas fa-check-circle me-2"></i>Validation du cours
+                                </h3>
+                            </div>
+                            
+                            <div class="section-body">
+                                <!-- Avertissement de validation -->
+                                <div class="alert d-flex align-items-center" style="background: rgba(33, 150, 243, 0.1); color: #2196f3; border-left: 4px solid #2196f3; border-radius: 4px; padding: 1rem; margin-bottom: 1.5rem;">
+                                    <i class="fas fa-info-circle me-3" style="font-size: 1.25rem;"></i>
+                                    <div>
+                                        <h6 class="alert-heading mb-1" style="font-weight: 600;">Vérification requise</h6>
+                                        <p class="mb-0">Veuillez vérifier que toutes les informations sont correctes avant de publier votre cours.</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Résumé du cours -->
+                                <div class="card mb-4 border-0" style="background: rgba(40, 45, 60, 0.6);">
+                                    <div class="card-header d-flex justify-content-between align-items-center" style="background: rgba(79, 195, 247, 0.1); border-bottom: 1px solid rgba(79, 195, 247, 0.2);">
+                                        <h5 class="mb-0" style="color: #4fc3f7;">
+                                            <i class="fas fa-book me-2"></i>Résumé du cours
+                                        </h5>
+                                        <span class="badge" style="background: rgba(79, 195, 247, 0.2); color: #4fc3f7;">Brouillon</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="coursePreview">
+                                            <!-- L'aperçu sera généré dynamiquement ici -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Conteneur pour l'aperçu détaillé -->
+                                <div class="card border-0 mt-4" style="background: rgba(40, 45, 60, 0.6);">
+                                    <div class="card-header" style="background: rgba(79, 195, 247, 0.1); border-bottom: 1px solid rgba(79, 195, 247, 0.2);">
+                                        <h5 class="mb-0" style="color: #4fc3f7;">
+                                            <i class="fas fa-list-check me-2"></i>Détails du cours
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="courseDetailsPreview" class="course-preview">
+                                            <!-- L'aperçu détaillé sera généré ici dynamiquement -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary prev-tab" data-prev-tab="modules-tab" style="background: rgba(30, 30, 40, 0.6) !important; color: #e0e0e0 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 4px !important; padding: 0.4rem 0.8rem !important; font-size: 0.85rem !important;">
+                                        <i class="fas fa-arrow-left me-2"></i> Précédent
+                                    </button>
+                                    <div>
+                                        <button type="button" id="previewBtn" class="btn me-2" style="background: rgba(30, 30, 40, 0.6) !important; color: #e0e0e0 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 4px !important; padding: 0.4rem 0.8rem !important; font-size: 0.85rem !important;">
+                                            <i class="fas fa-eye me-1"></i> Voir l'aperçu complet
+                                        </button>
+                                        <button type="submit" class="btn" style="background: rgba(79, 195, 247, 0.6) !important; color: #ffffff !important; border: 1px solid rgba(79, 195, 247, 0.8) !important; border-radius: 4px !important; padding: 0.4rem 0.8rem !important; font-size: 0.85rem !important; font-weight: 500;">
+                                            <i class="fas fa-check-circle me-1"></i> Publier le cours
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bouton Retour en haut de page -->
+                <div class="d-flex justify-content-start mt-4">
+                    <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour au tableau de bord
+                    </a>
+                </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'aperçu -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">Aperçu du cours</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Le contenu de l'aperçu sera injecté ici par JavaScript -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement de l'aperçu...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Continuer l'édition</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates pour les éléments dynamiques -->
+<template id="moduleTemplate">
+    <div class="module-card mb-0" data-module-index="MODULE_INDEX">
+        <div class="module-header d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center flex-grow-1 me-3">
+                <span class="me-2 fw-bold">1.</span>
+                <input type="text" class="form-control d-inline-block w-auto" name="modules-MODULE_INDEX-title" placeholder="Titre du module" required>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger remove-module">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="module-body p-2">
+            <div class="mb-2">
+                <label class="form-label">Description du module</label>
+                <textarea class="form-control" name="modules-MODULE_INDEX-description" rows="2"></textarea>
+            </div>
+            <input type="hidden" name="modules-MODULE_INDEX-order" value="1">
+            
+            <div class="lessons-container mt-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="h6 mb-0" style="font-size: 1rem; color: #e0e0e0; font-weight: 500;">Leçons</h5>
+                    <button type="button" class="add-lesson-btn d-flex align-items-center justify-content-center" style="background: rgba(30, 30, 40, 0.6) !important; color: #e0e0e0 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 4px !important; width: 28px; height: 28px; padding: 0 !important; font-size: 0.9rem !important;">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+                
+                <div class="lessons-list" id="lessonsContainer-MODULE_INDEX">
+                    <!-- Les leçons seront ajoutées ici dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="lessonTemplate">
+    <div class="lesson-card mb-2 p-2 border rounded" data-lesson-index="LESSON_INDEX" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+        <fieldset class="mb-2 p-2 border rounded-3" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+            <legend class="float-none w-auto px-2" style="font-size: 0.9rem; color: #4fc3f7;">
+                <i class="fas fa-book me-1"></i>Détails de la leçon
+            </legend>
+            <div class="lesson-header d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">
+                    <span class="lesson-number">1</span>
+                    <input type="text" class="form-control d-inline-block w-auto" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-title" placeholder="Titre de la leçon" required>
+                </h6>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-lesson">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        <div class="lesson-body">
+            <div class="mb-1">
+                <label class="form-label">Description de la leçon</label>
+                <textarea class="form-control" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-description" rows="2"></textarea>
+            </div>
+            
+            <!-- Fichier de contenu de la leçon -->
+            <div class="mb-3">
+                <label class="form-label d-block fw-medium mb-2">Fichier de contenu (PDF, DOCX, etc.)</label>
+                <div class="file-upload-container position-relative">
+                    <input type="file" class="form-control d-none" id="content_file-LESSON_INDEX" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-content_file" accept=".pdf,.doc,.docx,.txt,.ppt,.pptx">
+                    <label for="content_file-LESSON_INDEX" class="file-upload-label d-flex flex-column align-items-center justify-content-center p-3 border-2 border-dashed rounded-3" style="border-color: var(--ps5-gray-light); cursor: pointer;">
+                        <i class="fas fa-file-upload mb-2" style="font-size: 1.5rem; color: var(--ps5-blue-light);"></i>
+                        <span class="text-center">Glissez-déposez votre fichier ici ou <span class="text-primary">parcourir</span></span>
+                        <small class="text-muted mt-1">Formats acceptés : PDF, DOC, DOCX, TXT, PPT, PPTX</small>
+                    </label>
+                    <div id="filePreview-LESSON_INDEX" class="mt-2">
+                        <div id="fileContainer-LESSON_INDEX" class="d-none">
+                            <div class="d-flex align-items-center p-2 bg-light rounded">
+                                <i class="fas fa-file-alt me-2" style="font-size: 1.25rem; color: var(--ps5-blue);"></i>
+                                <div class="flex-grow-1 text-truncate" id="fileName-LESSON_INDEX"></div>
+                                <button type="button" class="btn-close remove-file" data-lesson-index="LESSON_INDEX" aria-label="Supprimer le fichier"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <input type="hidden" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-order" value="1">
+            
+            <div class="videos-container mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted" style="font-size: 0.9rem; color: #e0e0e0 !important;">Vidéos</small>
+                    <button type="button" class="add-video-btn d-flex align-items-center justify-content-center" style="background: rgba(30, 30, 40, 0.6) !important; color: #e0e0e0 !important; border: 1px solid rgba(79, 195, 247, 0.5) !important; border-radius: 4px !important; width: 24px; height: 24px; padding: 0 !important; font-size: 0.8rem !important; position: relative; overflow: hidden; box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);">
+                        <i class="fas fa-plus"></i>
+                        <span class="border-animation"></span>
+                    </button>
+                </div>
+                
+                <div class="videos-list" id="videosContainer-MODULE_INDEX-LESSON_INDEX">
+                    <!-- Les vidéos seront ajoutées ici dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="videoTemplate">
+    <div class="video-item mb-2 p-2 border rounded" data-video-index="VIDEO_INDEX" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+        <fieldset class="mb-2 p-2 border rounded-3" style="border-color: rgba(79, 195, 247, 0.3) !important;">
+            <legend class="float-none w-auto px-2" style="font-size: 0.9rem; color: #4fc3f7;">
+                <i class="fas fa-video me-1"></i>Détails de la vidéo
+            </legend>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <span class="video-number">1.</span>
+                    <input type="text" class="form-control d-inline-block w-auto" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-videos-VIDEO_INDEX-title" placeholder="Titre de la vidéo" required>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-video">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        <div class="video-details">
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label small">Fichier vidéo</label>
+                    <input type="file" class="form-control form-control-sm" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-videos-VIDEO_INDEX-video_file" accept="video/*" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small">Durée (minutes)</label>
+                    <input type="number" class="form-control form-control-sm" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-videos-VIDEO_INDEX-duration" min="1" value="5">
+                </div>
+            </div>
+            <div class="mt-1">
+                <label class="form-label small">Description</label>
+                <textarea class="form-control form-control-sm" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-videos-VIDEO_INDEX-description" rows="2" placeholder="Description optionnelle de la vidéo"></textarea>
+            </div>
+        </div>
+        </fieldset>
+        <input type="hidden" name="modules-MODULE_INDEX-lessons-LESSON_INDEX-videos-VIDEO_INDEX-order" value="1">
+    </div>
+</template>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Bibliothèques JavaScript -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- Notre fichier JavaScript -->
+<script src="{% static 'courses/js/course_creation.js' %}"></script>
+
+<!-- Script pour la gestion des onglets et de la validation -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation des tooltips Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Gestion de la navigation entre les onglets
+        document.querySelectorAll('.next-tab').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const nextTabId = this.getAttribute('data-next-tab');
+                
+                // Validation avant de passer à l'onglet suivant
+                if (nextTabId === 'modules' && !validateInfoTab()) {
+                    return;
+                } else if (nextTabId === 'preview' && !validateModulesTab()) {
+                    return;
+                    
+                    // Faire défiler vers le haut
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Gestion du bouton Précédent
+        document.querySelectorAll('.prev-tab').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const prevTabId = this.getAttribute('data-prev-tab');
+                const currentTab = document.querySelector('.nav-link.active');
+                
+                // Désactiver l'onglet actif
+                currentTab.classList.remove('active');
+                currentTab.setAttribute('aria-selected', 'false');
+                
+                // Activer l'onglet précédent
+                const prevNavLink = document.querySelector(`[data-bs-target="#${prevTabId}"]`);
+                prevNavLink.classList.add('active');
+                prevNavLink.setAttribute('aria-selected', 'true');
+                
+                // Mettre à jour le contenu des onglets
+                document.querySelector('.tab-pane.active').classList.remove('show', 'active');
+                document.getElementById(prevTabId).classList.add('show', 'active');
+                
+                // Faire défiler vers le haut
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Fonction de validation des onglets
+        function validateCurrentTab(tabId) {
+            const tabElement = document.getElementById(tabId);
+            let isValid = true;
+            
+            // Validation pour l'onglet Informations
+            if (tabId === 'info') {
+                const requiredFields = tabElement.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    showAlert('Veuillez remplir tous les champs obligatoires', 'error');
+                }
+            }
+            
+            // Validation pour l'onglet Modules
+            if (tabId === 'modules') {
+                const modules = document.querySelectorAll('.module-item');
+                if (modules.length === 0) {
+                    showAlert('Veuvez ajouter au moins un module', 'error');
+                    return false;
+                }
+                
+                // Vérifier que chaque module a un titre
+                modules.forEach(module => {
+                    const titleInput = module.querySelector('input[name$="-title"]');
+                    if (!titleInput.value.trim()) {
+                        titleInput.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        titleInput.classList.remove('is-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    showAlert('Veuvez donner un titre à chaque module', 'error');
+                } else {
+                    // Activer le bouton Suivant de l'onglet Modules
+                    document.getElementById('nextToLessons').disabled = false;
+                }
+            }
+            
+            return isValid;
+        }
+        
+        // Fonction pour afficher les alertes
+        function showAlert(message, type = 'info') {
+            // Utiliser SweetAlert2 ou une autre bibliothèque pour les notifications
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: type,
+                    title: type === 'error' ? 'Erreur' : 'Information',
+                    text: message,
+                    confirmButtonColor: type === 'error' ? '#dc3545' : '#3085d6'
+                });
+            } else {
+                alert(message);
+            }
+        }
+        
+        // Initialisation du sélecteur de catégorie
+        if (document.querySelector('.select2')) {
+            $('.select2').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Sélectionnez une catégorie',
+                allowClear: true
+            });
+        }
+        
+        // Gestion du téléchargement de la miniature
+        const thumbnailInput = document.getElementById('id_thumbnail');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewThumbnail = document.getElementById('previewThumbnail');
+        
+        if (thumbnailInput) {
+            thumbnailInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        if (previewThumbnail) {
+                            previewThumbnail.src = e.target.result;
+                            previewThumbnail.classList.remove('d-none');
+                        }
+                        previewContainer.classList.remove('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                }
+                updatePreview();
+            });
+            
+            // Gestion de la suppression de la miniature
+            const removeThumbnailBtn = document.getElementById('removeThumbnail');
+            if (removeThumbnailBtn) {
+                removeThumbnailBtn.addEventListener('click', function() {
+                    thumbnailInput.value = '';
+                    previewContainer.classList.add('d-none');
+                    if (previewThumbnail) {
+                        previewThumbnail.classList.add('d-none');
+                    }
+                    updatePreview();
+                });
+            }
+        }
+        
+        // Ajouter des écouteurs d'événements pour la mise à jour en temps réel
+        document.querySelectorAll('#courseForm input, #courseForm textarea, #courseForm select').forEach(input => {
+            input.addEventListener('input', updatePreview);
+            input.addEventListener('change', updatePreview);
+        });
+        
+        // Mettre à jour l'aperçu au chargement de la page
+        updatePreview();
+    });
+    
+    // Gestion du téléchargement des fichiers de contenu des leçons
+    // Délégation d'événements pour les fichiers de contenu
+    document.addEventListener('click', function(e) {
+        // Gestion de la suppression des fichiers
+        if (e.target.closest('.remove-file')) {
+            const lessonIndex = e.target.closest('.remove-file').dataset.lessonIndex;
+            const fileInput = document.getElementById(`content_file-${lessonIndex}`);
+            const fileContainer = document.getElementById(`fileContainer-${lessonIndex}`);
+            
+            fileInput.value = '';
+            fileContainer.classList.add('d-none');
+        }
+        
+        // Gestion du clic sur la zone de dépôt
+        if (e.target.closest('.file-upload-label')) {
+            e.preventDefault();
+            const label = e.target.closest('.file-upload-label');
+            const fileInput = document.getElementById(label.getAttribute('for'));
+            fileInput.click();
+        }
+    });
+    
+    // Gestion du glisser-déposer
+    document.addEventListener('dragover', function(e) {
+        if (e.target.closest('.file-upload-label')) {
+            e.preventDefault();
+            e.target.closest('.file-upload-label').style.borderColor = 'var(--ps5-blue)';
+            e.target.closest('.file-upload-label').style.backgroundColor = 'rgba(0, 114, 206, 0.1)';
+        }
+    }, false);
+    
+    document.addEventListener('dragleave', function(e) {
+        if (e.target.closest('.file-upload-label')) {
+            e.target.closest('.file-upload-label').style.borderColor = 'var(--ps5-gray-light)';
+            e.target.closest('.file-upload-label').style.backgroundColor = '';
+        }
+    }, false);
+    
+    document.addEventListener('drop', function(e) {
+        if (e.target.closest('.file-upload-label')) {
+            e.preventDefault();
+            const label = e.target.closest('.file-upload-label');
+            const fileInput = document.getElementById(label.getAttribute('for'));
+            
+            label.style.borderColor = 'var(--ps5-gray-light)';
+            label.style.backgroundColor = '';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(fileInput);
+            }
+        }
+    }, false);
+    
+    // Gestion de la sélection de fichier
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="file"][id^="content_file-"]')) {
+            handleFileSelect(e.target);
+        }
+    });
+    
+    // Fonction pour gérer la sélection d'un fichier
+    function handleFileSelect(fileInput) {
+        const lessonIndex = fileInput.id.split('-')[1];
+        const file = fileInput.files[0];
+        
+        if (file) {
+            // Vérifier la taille du fichier (max 20MB)
+            const maxSize = 20 * 1024 * 1024; // 20MB
+            if (file.size > maxSize) {
+                Swal.fire({
+                    title: 'Fichier trop volumineux',
+                    text: 'La taille maximale autorisée est de 20 Mo.',
+                    icon: 'error',
+                    confirmButtonColor: 'var(--ps5-blue)'
+                });
+                fileInput.value = '';
+                return;
+            }
+            
+            // Vérifier l'extension du fichier
+            const validExtensions = ['.pdf', '.doc', '.docx', '.txt', '.ppt', '.pptx'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExt)) {
+                Swal.fire({
+                    title: 'Format de fichier non supporté',
+                    text: 'Veuillez sélectionner un fichier PDF, DOC, DOCX, TXT, PPT ou PPTX.',
+                    icon: 'error',
+                    confirmButtonColor: 'var(--ps5-blue)'
+                });
+                fileInput.value = '';
+                return;
+            }
+            
+            // Afficher le nom du fichier
+            const fileNameElement = document.getElementById(`fileName-${lessonIndex}`);
+            const fileContainer = document.getElementById(`fileContainer-${lessonIndex}`);
+            
+            fileNameElement.textContent = file.name;
+            fileContainer.classList.remove('d-none');
+        }
+    }
+    
+    // Fonction pour charger les modules existants
+    function loadExistingModules() {
+        if (existingModules && existingModules.length > 0) {
+            existingModules.forEach((module, moduleIndex) => {
+                // Ajouter le module
+                addModule(moduleIndex, module);
+                
+                // Ajouter les leçons du module
+                if (module.lessons && module.lessons.length > 0) {
+                    module.lessons.forEach((lesson, lessonIndex) => {
+                        addLesson(moduleIndex, lessonIndex, lesson);
+                        
+                        // Ajouter les vidéos de la leçon
+                        if (lesson.videos && lesson.videos.length > 0) {
+                            lesson.videos.forEach((video, videoIndex) => {
+                                addVideo(moduleIndex, lessonIndex, videoIndex, video);
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    }
+    
+    // Fonction pour ajouter un module avec des données existantes
+    function addModule(index, moduleData = {}) {
+        // Créer un nouvel élément module à partir du template
+        const moduleTemplate = document.getElementById('moduleTemplate');
+        const moduleElement = moduleTemplate.content.cloneNode(true).firstElementChild;
+        
+        // Mettre à jour les champs avec les données existantes
+        if (moduleData.id) {
+            moduleElement.setAttribute('data-module-id', moduleData.id);
+        }
+        if (moduleData.title) {
+            moduleElement.querySelector('input[name$="-title"]').value = moduleData.title;
+        }
+        if (moduleData.description) {
+            moduleElement.querySelector('textarea[name$="-description"]').value = moduleData.description;
+        }
+        if (moduleData.order) {
+            moduleElement.querySelector('input[name$="-order"]').value = moduleData.order;
+        }
+        
+        // Ajouter le module au conteneur
+        modulesContainer.appendChild(moduleElement);
+        
+        // Mettre à jour les numéros d'ordre
+        updateModuleNumbers();
+        
+        // Mettre à jour l'aperçu
+        updatePreview();
+        
+        return moduleElement;
+    }
+    
+    // Fonction pour ajouter une leçon avec des données existantes
+    function addLesson(moduleIndex, lessonIndex, lessonData = {}) {
+        // Code existant de addLesson...
+        // Mettre à jour les champs avec les données existantes
+        if (lessonData.id) {
+            lessonElement.setAttribute('data-lesson-id', lessonData.id);
+        }
+        if (lessonData.title) {
+            lessonElement.querySelector('input[name$="-title"]').value = lessonData.title;
+        }
+        if (lessonData.description) {
+            lessonElement.querySelector('textarea[name$="-description"]').value = lessonData.description;
+        }
+        if (lessonData.order) {
+            lessonElement.querySelector('input[name$="-order"]').value = lessonData.order;
+        }
+        
+        // Gérer le fichier de contenu existant
+        if (lessonData.content_file) {
+            const fileInput = lessonElement.querySelector('input[type="file"]');
+            const fileContainer = lessonElement.querySelector(`#fileContainer-${lessonIndex}`);
+            const fileName = lessonElement.querySelector(`#fileName-${lessonIndex}`);
+            
+            // Créer un objet File simulé pour la prévisualisation
+            const file = new File([], lessonData.content_file.split('/').pop(), { type: 'application/octet-stream' });
+            
+            // Mettre à jour l'interface utilisateur
+            fileContainer.classList.remove('d-none');
+            fileName.textContent = file.name;
+            
+            // Stocker l'URL du fichier existant dans un champ caché
+            const existingFileInput = document.createElement('input');
+            existingFileInput.type = 'hidden';
+            existingFileInput.name = fileInput.name.replace('content_file', 'existing_content_file');
+            existingFileInput.value = lessonData.content_file;
+            lessonElement.appendChild(existingFileInput);
+        }
+        
+        // Ajouter la leçon au conteneur
+        const lessonsContainer = document.getElementById(`lessonsContainer-${moduleIndex}`);
+        lessonsContainer.appendChild(lessonElement);
+        
+        // Mettre à jour les numéros d'ordre
+        updateLessonNumbers(moduleIndex);
+        
+        // Mettre à jour l'aperçu
+        updatePreview();
+        
+        return lessonElement;
+    }
+    
+    // Fonction pour ajouter une vidéo avec des données existantes
+    function addVideo(moduleIndex, lessonIndex, videoIndex, videoData = {}) {
+        // Code existant de addVideo...
+        // Mettre à jour les champs avec les données existantes
+        if (videoData.id) {
+            videoElement.setAttribute('data-video-id', videoData.id);
+        }
+        if (videoData.title) {
+            videoElement.querySelector('input[name$="-title"]').value = videoData.title;
+        }
+        if (videoData.order) {
+            videoElement.querySelector('input[name$="-order"]').value = videoData.order;
+        }
+        
+        // Gérer le fichier vidéo existant
+        if (videoData.video_file) {
+            // Créer un champ caché pour conserver la référence au fichier existant
+            const existingVideoInput = document.createElement('input');
+            existingVideoInput.type = 'hidden';
+            existingVideoInput.name = videoElement.querySelector('input[type="file"]').name.replace('video_file', 'existing_video_file');
+            existingVideoInput.value = videoData.video_file;
+            videoElement.appendChild(existingVideoInput);
+            
+            // Afficher un message indiquant qu'une vidéo existe déjà
+            const videoInfo = document.createElement('div');
+            videoInfo.className = 'alert alert-info mt-2';
+            videoInfo.innerHTML = `<i class="fas fa-info-circle me-1"></i> Une vidéo est déjà enregistrée pour cette leçon.`;
+            videoElement.querySelector('.video-upload-container').appendChild(videoInfo);
+        }
+        
+        // Ajouter la vidéo au conteneur
+        const videosContainer = document.getElementById(`videosContainer-${moduleIndex}-${lessonIndex}`);
+        videosContainer.appendChild(videoElement);
+        
+        // Mettre à jour les numéros d'ordre
+        updateVideoNumbers(moduleIndex, lessonIndex);
+        
+        // Mettre à jour l'aperçu
+        updatePreview();
+        
+        return videoElement;
+    }
+    
+    // Fonction pour générer l'aperçu d'une leçon
+    function getLessonPreview(lesson) {
+        const title = lesson.querySelector('input[name$="-title"]')?.value || 'Sans titre';
+        const videos = lesson.querySelectorAll('.video-item');
+        const files = lesson.querySelectorAll('.file-upload-label:has(input[type="file"])').length;
+        
+        return `
+            <div class="lesson-preview ms-4 mb-2 p-2 border-start border-3 border-primary">
+                <div class="d-flex justify-content-between align-items-center">
+                    <strong>${title}</strong>
+                    <div>
+                        <span class="badge bg-primary me-2">${videos.length} vidéo(s)</span>
+                        <span class="badge bg-secondary">${files} fichier(s)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Fonction pour générer l'aperçu d'un module
+    function getModulePreview(module, index) {
+        const title = module.querySelector('input[name$="-title"]')?.value || `Module ${index + 1}`;
+        const description = module.querySelector('textarea[name$="-description"]')?.value || '';
+        const lessons = module.querySelectorAll('.lesson-card');
+        
+        let lessonsHTML = '';
+        lessons.forEach(lesson => {
+            lessonsHTML += getLessonPreview(lesson);
+        });
+        
+        return `
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">${title}</h5>
+                    ${description ? `<p class="mb-0 text-muted small">${description}</p>` : ''}
+                </div>
+                <div class="card-body">
+                    ${lessons.length > 0 ? lessonsHTML : '<div class="text-muted">Aucune leçon</div>'}
+                </div>
+            </div>
+        `;
+    }
+
+    // Fonction pour mettre à jour l'aperçu en temps réel
+    function updatePreview() {
+        // Récupérer les informations de base du cours
+        const title = document.getElementById('id_title')?.value || 'Titre du cours';
+        const description = document.getElementById('id_description')?.value || 'Aucune description fournie';
+        const categorySelect = document.getElementById('id_category');
+        const category = categorySelect?.options[categorySelect?.selectedIndex]?.text || 'Non spécifiée';
+        const languageSelect = document.getElementById('id_language');
+        const language = languageSelect?.options[languageSelect?.selectedIndex]?.text || 'Français';
+        
+        // Récupérer tous les modules
+        const modules = document.querySelectorAll('.module-card');
+        let modulesHTML = '';
+        let totalLessons = 0;
+        let totalVideos = 0;
+        
+        // Parcourir chaque module
+        modules.forEach((module, moduleIndex) => {
+            const moduleTitle = module.querySelector('input[name$="-title"]')?.value || `Module ${moduleIndex + 1}`;
+            const moduleDescription = module.querySelector('textarea[name$="-description"]')?.value || '';
+            const lessons = module.querySelectorAll('.lesson-card');
+            let lessonsHTML = '';
+            
+            // Parcourir chaque leçon du module
+            lessons.forEach((lesson, lessonIndex) => {
+                const lessonTitle = lesson.querySelector('input[name$="-title"]')?.value || `Leçon ${lessonIndex + 1}`;
+                const videos = lesson.querySelectorAll('.video-item');
+                const files = lesson.querySelectorAll('.file-upload-preview').length;
+                
+                lessonsHTML += `
+                    <div class="lesson-item ps-3 ms-2 border-start border-2 border-primary mb-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>${lessonTitle}</strong>
+                            <div>
+                                <span class="badge bg-primary me-1">${videos.length} vidéo(s)</span>
+                                <span class="badge bg-secondary">${files} fichier(s)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                totalLessons++;
+                totalVideos += videos.length;
+            });
+            
+            // Ajouter le module à l'aperçu
+            modulesHTML += `
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-1">${moduleTitle}</h5>
+                        ${moduleDescription ? `<p class="mb-0 small text-muted">${moduleDescription}</p>` : ''}
+                    </div>
+                    <div class="card-body">
+                        ${lessons.length > 0 ? lessonsHTML : '<p class="text-muted mb-0">Aucune leçon dans ce module</p>'}
+                    </div>
+                    <div class="card-footer bg-white">
+                        <small class="text-muted">${lessons.length} leçon(s) • ${Array.from(lessons).reduce((acc, lesson) => 
+                            acc + lesson.querySelectorAll('.video-item').length, 0)} vidéo(s)</small>
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Construire le contenu final de l'aperçu
+        const previewContent = `
+            <div class="course-preview">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="h4 mb-3">${title}</h2>
+                        <div class="mb-3">
+                            <p class="text-muted mb-1"><strong>Catégorie :</strong> ${category}</p>
+                            <p class="text-muted"><strong>Langue :</strong> ${language}</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5 class="h6">Description :</h5>
+                            <p>${description || '<em>Aucune description fournie</em>'}</p>
+                        </div>
+                        
+                        <h4 class="h5 mb-3">Structure du cours</h4>
+                        ${modules.length > 0 ? modulesHTML : 
+                            '<div class="alert alert-info">Aucun module n\'a été ajouté au cours.</div>'}
+                    </div>
+                </div>
+                
+                <div class="alert ${modules.length > 0 ? 'alert-success' : 'alert-warning'}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas ${modules.length > 0 ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                            ${modules.length > 0 
+                                ? `Votre cours contient ${modules.length} module(s), ${totalLessons} leçon(s) et ${totalVideos} vidéo(s).`
+                                : 'Ajoutez au moins un module pour commencer à construire votre cours.'}
+                        </div>
+                        ${modules.length > 0 ? 
+                            '<span class="badge bg-primary">Prêt à être publié</span>' : 
+                            '<span class="badge bg-warning text-dark">Incomplet</span>'}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Mettre à jour le conteneur d'aperçu
+        const previewContainer = document.getElementById('coursePreview');
+        if (previewContainer) {
+            previewContainer.innerHTML = previewContent;
+        }
+    }
+    
+    // Fonction pour mettre à jour l'aperçu des modules
+    function updateModulesPreview() {
+        const modulesList = document.getElementById('previewModulesList');
+        if (!modulesList) return;
+        
+        const modules = document.querySelectorAll('.module-item');
+        let html = '';
+        
+        if (modules.length === 0) {
+            html = '<div class="alert alert-info">Aucun module ajouté</div>';
+        } else {
+            modules.forEach((module, index) => {
+                const title = module.querySelector('input[name$="-title"]')?.value || `Module ${index + 1}`;
+                const description = module.querySelector('textarea[name$="-description"]')?.value || 'Aucune description';
+                
+                html += `
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">${title}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>${description}</p>
+                        ${getLessonsPreview(module)}
+                    </div>
+                </div>`;
+            });
+        }
+        
+        modulesList.innerHTML = html;
+    }
+    
+    // Fonction pour générer l'aperçu des leçons d'un module
+    function getLessonsPreview(module) {
+        const lessons = module.querySelectorAll('.lesson-card');
+        if (lessons.length === 0) return '<div class="alert alert-secondary">Aucune leçon</div>';
+        
+        let html = '<div class="lessons-preview"><h6>Leçons :</h6><ul class="list-group">';
+        
+        lessons.forEach((lesson, index) => {
+            const title = lesson.querySelector('input[name$="-title"]')?.value || `Leçon ${index + 1}`;
+            html += `<li class="list-group-item">${title}</li>`;
+        });
+        
+        html += '</ul></div>';
+        return html;
+    }
+    
+    // Mettre à jour l'aperçu lors du changement d'onglet
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        if (e.target.getAttribute('aria-controls') === 'preview') {
+            // Forcer le rafraîchissement complet de l'aperçu
+            updatePreview();
+            
+            // Faire défiler vers le haut pour voir l'aperçu
+            $('html, body').animate({
+                scrollTop: $('#preview').offset().top - 20
+            }, 300);
+        }
+    });
+
+    // Initialisation de Select2 et chargement des modules existants
+    $(document).ready(function() {
+        // Initialiser le conteneur des modules
+        const modulesContainer = document.getElementById('modulesContainer');
+        
+        // Mettre à jour l'aperçu au chargement de la page
+        updatePreview();
+        
+        // Écouter les changements sur les champs du formulaire
+        document.querySelectorAll('input, textarea, select').forEach(field => {
+            field.addEventListener('input', updatePreview);
+            field.addEventListener('change', updatePreview);
+        });
+        
+        // Charger les modules existants après l'initialisation de l'interface
+        setTimeout(loadExistingModules, 500);
+        $('.select2').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Sélectionnez une option',
+            allowClear: true
+        });
+    });
+</script>
+{% endblock %}

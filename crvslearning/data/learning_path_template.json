@@ -1,0 +1,60 @@
+{
+  "name": "Parcours Complet Agent État Civil",
+  "structure": "commune",
+  "level": "débutant",
+  "modules": [
+    {
+      "id": "module_fondamentaux",
+      "name": "Module Fondamentaux",
+      "category": "INTRODUCTION A L'ETAT CIVIL",
+      "courses": [16],
+      "order": 1,
+      "prerequisites": [],
+      "duration_weeks": 2,
+      "skills": ["base_concepts", "understanding"],
+      "description": "Découverte des bases de l'état civil"
+    },
+    {
+      "id": "module_pratique",
+      "name": "Module Pratique",
+      "category": "ENREGISTREMENT DES FAITS D'ETAT CIVIL",
+      "courses": [10, 11],
+      "order": 2,
+      "prerequisites": ["module_fondamentaux"],
+      "duration_weeks": 2,
+      "skills": ["form_filling", "procedures"],
+      "description": "Apprentissage pratique des déclarations"
+    },
+    {
+      "id": "module_relationnel",
+      "name": "Module Relationnel",
+      "category": "Compétences Relationnelles",
+      "courses": [],
+      "order": 3,
+      "prerequisites": ["module_fondamentaux"],
+      "duration_weeks": 1,
+      "skills": ["communication", "customer_service"],
+      "description": "Développement des compétences relationnelles"
+    },
+    {
+      "id": "module_digital",
+      "name": "Module Digital",
+      "category": "Digitalisation",
+      "courses": [],
+      "order": 4,
+      "prerequisites": ["module_pratique"],
+      "duration_weeks": 1,
+      "skills": ["digital_tools", "computer_skills"],
+      "description": "Initiation aux outils numériques"
+    }
+  ],
+  "total_duration_weeks": 6,
+  "certification_required": true,
+  "assessment_type": "mixed",
+  "learning_outcomes": [
+    "Comprendre les fondamentaux de l'état civil",
+    "Maîtriser les formulaires de base",
+    "Développer des compétences relationnelles",
+    "Utiliser les outils numériques"
+  ]
+}

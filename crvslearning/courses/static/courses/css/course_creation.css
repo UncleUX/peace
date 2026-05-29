@@ -1,0 +1,541 @@
+/* Thème PS5 pour le formulaire de création de cours */
+:root {
+    --ps5-blue: #0072ce;
+    --ps5-blue-dark: #005ba1;
+    --ps5-blue-light: #00a8ff;
+    --ps5-dark: #0f1923;
+    --ps5-darker: #0a1019;
+    --ps5-light: #e6f7ff;
+    --ps5-gray: #1a2634;
+    --ps5-gray-light: #2a3a4d;
+    --ps5-accent: #00a8ff;
+    --ps5-text: #ffffff;
+    --ps5-text-secondary: #b8c2cc;
+}
+
+body {
+    background: radial-gradient(circle at center, #0f1923 0%, #0a1019 100%);
+    color: var(--ps5-text);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Carte principale */
+.card {
+    background: rgba(26, 38, 52, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 170, 255, 0.2);
+}
+
+.card-header {
+    background: linear-gradient(90deg, var(--ps5-blue), var(--ps5-blue-light));
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid var(--ps5-accent);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: translateX(-100%);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.card-header h2 {
+    font-weight: 700;
+    margin: 0;
+    font-size: 1.75rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    letter-spacing: 0.5px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Boutons */
+.btn {
+    border: none;
+    border-radius: 50px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, var(--ps5-blue), var(--ps5-blue-light));
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 170, 255, 0.4);
+    background: linear-gradient(90deg, var(--ps5-blue-light), var(--ps5-blue));
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    border: 2px solid var(--ps5-text-secondary);
+    color: var(--ps5-text);
+}
+
+.btn-outline-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--ps5-text);
+    color: var(--ps5-text);
+}
+
+/* Champs de formulaire */
+.form-control, .form-select, .form-control:focus, .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--ps5-text);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--ps5-blue-light);
+    box-shadow: 0 0 0 0.25rem rgba(0, 170, 255, 0.25);
+    color: var(--ps5-text);
+}
+
+.form-label {
+    color: var(--ps5-text-secondary);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Section des modules et leçons */
+.section-card {
+    background: rgba(26, 38, 52, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.section-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(26, 38, 52, 0.8);
+}
+
+/* En-tête des sections */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--ps5-text);
+    margin: 0;
+}
+
+/* Boutons d'action */
+.btn-action {
+    background: transparent;
+    border: none;
+    color: var(--ps5-text-secondary);
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--ps5-text);
+    transform: scale(1.1);
+}
+
+.btn-action.add {
+    color: var(--ps5-blue-light);
+}
+
+.btn-action.remove {
+    color: #ff4d4f;
+}
+
+/* Animation de chargement */
+@keyframes pulse {
+    0% { opacity: 0.6; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0.6; transform: scale(0.95); }
+}
+
+.loading {
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Styles spécifiques pour les éléments du formulaire */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* Amélioration des onglets et de la navigation */
+.nav-tabs {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+}
+
+.nav-tabs .nav-link {
+    color: var(--ps5-text-secondary);
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--ps5-blue-light);
+    background: transparent;
+    border-color: var(--ps5-blue-light);
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--ps5-text);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Style pour les messages d'erreur */
+.invalid-feedback {
+    color: #ff6b6b;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Style pour les champs invalides */
+.is-invalid {
+    border-color: #ff6b6b !important;
+}
+
+/* Style pour les cartes de module et de leçon */
+.module-card, .lesson-card {
+    background: rgba(42, 42, 42, 0.7);
+    border: 1px solid var(--ps5-gray-light);
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.module-card:hover, .lesson-card:hover {
+    border-color: var(--ps5-blue-light);
+    box-shadow: 0 4px 15px rgba(0, 170, 255, 0.1);
+}
+
+/* Style pour les boutons d'ajout */
+.btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ps5-blue-light);
+    background: transparent;
+    border: 1px dashed var(--ps5-blue-light);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background: rgba(0, 170, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Style pour les icônes */
+.bi {
+    vertical-align: middle;
+}
+
+/* Style pour les cartes de section */
+.section-card {
+    transition: all 0.3s ease;
+}
+
+.section-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.section-header {
+    background: linear-gradient(90deg, var(--ps5-gray), var(--ps5-gray-light));
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header h3 {
+    color: var(--ps5-light);
+    margin: 0;
+    font-weight: 600;
+}
+
+.section-body {
+    padding: 1.5rem;
+    background-color: rgba(30, 30, 30, 0.7);
+}
+
+.module-card, .lesson-card, .video-card {
+    background-color: rgba(45, 45, 45, 0.7);
+    border: 1px solid var(--ps5-gray-light);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+}
+
+.module-card:hover, .lesson-card:hover, .video-card:hover {
+    background-color: rgba(60, 60, 60, 0.7);
+    border-color: var(--ps5-accent);
+}
+
+.module-header, .lesson-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+/* Boutons */
+.btn {
+    border-radius: 50px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, var(--ps5-blue), #00a8ff);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(90deg, #005fa3, #0088cc);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 114, 206, 0.4);
+}
+
+.btn-outline-secondary {
+    border: 2px solid var(--ps5-gray-light);
+    color: var(--ps5-light);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--ps5-gray-light);
+    color: var(--ps5-light);
+    border-color: var(--ps5-accent);
+}
+
+.btn-add {
+    margin: 0.5rem 0;
+    background: linear-gradient(90deg, #1e8449, #27ae60);
+    color: white;
+}
+
+.btn-add:hover {
+    background: linear-gradient(90deg, #27ae60, #2ecc71);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.btn-remove {
+    color: #ff6b6b;
+    background: none;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    border-radius: 50px;
+    transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+    color: white;
+    background-color: #ff3e3e;
+    transform: scale(1.1);
+}
+
+/* Champs de formulaire */
+.form-control, .form-select {
+    background-color: rgba(30, 30, 30, 0.8);
+    border: 1px solid var(--ps5-gray-light);
+    color: white;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(45, 45, 45, 0.9);
+    border-color: var(--ps5-accent);
+    box-shadow: 0 0 0 0.25rem rgba(0, 114, 206, 0.25);
+    color: white;
+}
+
+.form-label {
+    color: #b3b3b3;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Styles pour la prévisualisation de l'image */
+.thumbnail-preview {
+    max-width: 200px;
+    max-height: 200px;
+    margin-top: 1rem;
+    display: block;
+    border-radius: 8px;
+    border: 2px solid var(--ps5-gray-light);
+}
+
+/* Styles pour les templates cachés */
+.template {
+    display: none;
+}
+
+/* Styles pour le modal de prévisualisation */
+#previewModal .modal-content {
+    background-color: var(--ps5-gray);
+    color: white;
+    border: 1px solid var(--ps5-gray-light);
+}
+
+#previewModal .modal-header {
+    border-bottom: 1px solid var(--ps5-gray-light);
+}
+
+#previewModal .modal-body img {
+    max-width: 100%;
+    max-height: 300px;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+/* Styles pour les sections dépliables */
+.collapsible-section {
+    margin-bottom: 1.5rem;
+}
+
+.collapsible-header {
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(90deg, var(--ps5-gray), var(--ps5-gray-light));
+    border: 1px solid var(--ps5-gray-light);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    color: white;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.collapsible-header:hover {
+    background: linear-gradient(90deg, var(--ps5-gray-light), #3d3d3d);
+}
+
+.collapsible-content {
+    padding: 1.5rem;
+    border: 1px solid var(--ps5-gray-light);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background-color: rgba(30, 30, 30, 0.7);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Styles pour les compteurs */
+.module-number, .lesson-number, .video-number {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.col-lg-10 {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.module-body {
+    padding: 1rem;
+    background: rgba(15, 25, 35, 0.5);
+    border-radius: 6px;
+    margin-top: 0.75rem;
+}
+
+.row {
+    margin-left: -10px;
+    margin-right: -10px;
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+}

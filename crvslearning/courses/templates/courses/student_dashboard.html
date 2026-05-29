@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord - CRVS Learning{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard-header {
+    background: linear-gradient(135deg, #0072ce 0%, #0056b3 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #0072ce;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.course-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+.course-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.course-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.course-body {
+    padding: 1.5rem;
+}
+
+.progress-section {
+    margin-bottom: 1rem;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.progress-bar-container {
+    background: #e9ecef;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0072ce 0%, #0056b3 100%);
+    transition: width 0.3s ease;
+}
+
+.score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.score-item {
+    text-align: center;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.score-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.score-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.badge-warning {
+    background: #ffc107;
+    color: #212529;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header du dashboard -->
+<div class="dashboard-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Tableau de bord
+                </h1>
+                <p class="mb-0">Suivez votre progression et vos résultats</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="d-inline-block text-center">
+                    <div class="stat-number text-white">{{ average_score }}%</div>
+                    <div class="text-white-50">Score moyen</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Statistiques globales -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_courses }}</div>
+            <div class="stat-label">Cours inscrits</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ completed_courses }}</div>
+            <div class="stat-label">Cours terminés</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ in_progress_courses }}</div>
+            <div class="stat-label">En cours</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ average_score }}%</div>
+            <div class="stat-label">Moyenne générale</div>
+        </div>
+    </div>
+
+    <!-- Progression des cours -->
+    <h2 class="mb-4">
+        <i class="bi bi-book me-2"></i>
+        Mes cours
+    </h2>
+
+    {% if course_progress %}
+        <div class="course-grid">
+            {% for course_data in course_progress %}
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-title">{{ course_data.course.title }}</div>
+                        <div class="text-muted small">
+                            {{ course_data.progress_details.total_lessons }} leçons • 
+                            {{ course_data.progress_details.total_quizzes }} quiz
+                        </div>
+                    </div>
+                    
+                    <div class="course-body">
+                        <!-- Statut du cours -->
+                        <div class="mb-3">
+                            {% if course_data.is_passed %}
+                                <span class="badge-success">
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    Terminé
+                                </span>
+                            {% else %}
+                                <span class="badge-warning">
+                                    <i class="bi bi-clock me-1"></i>
+                                    En cours
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Progression des leçons -->
+                        <div class="progress-section">
+                            <div class="progress-label">
+                                <span>Leçons</span>
+                                <span>{{ course_data.progress_details.completed_lessons }}/{{ course_data.progress_details.total_lessons }}</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: {{ course_data.progress_details.lesson_completion_rate }}%"></div>
+                            </div>
+                            <div class="text-muted small">{{ course_data.progress_details.lesson_completion_rate|floatformat:1 }}%</div>
+                        </div>
+
+                        <!-- Progression des quiz -->
+                        {% if course_data.progress_details.total_quizzes > 0 %}
+                            <div class="progress-section">
+                                <div class="progress-label">
+                                    <span>Quiz</span>
+                                    <span>{{ course_data.progress_details.passed_quizzes }}/{{ course_data.progress_details.total_quizzes }}</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" style="width: {{ course_data.progress_details.quiz_success_rate }}%; background: linear-gradient(90deg, #28a745 0%, #20c997 100%);"></div>
+                                </div>
+                                <div class="text-muted small">{{ course_data.progress_details.quiz_success_rate|floatformat:1 }}%</div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Scores -->
+                        <div class="score-grid">
+                            <div class="score-item">
+                                <div class="score-value">{{ course_data.lesson_score|floatformat:1 }}%</div>
+                                <div class="score-label">Leçons</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-value">{{ course_data.quiz_score|floatformat:1 }}%</div>
+                                <div class="score-label">Quiz</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-value {% if course_data.is_passed %}text-success{% else %}text-warning{% endif %}">
+                                    {{ course_data.final_score|floatformat:1 }}%
+                                </div>
+                                <div class="score-label">Final</div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-3">
+                            <a href="{% url 'courses:course_detail' course_data.course.id %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-play-circle me-1"></i>
+                                Continuer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>Aucun cours inscrit</h3>
+            <p>Vous n'êtes inscrit à aucun cours pour le moment.</p>
+            <a href="{% url 'users:dashboard' %}" class="btn btn-primary">
+                <i class="bi bi-search me-1"></i>
+                Explorer les cours
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animation des barres de progression au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBars = document.querySelectorAll('.progress-bar-fill');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const bar = entry.target;
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+                
+                observer.unobserve(bar);
+            }
+        });
+    });
+    
+    progressBars.forEach(bar => {
+        observer.observe(bar);
+    });
+});
+</script>
+{% endblock %}

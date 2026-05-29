@@ -1,0 +1,695 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+<style>
+    /* Thème PS5 amélioré */
+    :root {
+        --ps5-blue: #0072ce;
+        --ps5-blue-hover: #1a8cff;
+        --ps5-dark: #000000;
+        --ps5-card: #161c21;
+        --ps5-card-hover: #1e272e;
+        --ps5-text: #ffffff;
+        --ps5-text-secondary: #b8c5d0;
+        --ps5-gray: #2a2a2f;
+        --ps5-border: rgba(255, 255, 255, 0.12);
+        --ps5-hover: rgba(255, 255, 255, 0.05);
+        --ps5-focus: rgba(0, 114, 206, 0.3);
+        --ps5-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    body {
+        background-color: var(--ps5-dark);
+        color: var(--ps5-text);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* En-tête style PS5 */
+    .page-header {
+        background: linear-gradient(135deg, #0a0a0c 0%, #111114 100%);
+        border-radius: 16px;
+        padding: 1.75rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--ps5-border);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--ps5-blue), #1a8cff);
+    }
+
+    .page-header h2 {
+        color: var(--ps5-text);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin: 0;
+        position: relative;
+        display: inline-block;
+    }
+
+    .page-header h2:after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: var(--ps5-blue);
+        border-radius: 3px;
+    }
+
+    /* Cartes style PS5 */
+    .card {
+        background: linear-gradient(145deg, #1a1f24, #14181c);
+        border: 1px solid var(--ps5-border);
+        border-radius: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 24px;
+        box-shadow: var(--ps5-shadow);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .card:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--ps5-blue), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+        border-color: var(--ps5-blue);
+    }
+
+    .card:hover:before {
+        opacity: 1;
+    }
+
+    .card-header {
+        background: linear-gradient(to right, rgba(0, 114, 206, 0.1), transparent);
+        border-bottom: 1px solid var(--ps5-border);
+        padding: 1.25rem 1.5rem;
+        position: relative;
+    }
+
+    .card-header h5 {
+        color: var(--ps5-text);
+        font-weight: 600;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+
+    /* Boutons style PS5 */
+    .btn {
+        border-radius: 50px;
+        padding: 0.75rem 1.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        position: relative;
+        overflow: hidden;
+        font-size: 0.9rem;
+    }
+
+    .btn:active {
+        transform: translateY(1px);
+    }
+
+    .btn i {
+        margin-right: 8px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--ps5-blue), #1a8cff);
+        color: white;
+        box-shadow: 0 4px 16px rgba(0, 114, 206, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--ps5-blue-hover), #2d9dff);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 114, 206, 0.4);
+    }
+
+    .btn-outline-secondary {
+        background: transparent;
+        border: 2px solid var(--ps5-blue);
+        color: var(--ps5-blue);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .btn-outline-secondary:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: rgba(0, 114, 206, 0.1);
+        transition: all 0.3s ease;
+        z-index: -1;
+    }
+
+    .btn-outline-secondary:hover {
+        color: var(--ps5-text);
+        border-color: var(--ps5-blue-hover);
+    }
+
+    .btn-outline-secondary:hover:before {
+        width: 100%;
+    }
+
+    /* Formulaire style PS5 */
+    #exercise-form {
+        background: var(--ps5-card);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: var(--ps5-shadow);
+        border: 1px solid var(--ps5-border);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #exercise-form:hover {
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        transform: translateY(-2px);
+    }
+
+    /* Champs de formulaire style PS5 */
+    .form-control, .form-select, .input-group-text, textarea, select, input[type="text"], input[type="number"] {
+        background-color: rgba(255, 255, 255, 0.08);
+        border: 2px solid var(--ps5-border);
+        color: var(--ps5-text);
+        border-radius: 12px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 1rem;
+        height: auto;
+    }
+    
+    .form-control, textarea, input[type="text"], input[type="number"] {
+        padding: 0.75rem 1.25rem;
+    }
+    
+    .form-control:focus, .form-select:focus, textarea:focus, select:focus, input[type="text"]:focus, input[type="number"]:focus {
+        background-color: rgba(255, 255, 255, 0.12);
+        border-color: var(--ps5-blue);
+        box-shadow: 0 0 0 3px var(--ps5-focus);
+        outline: none;
+    }
+    
+    .input-group-text {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-right: none;
+        color: var(--ps5-text-secondary);
+        padding: 0 1rem;
+    }
+    
+    .input-group-text {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none;
+    }
+    
+    .input-group .form-control:not(:first-child) {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: none;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--ps5-blue);
+        border-color: var(--ps5-blue);
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: var(--ps5-blue);
+        color: white;
+        box-shadow: 0 0 0 0.25rem rgba(0, 114, 206, 0.25);
+    }
+
+    /* Liste des questions style PS5 */
+    .list-group-item {
+        background: linear-gradient(145deg, #1e252b, #1a1f24);
+        border: 1px solid var(--ps5-border);
+        color: var(--ps5-text);
+        margin-bottom: 12px;
+        border-radius: 12px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 1.25rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .list-group-item:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--ps5-blue);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        background: linear-gradient(145deg, #232b32, #1d242a);
+        transform: translateX(8px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .list-group-item:hover:before {
+        opacity: 1;
+    }
+
+    .list-group-item .text-muted {
+        color: var(--ps5-text-secondary) !important;
+        font-size: 0.85rem;
+    }
+
+    /* Checkbox et éléments de formulaire personnalisés */
+    .form-check {
+        padding-left: 2.5em;
+        min-height: 2em;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-check-input {
+        width: 1.5em;
+        height: 1.5em;
+        margin-top: 0;
+        margin-left: -2.5em;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 2px solid var(--ps5-border);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--ps5-blue);
+        border-color: var(--ps5-blue);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+    }
+
+    .form-check-input:focus {
+        box-shadow: 0 0 0 0.25rem var(--ps5-focus);
+        border-color: var(--ps5-blue);
+    }
+
+    .form-check-label {
+        margin-left: 0.5rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+    .btn-pulse {
+        position: relative;
+        overflow: hidden;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 114, 206, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(0, 114, 206, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 114, 206, 0);
+        }
+    }
+
+    .btn-pulse:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .btn-pulse:active:after {
+        opacity: 0.3;
+        transform: translate(-50%, -50%) scale(2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Bouton de retour -->
+    <div class="mb-4">
+        <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Section de gauche : Liste des questions existantes -->
+        <div class="col-lg-5">
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2>Questions existantes</h2>
+                    <span class="badge bg-primary rounded-pill">{{ exercises|length }}</span>
+                </div>
+            </div>
+            {% if exercises %}
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush" style="max-height: 70vh; overflow-y: auto;">
+                        {% for exercise in exercises %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="me-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <h6 class="mb-0">Question #{{ forloop.counter }}</h6>
+                                        {% if exercise in form.instance.lesson.exercises.all %}
+                                        <span class="badge bg-success ms-2">Déjà ajoutée</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="mb-1 text-muted">{{ exercise.question|truncatechars:60 }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-list-ol"></i> {{ exercise.choices.count }} choix
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-check-circle"></i> {{ exercise.correct_choices.count }} correct(s)
+                                    </small>
+                                </div>
+                                <div class="btn-group">
+                                    <a href="{% url 'exercices:exercise_edit' pk=exercise.id %}" 
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Modifier cette question">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Aucune question n'a été créée pour le moment</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Section de droite : Formulaire d'ajout/modification -->
+        <div class="col-lg-7">
+            <div class="page-header">
+                <h2>{% if form.instance.pk %}Modifier{% else %}Ajouter{% endif %} une question</h2>
+            </div>
+
+    <!-- Liste des questions existantes -->
+    {% if exercises %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Questions existantes ({{ exercises|length }})</h5>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for exercise in exercises %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Question #{{ forloop.counter }}</strong>: {{ exercise.question|truncatechars:80 }}
+                        <br>
+                        <small class="text-muted">{{ exercise.choices.count }} choix de réponses</small>
+                    </div>
+                    <div>
+                        <a href="{% url 'exercices:exercise_edit' pk=exercise.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" id="exercise-form" class="mt-4">
+        {% csrf_token %}
+        {{ form|crispy }}
+        
+        <h4 class="mt-4">Choix de réponses</h4>
+        {{ formset.management_form }}
+        <div id="choices-container">
+            {% for choice_form in formset %}
+                <div class="card mb-3 choice-form">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <!-- Case à cocher pour la réponse correcte -->
+                            <div class="col-auto">
+                                <div class="form-check mb-0">
+                                    <input type="checkbox" name="{{ choice_form.is_correct.name }}" 
+                                           class="form-check-input" 
+                                           id="{{ choice_form.is_correct.id_for_label }}"
+                                           {% if choice_form.is_correct.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="{{ choice_form.is_correct.id_for_label }}" 
+                                           title="Réponse correcte">
+                                        <i class="fas fa-check-circle fa-lg"></i>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Champ de texte de la réponse -->
+                            <div class="col">
+                                <div class="input-group">
+                                    <input type="text" 
+                                           name="{{ choice_form.text.name }}" 
+                                           value="{{ choice_form.text.value|default:'' }}"
+                                           class="form-control" 
+                                           placeholder="Texte de la réponse"
+                                           required>
+                                    
+                                    <!-- Bouton de suppression -->
+                                    {% if not forloop.first and formset.can_delete %}
+                                    <div class="input-group-text bg-transparent border-0">
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" 
+                                                   class="form-check-input" 
+                                                   name="{{ choice_form.DELETE.name }}"
+                                                   id="{{ choice_form.DELETE.id_for_label }}">
+                                            <label class="form-check-label text-danger" 
+                                                   for="{{ choice_form.DELETE.id_for_label }}" 
+                                                   title="Supprimer cette réponse">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Champ d'ordre (caché par défaut) -->
+                            <div class="col-auto d-none">
+                                <input type="number" 
+                                       name="{{ choice_form.order.name }}" 
+                                       value="{{ forloop.counter }}" 
+                                       class="form-control" 
+                                       min="1">
+                            </div>
+                        </div>
+                        <div class="row mt-2 ms-1">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-sm btn-outline-secondary toggle-explanation"
+                                        style="font-size: 0.8rem;">
+                                    <i class="fas fa-comment-dots"></i> 
+                                    <span class="explanation-text">Ajouter une explication</span>
+                                </button>
+                                <div class="explanation-field mt-2" style="display: none;">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
+                                            <textarea name="{{ choice_form.explanation.name }}" 
+                                                    class="form-control" 
+                                                    rows="2" 
+                                                    placeholder="Explication (optionnelle)">{{ choice_form.explanation.value|default:'' }}</textarea>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Cette explication sera affichée à l'utilisateur après sa réponse.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% for hidden in choice_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button type="button" class="btn btn-primary" id="add-choice">
+                        <i class="fas fa-plus-circle"></i> Ajouter un choix
+                    </button>
+                </div>
+                <div>
+                    <button type="button" onclick="window.history.back();" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </button>
+                    <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-success" id="submit-btn">
+                        <i class="fas fa-save"></i> Enregistrer l'exercice
+                    </button>
+                </div>
+            </div>
+        </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Scripts personnalisés -->
+<script src="{% static 'exercices/js/exercise_form.js' %}"></script>
+
+<!-- Initialisation des messages Django -->
+<script>
+//<![CDATA[
+    document.addEventListener('DOMContentLoaded', function() {
+        // Afficher les messages Django
+        const messages = [];
+        {% if messages %}
+            {% for message in messages %}
+            messages.push({
+                type: '{{ message.tags|escapejs }}',
+                message: '{{ message|escapejs }}'
+            });
+            {% endfor %}
+        {% endif %}
+        
+        // Afficher les messages
+        messages.forEach(msg => {
+            window.showMessage({
+                type: msg.type || 'info',
+                message: msg.message
+            });
+        });
+
+        // Gestion des événements pour les choix
+        function initChoiceEvents(choiceElement) {
+            // Bouton pour afficher/masquer l'explication
+            const toggleBtn = choiceElement.querySelector('.toggle-explanation');
+            const explanationField = choiceElement.querySelector('.explanation-field');
+            
+            if (toggleBtn && explanationField) {
+                toggleBtn.addEventListener('click', function() {
+                    const isVisible = explanationField.style.display === 'block';
+                    explanationField.style.display = isVisible ? 'none' : 'block';
+                    toggleBtn.innerHTML = isVisible 
+                        ? '<i class="fas fa-comment-dots"></i> Ajouter une explication'
+                        : '<i class="fas fa-times"></i> Masquer l\'explication';
+                });
+            }
+        }
+
+        // Ajouter un nouveau choix
+        document.getElementById('add-choice')?.addEventListener('click', function() {
+            const formCount = document.getElementById('id_choices-TOTAL_FORMS');
+            const container = document.getElementById('choices-container');
+            const totalForms = parseInt(formCount.value);
+            const formPrefix = 'choices-' + totalForms + '-';
+            
+            // Créer un nouveau formulaire
+            const newForm = document.createElement('div');
+            newForm.className = 'card mb-3 choice-form';
+            newForm.innerHTML = `
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-1 text-center">
+                            <div class="form-check">
+                                <input type="checkbox" name="${formPrefix}is_correct" class="form-check-input" id="id_${formPrefix}is_correct">
+                                <label class="form-check-label" for="id_${formPrefix}is_correct">
+                                    <i class="fas fa-check-circle"></i>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-9">
+                            <input type="text" name="${formPrefix}text" class="form-control" placeholder="Texte de la réponse" required>
+                        </div>
+                        <div class="col-1">
+                            <input type="number" name="${formPrefix}order" class="form-control" value="${totalForms + 1}">
+                        </div>
+                        <div class="col-1 text-end">
+                            <input type="checkbox" name="${formPrefix}DELETE" id="id_${formPrefix}DELETE">
+                            <label for="id_${formPrefix}DELETE">Supprimer</label>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2 toggle-explanation">
+                                <i class="fas fa-comment-dots"></i> Ajouter une explication
+                            </button>
+                            <div class="explanation-field" style="display: none;">
+                                <textarea name="${formPrefix}explanation" class="form-control" rows="2" placeholder="Explication (optionnelle)"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="${formPrefix}id" id="id_${formPrefix}id">
+                </div>
+            `;
+            
+            // Ajouter le nouveau formulaire
+            container.appendChild(newForm);
+            
+            // Mettre à jour le compteur de formulaires
+            formCount.value = totalForms + 1;
+            
+            // Initialiser les événements pour le nouveau formulaire
+            initChoiceEvents(newForm);
+        });
+        
+        // Initialiser les événements pour chaque choix existant
+        document.querySelectorAll('.choice-form').forEach(choice => {
+            initChoiceEvents(choice);
+        });
+    });
+//]]>
+</script>
+{% endblock %}

@@ -1,0 +1,91 @@
+<style>
+    :root { --primary: #003366; --bg-gray: #f8fafc; --radius: 10px; }
+    .ld-main { background: #fff; padding: 24px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+    
+    /* Vidéo 16/9 fluide */
+    .ld-player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: var(--radius); overflow: hidden; }
+    #lesson-video { width: 100%; height: 100%; object-fit: contain; }
+
+    /* Header & Bouton Retour */
+    .video-info-header { margin-top: 1.5rem; }
+    
+    /* Actions */
+    .ld-actions { display: flex; flex-wrap: wrap; gap: 5px; margin: 13px 0; padding: 16px; background: var(--bg-gray); border-radius: var(--radius); align-items: center; }
+    .btn { transition: 0.2s; border-radius: 10px; font-weight: 600; padding: 5px 8px; }
+    .ld-actions a button { font-size: 12px;}
+    .btn.ghost { background: #fff; border: 1px solid #e2e8f0; color: #475569; }
+    .btn.solid { background: var(--primary); color: #fff; }
+    
+    /* Commentaires */
+    .comment-item { display: flex; gap: 10px; padding: 5px; background: #fff; border: 1px solid #f1f5f9; border-radius: var(--radius); margin-bottom: 5px; }
+    .c-author-avatar { width: 35px; height: 35px; background: #e6f0ff; color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+    .c-body { color: #334155; line-height: 1.6; margin-top: 4px; font-size: 0.75rem; }
+    .c-meta { font-size: 0.75rem; color: #94a3b8; }
+    .text-comment{ font-size: 13px;}
+    
+    @media (max-width: 768px) { 
+    .ld-main { padding: 16px; border-radius: 0; }
+    .comments {
+        display: none;
+    }
+    .ld-player{
+        width: 90vw;
+        margin-left: -30px;
+    }
+    .btn{
+        font-size: 12px !important;
+    }
+    .ld-actions {
+        padding: 5px 8px !important;
+    }
+     }
+</style>
+
+<div class="ld-main">
+    {% if active_video_url %}
+        <div class="ld-player">
+            <video controls id="lesson-video" autoplay muted>
+                <source src="{{ active_video_url }}" type="video/mp4">
+            </video>
+        </div>
+    {% endif %}
+
+    <div class="ld-actions justify-content-end mt-2">
+        {% if lesson.content_file %}
+            <a class="btn ghost" href="{{ lesson.content_file.url }}" target="_blank"><i class="bi bi-download"></i> Document</a>
+        {% endif %}
+        <button class="btn ghost" id="btn-open-comment" type="button"><i class="bi bi-chat-left-text"></i> Commentaires</button>
+        {% if user.is_authenticated and is_enrolled %}
+            <form class="mark-lesson-completed-form" action="{% url 'courses:mark_lesson_completed' lesson.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn {% if lesson_completed %}btn-success{% else %}btn-outline-secondary{% endif %}" id="mark-lesson-done" type="submit">
+                    {% if lesson_completed %}✓ Terminée{% else %}Marquer terminée{% endif %}
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <div class="comments">
+        <h6 class="mb-2">Commentaires ({{ comments|length }})</h6>
+        <div class="comment-list">
+            {% for c in comments %}
+            <div class="comment-item">
+                <div class="c-author-avatar">{{ c.user.get_full_name|default:c.user.username|slice:":1"|upper }}</div>
+                <div>
+                    <div class="fw-bold text-comment">{{ c.user.get_full_name|default:c.user.username }}</div>
+                    <div class="c-meta"><i class="bi bi-clock"></i> {{ c.created_at|timesince }}</div>
+                    <div class="c-body">{{ c.content }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if user.is_authenticated and is_enrolled %}
+            <form method="post" action="{% url 'courses:add_comment' lesson.id %}" id="comment-form">
+                {% csrf_token %}
+                <textarea id="content" name="content" class="form-control" rows="3" placeholder="Partagez vos réflexions..." required></textarea>
+                <button type="submit" class="btn solid mt-3">Publier le commentaire</button>
+            </form>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,40 @@
+🏆 FÉLICITATIONS - CERTIFICATION OBTENUE
+
+Bonjour {{ user.get_full_name|default:user.username }},
+
+🎉 FÉLICITATIONS ! VOUS AVEZ OBTENU VOTRE CERTIFICATION ! 🎉
+
+Vous avez terminé avec succès votre parcours d'apprentissage et obtenu votre certification.
+
+DÉTAILS DE LA CERTIFICATION
+=============================
+Code : {{ certification.code }}
+Niveau : {{ certification.get_level_display }}
+Parcours : {{ certification.course.title }}
+Date d'obtention : {{ certification.issued_at|date:"d/m/Y H:i" }}
+
+{% if certification.title %}
+Titre : {{ certification.title }}
+{% endif %}
+
+Cette certification atteste de votre réussite et de vos compétences acquises dans le parcours d'apprentissage.
+
+ACCÈS À VOTRE CERTIFICAT
+===============================
+Pour visualiser et télécharger votre certificat, connectez-vous à :
+{{ certificate_url }}
+
+Vous pouvez également accéder à tous vos certificats depuis votre profil.
+
+PROCHAINES ÉTAPES
+==================
+Continuez votre apprentissage avec de nouveaux parcours pour développer davantage vos compétences.
+
+Ressources disponibles :
+- Catalogue des parcours : {{ site_url }}/courses/
+- Votre profil : {{ site_url }}/profile/
+- Centre d'aide : {{ site_url }}/help/
+
+Félicitations encore une fois pour cette réussite exceptionnelle !
+
+© 2026 {{ site_name }}. Tous droits réservés.

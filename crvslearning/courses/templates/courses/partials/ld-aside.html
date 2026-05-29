@@ -1,0 +1,134 @@
+ {% load static %}
+
+<style>
+    /* ==========================================================================
+       ASIDE DYNAMIQUE (Playlist)
+       ========================================================================== */
+    .ld-aside { 
+        background: #fff; 
+        border-radius: 16px; /* Arrondis modernes */
+        border: 1px solid #edf2f7; 
+        
+        /* Comportement dynamique : s'adapte strictement au contenu */
+        height: auto !important; 
+        min-height: min-content !important; 
+        display: flex; 
+        flex-direction: column; 
+        padding: 1.25rem;
+        width: 100%;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .aside-title { 
+        font-weight: 600; 
+        color: #10b981; 
+        margin-bottom: 0.5rem; 
+        font-size: 1rem;
+    }
+    
+    /* La liste grandit selon le nombre d'éléments */
+    .simple-playlist { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 6px; 
+    }
+
+    .playlist-item { 
+        display: flex; 
+        align-items: center; 
+        padding: 10px; 
+        border-radius: 12px; 
+        cursor: pointer; 
+        transition: all 0.25s ease; 
+        border: 1px solid transparent; 
+        gap: 12px;
+    }
+    
+    .playlist-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+    .playlist-item.current { background: #f0fdf4; border-color: #bbf7d0; }
+    
+    .playlist-item-number { 
+        font-size: 0.85rem; 
+        min-width: 28px; 
+        text-align: center; 
+        color: #64748b; 
+        font-weight: 500;
+    }
+    
+    .playlist-item-content { flex-grow: 1; min-width: 0; }
+    
+    .playlist-item-title { 
+        font-weight: 600; 
+        font-size: 0.9rem; 
+        white-space: nowrap; 
+        overflow: hidden; 
+        text-overflow: ellipsis; 
+        color: #1e293b; 
+    }
+    
+    .playlist-item-module { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+    
+    .current-indicator { 
+        font-size: 0.65rem; 
+        background: #dcfce7; 
+        color: #166534; 
+        padding: 2px 8px; 
+        border-radius: 20px; 
+        margin-left: 8px; 
+        vertical-align: middle;
+    }
+
+    .playlist-item-status { display: flex; gap: 8px; align-items: center; }
+
+    /* ==========================================================================
+       RESPONSIVE MOBILE (La remontée "Cover")
+       ========================================================================== */
+    @media (max-width: 768px) { 
+        .ld-aside {
+            margin-top: -30px !important; /* Effet de recouvrement */
+            border-radius: 20px 20px 0 0;  /* Coins arrondis haut uniquement */
+            padding: 1rem !important;
+            /* La section reste en flux normal, aucune hauteur forcée */
+        }
+        
+        /* Réduction légère pour mobile */
+        .playlist-item { padding: 12px 8px; }
+        .playlist-item-title { font-size: 0.85rem; }
+    }
+</style>
+{% load course_extras %}
+
+<aside class="ld-aside p-3 order-first order-md-2">
+    <h5 class="aside-title fw-semibold">Playlist du cours</h5>
+    <div class="simple-playlist mt-2" id="simple-playlist">
+        {% if simple_playlist %}
+            {% for item in simple_playlist %}
+                <div class="playlist-item {% if item.is_current %}current{% endif %}" 
+                     onclick="window.location.href='{{ item.href }}'">
+                    
+                    <div class="playlist-item-number">
+                        {% if item.is_current %}▶️{% elif item.is_next_module %}🔓{% elif item.is_paid_module %}💳{% else %}{{ forloop.counter }}{% endif %}
+                    </div>
+                    
+                    <div class="playlist-item-content">
+                        <div class="playlist-item-title">
+                            {{ item.title }}
+                            {% if item.is_current %}<span class="current-indicator">Actuelle</span>{% endif %}
+                        </div>
+                        <div class="playlist-item-module">
+                            {{ item.module_title }} 
+                            {% if item.lesson_order %}<span class="lesson-order">· Leçon {{ item.lesson_order }}</span>{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="playlist-item-status">
+                        {% if item.is_completed %}<i class="bi bi-check-circle-fill text-success"></i>{% endif %}
+                        {% if not item.has_video %}<i class="bi bi-file-earmark-text text-muted"></i>{% else %}<i class="bi bi-play-circle text-primary"></i>{% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-muted p-2 small">Aucune vidéo disponible</div>
+        {% endif %}
+    </div>
+</aside>

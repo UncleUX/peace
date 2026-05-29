@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cours terminé - {{ course.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.success-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    text-align: center;
+}
+
+.success-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 3rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.success-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.3; }
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    60% { transform: translateY(-10px); }
+}
+
+.success-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.success-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.course-info {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    border-left: 5px solid #28a745;
+}
+
+.course-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.course-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #28a745;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.next-course-section {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.next-course-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.next-course-card {
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.next-course-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.next-course-description {
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-success-large {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    background: linear-gradient(135deg, #218838, #1ea085);
+    color: white;
+}
+
+.btn-outline-light {
+    background: transparent;
+    color: white;
+    border: 2px solid rgba(255,255,255,0.5);
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-outline-light:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: white;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.no-more-courses {
+    text-align: center;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.no-more-icon {
+    font-size: 3rem;
+    color: #ffc107;
+    margin-bottom: 1rem;
+}
+
+.no-more-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.no-more-text {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .success-container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+    
+    .success-header {
+        padding: 2rem;
+    }
+    
+    .success-title {
+        font-size: 2rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-success-large,
+    .btn-outline-light {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <!-- Header de succès -->
+    <div class="success-header">
+        <div class="success-icon">🎉</div>
+        <h1 class="success-title">Félicitations !</h1>
+        <p class="success-subtitle">Vous avez terminé ce cours avec succès</p>
+    </div>
+
+    <!-- Informations du cours -->
+    <div class="course-info">
+        <h2 class="course-title">{{ course.title }}</h2>
+        <p class="text-muted">{{ course.description|truncatewords:20 }}</p>
+        
+        <div class="course-stats">
+            <div class="stat-item">
+                <span class="stat-value">{{ total_lessons }}</span>
+                <span class="stat-label">Leçons</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ completed_lessons }}</span>
+                <span class="stat-label">Terminées</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">100%</span>
+                <span class="stat-label">Progression</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">{{ time_spent|default:"--" }}</span>
+                <span class="stat-label">Temps passé</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section du cours suivant -->
+    {% if next_course %}
+        <div class="next-course-section">
+            <h3 class="next-course-title">🚀 Prêt pour la suite ?</h3>
+            <div class="next-course-card">
+                <div class="next-course-name">{{ next_course.title }}</div>
+                <div class="next-course-description">{{ next_course.description|truncatewords:15 }}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small><i class="bi bi-book me-1"></i>{{ next_course.get_total_lessons }} leçons</small>
+                    <small><i class="bi bi-clock me-1"></i>{{ next_course.get_total_duration }} min</small>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{% url 'courses:course_detail' next_course.slug %}" class="btn-success-large">
+                    <i class="bi bi-play-circle"></i>
+                    Commencer le cours suivant
+                </a>
+                <a href="{% url 'courses:learning_path_dashboard' %}" class="btn-outline-light">
+                    <i class="bi bi-speedometer2"></i>
+                    Voir mon parcours
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <!-- Plus de cours disponibles -->
+        <div class="no-more-courses">
+            <div class="no-more-icon">🏆</div>
+            <h3 class="no-more-title">Parcours terminé !</h3>
+            <p class="no-more-text">
+                Vous avez terminé tous les cours disponibles dans votre parcours. 
+                Félicitations pour votre achievement !
+            </p>
+            <div class="action-buttons">
+                <a href="{% url 'courses:learning_path_dashboard' %}" class="btn-success-large">
+                    <i class="bi bi-trophy"></i>
+                    Voir mes achievements
+                </a>
+                <a href="{% url 'courses:all_courses' %}" class="btn-outline-light">
+                    <i class="bi bi-grid"></i>
+                    Explorer d'autres cours
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

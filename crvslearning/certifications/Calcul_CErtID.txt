@@ -1,0 +1,33 @@
+L'ID du certificat (ou code) est généré automatiquement lors de la création d'un objet [Certification](cci:2://file:///e:/Documents/Astrid/ELEARNING/crvslearning/certifications/models.py:6:0-32:73) grâce à la méthode [save()](cci:1://file:///e:/Documents/Astrid/ELEARNING/crvslearning/certifications/models.py:25:4-29:44) du modèle. Voici comment cela fonctionne :
+
+1. **Définition du champ dans le modèle** :
+```python
+# certifications/models.py
+code = models.CharField(max_length=64, unique=True, db_index=True, default="", blank=True)
+```
+
+2. **Génération du code dans la méthode save()** :
+```python
+def save(self, *args, **kwargs):
+    if not self.code:
+        # Génère un code unique avec UUID
+        self.code = uuid.uuid4().hex
+    return super().save(*args, **kwargs)
+```
+
+L'algorithme utilisé est le suivant :
+1. Vérifie si un code existe déjà pour ce certificat
+2. Si aucun code n'existe, il génère un UUID4 (version 4 d'UUID)
+3. Convertit cet UUID en une chaîne hexadécimale de 32 caractères avec `.hex`
+4. Sauvegarde ce code dans le champ `code` du certificat
+
+Caractéristiques du code généré :
+- Longueur fixe de 32 caractères hexadécimaux (0-9, a-f)
+- Unique (garanti par l'algorithme UUID v4)
+- Stocké dans la base de données avec un index pour des recherches rapides
+- Généré une seule fois à la création du certificat
+
+Ce code est ensuite utilisé pour :
+- L'URL de vérification du certificat
+- Le nom du fichier PDF du certificat
+- L'identification unique du certificat dans le système

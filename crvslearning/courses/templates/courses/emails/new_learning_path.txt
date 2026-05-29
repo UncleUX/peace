@@ -1,0 +1,29 @@
+🎯 NOUVEAU PARCOURS D'APPRENTISSAGE DISPONIBLE
+
+Bonjour {{ user.get_full_name|default:user.username }},
+
+{{ custom_message }}
+
+DÉTAILS DU PARCOURS
+==================
+Nom : {{ template.name }}
+Structure : {{ template.get_structure_display }}
+Niveau : {{ template.get_level_display }}
+Durée : {{ template.get_total_duration_weeks }} semaines
+Nombre de cours : {{ template.get_course_count }} cours
+Statut : ✅ Actif
+
+{% if template.description %}
+DESCRIPTION
+-----------
+{{ template.description }}
+{% endif %}
+
+ACCÈS AU PARCOURS
+==================
+Pour accéder à votre parcours, connectez-vous à :
+{{ login_url }}
+
+Cet email vous a été envoyé car vous êtes concerné par ce parcours d'apprentissage.
+
+© 2026 {{ site_name }}. Tous droits réservés.

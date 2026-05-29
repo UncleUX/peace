@@ -1,0 +1,218 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Envoyer une notification avec pièce jointe" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-paperclip"></i>
+                        {% trans "Envoyer une notification avec pièce jointe" %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user"></i>
+                                    {% trans "Destinataire" %}
+                                </label>
+                                <select name="username" id="username" class="form-select" required>
+                                    <option value="">{% trans "Sélectionner un utilisateur" %}</option>
+                                    <option value="all">{% trans "Tous les utilisateurs" %}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sender" class="form-label">
+                                    <i class="fas fa-user-shield"></i>
+                                    {% trans "Expéditeur" %}
+                                </label>
+                                <input type="text" name="sender" id="sender" 
+                                       class="form-control" 
+                                       value="Administration CRVS"
+                                       placeholder="{% trans "Nom de l'expéditeur" %}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">
+                                <i class="fas fa-heading"></i>
+                                {% trans "Sujet" %}
+                            </label>
+                            <input type="text" name="subject" id="subject" 
+                                   class="form-control" 
+                                   placeholder="{% trans "Sujet de la notification" %}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label">
+                                <i class="fas fa-envelope"></i>
+                                {% trans "Message" %}
+                            </label>
+                            <textarea name="message" id="message" rows="4" 
+                                      class="form-control" 
+                                      placeholder="{% trans "Contenu de votre message..." %}"
+                                      required></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="url" class="form-label">
+                                    <i class="fas fa-link"></i>
+                                    {% trans "URL de redirection" %}
+                                </label>
+                                <input type="text" name="url" id="url" 
+                                       class="form-control" 
+                                       value="/dashboard/"
+                                       placeholder="{% trans "URL vers laquelle l'utilisateur sera redirigé" %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-info-circle"></i>
+                                    {% trans "Suggestions d'URL" %}
+                                </label>
+                                <select class="form-select" onchange="document.getElementById('url').value = this.value">
+                                    <option value="/dashboard/">/dashboard/</option>
+                                    <option value="/courses/">/courses/</option>
+                                    <option value="/certifications/">/certifications/</option>
+                                    <option value="/profile/">/profile/</option>
+                                    <option value="/help/">/help/</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Pièce jointe -->
+                        <div class="mb-4">
+                            <label for="attachment" class="form-label">
+                                <i class="fas fa-paperclip"></i>
+                                {% trans "Pièce jointe" %}
+                            </label>
+                            <div class="input-group">
+                                <input type="file" name="attachment" id="attachment" 
+                                       class="form-control" 
+                                       accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.zip,.rar"
+                                       onchange="updateFileInfo()">
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                {% trans "Formats acceptés : PDF, Word, Excel, PowerPoint, Images, ZIP, RAR (Max 10MB)" %}
+                            </div>
+                            <div id="fileInfo" class="mt-2 text-muted"></div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> {% trans "Conseils" %}</h6>
+                            <ul class="mb-0">
+                                <li>{% trans "Utilisez des pièces jointes pour les documents importants" %}</li>
+                                <li>{% trans "Les PDF sont parfaits pour les certificats et rapports" %}</li>
+                                <li>{% trans "Les images sont idéales pour les captures d'écran et schémas" %}</li>
+                                <li>{% trans "La pièce jointe sera disponible pour téléchargement" %}</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'admin:notifications_notification_changelist' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                {% trans "Retour" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                {% trans "Envoyer" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateFileInfo() {
+    const fileInput = document.getElementById('attachment');
+    const fileInfo = document.getElementById('fileInfo');
+    
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        
+        if (fileSize > 10) {
+            fileInfo.innerHTML = `<span class="text-danger">❌ Fichier trop volumineux (${fileSize} MB). Maximum 10MB.</span>`;
+            fileInput.value = '';
+        } else {
+            fileInfo.innerHTML = `
+                <span class="text-success">✅ ${file.name} (${fileSize} MB)</span>
+            `;
+        }
+    } else {
+        fileInfo.innerHTML = '';
+    }
+}
+
+function clearFile() {
+    document.getElementById('attachment').value = '';
+    document.getElementById('fileInfo').innerHTML = '';
+}
+</script>
+
+<style>
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+}
+
+.alert-info h6 {
+    color: #0c5460;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+</style>
+{% endblock %}

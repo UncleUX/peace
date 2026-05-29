@@ -1,0 +1,160 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Notification rapide" %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt"></i>
+                        {% trans "Notification rapide" %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Messages prédéfinis -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-star"></i>
+                                    {% trans "Message rapide" %}
+                                </label>
+                                <select name="message" class="form-select">
+                                    <option value="🎉 Félicitations ! Votre certification a été générée avec succès.">
+                                        🎉 Félicitations ! Votre certification a été générée avec succès.
+                                    </option>
+                                    <option value="📚 Nouveau cours disponible dans votre parcours d'apprentissage.">
+                                        📚 Nouveau cours disponible dans votre parcours d'apprentissage.
+                                    </option>
+                                    <option value="🎯 Continuez votre excellent travail ! Vous êtes sur la bonne voie.">
+                                        🎯 Continuez votre excellent travail ! Vous êtes sur la bonne voie.
+                                    </option>
+                                    <option value="📢 Annonce importante : Maintenance prévue cette semaine.">
+                                        📢 Annonce importante : Maintenance prévue cette semaine.
+                                    </option>
+                                    <option value="🔐 Action requise : Veuillez mettre à jour votre profil.">
+                                        🔐 Action requise : Veuillez mettre à jour votre profil.
+                                    </option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="col-md-6">
+                                    <label class="form-label">
+                                        <i class="fas fa-user"></i>
+                                        {% trans "Destinataire" %}
+                                    </label>
+                                <select name="username" class="form-select">
+                                    <option value="all">{% trans "Tous les utilisateurs" %}</option>
+                                    {% for user in users %}
+                                        <option value="{{ user.username }}">
+                                            {{ user.get_full_name|default:user.username }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-link"></i>
+                                    {% trans "URL" %}
+                                </label>
+                                <select class="form-select" onchange="document.getElementById('url').value = this.value">
+                                    <option value="/dashboard/">/dashboard/</option>
+                                    <option value="/courses/">/courses/</option>
+                                    <option value="/certifications/">/certifications/</option>
+                                    <option value="/profile/">/profile/</option>
+                                    <option value="/help/">/help/</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-user-shield"></i>
+                                    {% trans "Expéditeur" %}
+                                </label>
+                                <select class="form-select">
+                                    <option value="Administration CRVS">Administration CRVS</option>
+                                    <option value="Équipe pédagogique">Équipe pédagogique</option>
+                                    <option value="Sécurité CRVS">Sécurité CRVS</option>
+                                    <option value="Support technique">Support technique</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'admin:notifications_notification_changelist' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                {% trans "Retour" %}
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i>
+                                {% trans "Envoyer" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+</style>
+
+<script>
+// Récupérer la liste des utilisateurs
+const users = [
+    {% for user in users %}
+    {
+        username: "{{ user.username }}",
+        full_name: "{{ user.get_full_name|default:user.username }}"
+    },
+    {% endfor %}
+];
+
+// Mettre à jour la liste des utilisateurs dans le formulaire
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.querySelector('select[name="username"]');
+    if (select) {
+        users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.username;
+            option.textContent = user.full_name;
+            select.appendChild(option);
+        });
+    }
+});
+</script>
+{% endblock %}

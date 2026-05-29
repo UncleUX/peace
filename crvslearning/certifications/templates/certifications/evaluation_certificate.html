@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certification Évaluation - {{ certification.title }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .certificate {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #059669;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            z-index: -1;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #059669;
+            padding-bottom: 20px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #059669;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 18px;
+            color: #6b7280;
+            margin: 0;
+        }
+        .content {
+            margin: 30px 0;
+        }
+        .evaluation-info {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .course-name {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .evaluation-description {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .score-display {
+            background: #dcfce7;
+            border: 2px solid #16a34a;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .score-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 10px;
+        }
+        .score-label {
+            font-size: 18px;
+            color: #166534;
+        }
+        .certification-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .detail-item {
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #059669;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        .detail-value {
+            color: #1f2937;
+            font-size: 16px;
+        }
+        .recipient {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f0fdf4;
+            border: 2px solid #16a34a;
+            border-radius: 10px;
+        }
+        .recipient-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #14532d;
+            margin-bottom: 10px;
+        }
+        .achievement {
+            font-size: 18px;
+            color: #166534;
+            margin: 0;
+        }
+        .level-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            background: #f59e0b;
+            color: white;
+        }
+        .validation-code {
+            background: #fef3c7;
+            border: 2px dashed #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 20px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .date {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        @media print {
+            body { background: white; }
+            .certificate { box-shadow: none; border: 2px solid #059669; }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="header">
+            <div class="logo">CRVS Learning</div>
+            <div class="title">Certification d'Évaluation</div>
+        </div>
+        
+        <div class="content">
+            <div class="level-badge">
+                {{ certification.get_level_display }}
+            </div>
+            
+            <div class="evaluation-info">
+                <div class="course-name">{{ certification.course.title }}</div>
+                <div class="evaluation-description">Évaluation de compétences validée</div>
+            </div>
+            
+            {% if score %}
+            <div class="score-display">
+                <div class="score-value">{{ score }}%</div>
+                <div class="score-label">Score obtenu</div>
+            </div>
+            {% endif %}
+            
+            <h2 style="text-align: center; color: #1f2937; margin: 20px 0;">
+                {{ certification.title }}
+            </h2>
+            
+            <div class="certification-details">
+                <div class="detail-item">
+                    <div class="detail-label">Numéro de Certification</div>
+                    <div class="detail-value">{{ certification.code }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Date de Délivrance</div>
+                    <div class="detail-value">{{ certification.issued_at|date:"d F Y" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Type de Certification</div>
+                    <div class="detail-value">Évaluation de compétences</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Niveau de Compétence</div>
+                    <div class="detail-value">{{ certification.get_level_display }}</div>
+                </div>
+            </div>
+            
+            <div class="recipient">
+                <div class="recipient-name">{{ certification.user.get_full_name|default:certification.user.username }}</div>
+                <div class="achievement">a réussi avec succès l'évaluation de compétences</div>
+            </div>
+            
+            <div class="validation-code">
+                <strong>Code de Validation :</strong> {{ certification.code }}
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="date">
+                Généré le {% now "d/m/Y H:i" %} | 
+                Valide en ligne : https://crvs-learning.com/certifications/verify/{{ certification.code }}
+            </div>
+            <div style="margin-top: 10px; font-weight: bold; color: #059669;">
+                CRVS Learning - Excellence en Évaluation Professionnelle
+            </div>
+        </div>
+    </div>
+</body>
+</html>

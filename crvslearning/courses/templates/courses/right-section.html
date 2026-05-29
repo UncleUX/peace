@@ -1,0 +1,348 @@
+<!-- Right Panel -->
+<style>
+  /* Base du Panel Cyber-Tech Micro-Compact */
+  .cyber-panel-compact {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
+  
+  .cyber-user-tag {
+    font-family: 'Fira Code', monospace;
+    color: #64748b;
+    font-size: 12px;
+  }
+
+  /* Cartes TryHackMe Ultra-Compactes */
+  .thm-card-compact {
+    background: #0b0f19; /* Mode sombre profond */
+    border-radius: 10px;
+    padding: 14px;
+    color: #f8fafc;
+    border: 1px solid #1e293b;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .thm-card-compact h6 {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  /* Flexbox Cercle + Datas côte à côte */
+  .thm-row-align {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  /* SVG Circle Fluide */
+  .thm-svg-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .thm-svg-circle {
+    transform: rotate(-90deg);
+  }
+
+  .thm-circle-bg {
+    fill: none;
+    stroke: #161e2e;
+    stroke-width: 7;
+  }
+
+  .thm-circle-fill {
+    fill: none;
+    stroke: #10b981; /* Vert TryHackMe */
+    stroke-width: 7;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease-in-out;
+    filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
+  }
+
+  .thm-inner-percent {
+    position: absolute;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  /* Grille de micro-données internes */
+  .thm-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    width: 100%;
+  }
+
+  .thm-stat-box {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+
+  .thm-stat-box .label {
+    font-size: 10px;
+    color: #64748b;
+    display: block;
+    text-transform: uppercase;
+  }
+
+  .thm-stat-box .val {
+    font-size: 12px;
+    font-weight: 700;
+    color: #e2e8f0;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* Micro-Badges */
+  .micro-badge-thm {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: fit-content;
+  }
+  
+  .bg-thm-success { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+  .bg-thm-warning { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+  .bg-thm-info { background: rgba(14, 165, 233, 0.12); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.2); }
+
+  /* --- Mini Calendrier Style Cyber --- */
+  .cyber-cal-month {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #f8fafc;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .cyber-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .cyber-cal-weekday {
+    font-size: 9px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    padding-bottom: 2px;
+  }
+
+  .cyber-cal-day {
+    font-size: 11px;
+    font-family: 'Fira Code', monospace;
+    color: #94a3b8;
+    padding: 3px 0;
+    border-radius: 4px;
+    position: relative;
+    user-select: none;
+  }
+
+  .cyber-cal-day.muted {
+    color: #334155;
+  }
+
+  /* Jour actuel - Effet TryHackMe */
+  .cyber-cal-day.today {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    font-weight: 700;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Indicateur d'activité passée (ex: Jalons de déploiement) */
+  .cyber-cal-day.has-event::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 3px;
+    background-color: #6366f1; /* Teinte indigo discrète */
+    border-radius: 50%;
+  }
+</style>
+
+<div class="panel cyber-panel-compact p-3 rounded">
+  <!-- Header de section condensé -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h6 class="text-dark fw-bold mb-0" style="font-size: 0.95rem;">Suivi de Formation</h6>
+      <span class="cyber-user-tag">@{{ request.user.username|lower }}</span>
+    </div>
+    <span class="micro-badge-thm bg-thm-info">
+      <i class="bi bi-shield-check"></i> Actif
+    </span>
+  </div>
+  
+  <!-- BLOC 1 : AVANCEMENT DU COURS -->
+  <div class="thm-card-compact">
+    <h6>Progression Générale</h6>
+    
+    {% if is_enrolled %}
+    <div class="thm-row-align">
+      <div class="thm-svg-wrapper">
+        <svg class="thm-svg-circle" width="76" height="76" viewBox="0 0 80 80">
+          <circle class="thm-circle-bg" cx="40" cy="40" r="35"></circle>
+          <circle class="thm-circle-fill" cx="40" cy="40" r="35" 
+                  style="stroke-dasharray: 219.9; stroke-dashoffset: calc(219.9 - (219.9 * {{ progress_percent|default:0 }}) / 100);">
+          </circle>
+        </svg>
+        <span class="thm-inner-percent">{{ progress_percent }}%</span>
+      </div>
+
+      <div class="thm-stats-grid">
+        <div class="thm-stat-box">
+          <span class="label">Validées</span>
+          <span class="val">{{ completed_count }}/{{ total_lessons }} leçons</span>
+        </div>
+        <div class="thm-stat-box">
+          <span class="label">Statut</span>
+          <span class="val">
+            {% if progress_percent == 100 %}Terminé{% else %}En cours{% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="bg-thm-info p-2 rounded text-center mb-0" style="font-size: 11px;">
+      <i class="bi bi-lock-fill me-1"></i> Rejoignez le module pour tracer vos métriques.
+    </div>
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-10" style="font-size: 11px;">
+      <span class="text-white-50"><i class="bi bi-clock me-1"></i>{{ course.duration|default:"Durée estimée N/A" }}</span>
+      <span class="text-emerald fw-semibold" style="color: #10b981;">Niveau Standard</span>
+    </div>
+  </div>
+
+  <!-- BLOC 2 : ACCRÉDITATION & EVALUATION -->
+  <div class="thm-card-compact" style="border-top: 2px solid {% if quiz_score and quiz_score.score >= 70 %}#10b981{% elif quiz_score %}#f59e0b{% else %}#1e293b{% endif %};">
+    {% if quiz_score %}
+      {% with score=quiz_score.score|default:0|floatformat:0 %}
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6>Évaluation Finale</h6>
+        <span class="micro-badge-thm {% if score >= 70 %}bg-thm-success{% else %}bg-thm-warning{% endif %}">
+          {% if score >= 70 %}Certifié{% else %}Échoué{% endif %}
+        </span>
+      </div>
+      
+      <div class="thm-row-align">
+        <div class="thm-svg-wrapper">
+          <svg class="thm-svg-circle" width="66" height="66" viewBox="0 0 70 70">
+            <circle class="thm-circle-bg" cx="35" cy="35" r="30"></circle>
+            <circle class="quiz-circle-fill" cx="35" cy="35" r="30" 
+                    style="stroke-width: 6; fill: none; stroke: {% if score >= 70 %}#10b981{% else %}#f59e0b{% endif %}; stroke-dasharray: 188.4; stroke-dashoffset: calc(188.4 - (188.4 * {{ score }}) / 100); filter: drop-shadow(0 0 3px {% if score >= 70 %}rgba(16,185,129,0.4){% else %}rgba(245,158,11,0.4){% endif %});">
+            </circle>
+          </svg>
+          <span class="thm-inner-percent" style="font-size: 1rem; color: {% if score >= 70 %}#10b981{% else %}#f59e0b{% endif %};">{{ score }}%</span>
+        </div>
+
+        <div class="thm-stats-grid">
+          <div class="thm-stat-box" style="grid-column: span 2;">
+            <span class="label">Score Lab :</span>
+            <span class="val" style="color:#ffffff;">{{ quiz_score.correct_answers }} / {{ quiz_score.total_questions }} rep.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 pt-2 border-top border-secondary border-opacity-10 d-flex justify-content-between align-items-center" style="font-size: 10px; color: #64748b;">
+        <span>Examen : {{ quiz_score.last_attempt|date:"d/m H:i" }}</span>
+        <span>Requis: 70%</span>
+      </div>
+      {% endwith %}
+    {% else %}
+      <h6>Évaluation Finale</h6>
+      <div class="d-flex align-items-center gap-2 py-1">
+        <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.04); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+          <i class="bi bi-terminal-dash text-muted"></i>
+        </div>
+        <div>
+          <p class="mb-0 text-white-50" style="font-size: 11px;">Aucune donnée d'examen</p>
+          <small class="text-muted d-block" style="font-size: 9px;">Complétez le parcours pour débloquer.</small>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- BLOC 3 : MINI CALENDRIER COMPACT -->
+  <div class="thm-card-compact">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6>Calendrier Activité</h6>
+      <span class="cyber-cal-month"><i class="bi bi-calendar3 me-1"></i> Mai 2026</span>
+    </div>
+
+    <div class="cyber-cal-grid">
+      <!-- Jours de la semaine -->
+      <div class="cyber-cal-weekday">Lu</div>
+      <div class="cyber-cal-weekday">Ma</div>
+      <div class="cyber-cal-weekday">Me</div>
+      <div class="cyber-cal-weekday">Je</div>
+      <div class="cyber-cal-weekday">Ve</div>
+      <div class="cyber-cal-weekday">Sa</div>
+      <div class="cyber-cal-weekday">Di</div>
+
+      <!-- Semaine précédente fin Avril (Grisé) -->
+      <div class="cyber-cal-day muted">27</div>
+      <div class="cyber-cal-day muted">28</div>
+      <div class="cyber-cal-day muted">29</div>
+      <div class="cyber-cal-day muted">30</div>
+
+      <!-- Jours de Mai -->
+      <div class="cyber-cal-day">1</div>
+      <div class="cyber-cal-day">2</div>
+      <div class="cyber-cal-day">3</div>
+
+      <div class="cyber-cal-day">4</div>
+      <div class="cyber-cal-day">5</div>
+      <div class="cyber-cal-day has-event" title="Début Mission Garoua III">6</div>
+      <div class="cyber-cal-day has-event">7</div>
+      <div class="cyber-cal-day has-event">8</div>
+      <div class="cyber-cal-day has-event">9</div>
+      <div class="cyber-cal-day has-event">10</div>
+
+      <div class="cyber-cal-day has-event">11</div>
+      <div class="cyber-cal-day has-event">12</div>
+      <div class="cyber-cal-day has-event">13</div>
+      <div class="cyber-cal-day has-event" title="Fin Mission Garoua III">14</div>
+      <div class="cyber-cal-day">15</div>
+      <div class="cyber-cal-day">16</div>
+      <div class="cyber-cal-day">17</div>
+
+      <div class="cyber-cal-day">18</div>
+      <div class="cyber-cal-day today" title="Aujourd'hui">19</div>
+      <div class="cyber-cal-day">20</div>
+      <div class="cyber-cal-day">21</div>
+      <div class="cyber-cal-day">22</div>
+      <div class="cyber-cal-day">23</div>
+      <div class="cyber-cal-day">24</div>
+
+      <div class="cyber-cal-day">25</div>
+      <div class="cyber-cal-day">26</div>
+      <div class="cyber-cal-day">27</div>
+      <div class="cyber-cal-day">28</div>
+      <div class="cyber-cal-day">29</div>
+      <div class="cyber-cal-day">30</div>
+      <div class="cyber-cal-day">31</div>
+    </div>
+  </div>
+</div>

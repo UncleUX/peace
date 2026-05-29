@@ -1,0 +1,1667 @@
+{% extends "base.html" %}
+
+{% block title %}Gérer mes cours{% endblock %}
+
+{% block content %}
+
+<style>
+:root{
+  --cover-h:240px;
+}
+
+/* ==================================================
+   STYLES DE DÉBOGAGE
+================================================== */
+#debug-console {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 400px;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: rgba(0,0,0,0.8);
+    color: #0f0;
+    padding: 10px;
+    z-index: 9999;
+    border-radius: 5px;
+    display: none;
+}
+
+#debug-console div {
+    border-bottom: 1px solid #333;
+    padding: 4px 0;
+}
+
+#debug-console div:first-child {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.debug-toggle {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10000;
+    padding: 5px 10px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* ==================================================
+   COVER
+================================================== */
+.chan-cover{
+  position:relative;
+  height:var(--cover-h);
+  border-radius:5px;
+  overflow:hidden;
+  margin-bottom:24px;
+  box-shadow:0 20px 40px rgba(0,0,0,.25);
+}
+.chan-cover img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:.9;
+}
+.chan-cover::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.2));
+}
+.cover-edit{
+  position:absolute;
+  right:20px;
+  bottom:20px;
+  z-index:2;
+}
+
+/* ==================================================
+   TITRES
+================================================== */
+.page-title{
+  font-weight:900;
+  font-size:1.9rem;
+}
+
+/* ==================================================
+   SIDEBAR
+================================================== */
+.sidebar-card{
+  border:0;
+  border-radius:5px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+
+}
+.sidebar-card .card-header{
+  border-radius:5px 5px 0 0;
+  font-weight:800;
+}
+.sidebar-card .list-group-item{
+  border:0;
+  padding:14px 18px;
+  font-weight:600;
+  border-collapse:separate;       /* essentiel */
+  border-spacing:0 4px;           /* ESPACE ENTRE LES LIGNES */
+}
+.sidebar-card .list-group-item.active{
+  background:#0d6efd;
+  color:#fff;
+}
+
+/* ==================================================
+   TABLE – STYLE AVANCÉ (ESPACES + CARTES)
+================================================== */
+.table-wrapper{
+  background:transparent;
+  box-shadow:none;
+}
+
+.table{
+  border-collapse:separate;       /* essentiel */
+  border-spacing:0 4px;           /* ESPACE ENTRE LES LIGNES */
+}
+
+.table thead th{
+  background:#111827;
+  color:#ffffff;
+  font-weight:800;
+  border:0;
+}
+
+.table td{
+  border:0;
+  padding:14px 16px;
+  vertical-align:middle;
+}
+
+.table tbody tr{
+  background:#ffffff;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+  transition:all .2s ease;
+}
+
+.table tbody tr:hover{
+  background:#f9fafb;
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(0,0,0,.1);
+}
+
+/* coins arrondis visibles */
+.table tbody tr td:first-child{
+  border-radius:5px 0 0 5px;
+}
+.table tbody tr td:last-child{
+  border-radius:0 5px 5px 0;
+}
+
+/* ==================================================
+   ACTIONS
+================================================== */
+.course-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.course-actions .btn{
+  border-radius:5px;
+}
+
+/* ==================================================
+   PANEL AVANCÉ
+================================================== */
+.adv-panel{
+  background:#f9fafb;
+  border:1px solid #e5e7eb;
+  border-radius:5px;
+  padding:14px;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.04);
+  margin-top:12px;
+}
+
+/* ==================================================
+   FORMULAIRES
+================================================== */
+.form-label{
+  font-size:.8rem;
+  font-weight:800;
+  text-transform:uppercase;
+}
+</style>
+
+<div class="container">
+
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title mb-0">Gestion des cours</h2>
+    <a href="{% url 'courses:unified_course_creation' %}"
+       class="btn btn-primary px-4 fw-bold shadow-sm">
+          <i class="bi bi-plus-lg me-1"></i> Créer un cours
+    </a>
+  </div>
+
+  <div class="row">
+
+    <!-- SIDEBAR -->
+    <div class="col-lg-3 mb-4">
+      <div class="card sidebar-card">
+        <div class="list-group list-group-flush">
+          <a href="{% url 'subscriptions:my_subscriptions' %}"
+             class="list-group-item list-group-item-action">
+            <i class="bi bi-people me-2"></i> Mes abonnements
+          </a>
+
+          {% if user.role == 'trainer' %}
+          <a href="{% url 'subscriptions:my_subscribers' %}"
+             class="list-group-item list-group-item-action">
+            <i class="bi bi-people-fill me-2"></i> Mes abonnés
+            <span class="badge bg-primary rounded-pill float-end">
+              {{ user.subscribers.count }}
+            </span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="col-lg-9">
+      <div class="table-wrapper">
+        <table class="table table-hover ">
+          <thead>
+            <tr>
+              <th>Titre</th>
+              <th>Catégorie</th>
+              <th>Langue</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in courses %}
+            <tr data-course-id="{{ c.id }}">
+              <td class="fw-bold">{{ c.title }}</td>
+              <td>{{ c.category.name|default:"—" }}</td>
+              <td>{{ c.language|upper }}</td>
+              <td style="min-width:360px;">
+                <div class="course-actions d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-primary"
+                     href="{% url 'courses:course_detail' c.id %}"
+                     data-bs-toggle="tooltip" data-bs-placement="top" title="Voir le cours">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a class="btn btn-sm btn-outline-secondary"
+                     href="{% url 'courses:module_list' c.id %}"
+                     data-bs-toggle="tooltip" data-bs-placement="top" title="Gérer les modules">
+                    <i class="bi bi-stack"></i>
+                  </a>
+                  <button type="button" class="btn btn-sm btn-outline-success" 
+                          data-bs-toggle="modal" data-bs-target="#addModuleModal"
+                          data-course-id="{{ c.id }}" data-course-title="{{ c.title }}"
+                          data-bs-toggle="tooltip" data-bs-placement="top" title="Ajouter un module">
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
+                  <a class="btn btn-sm btn-outline-warning"
+                     href="{% url 'courses:course_edit' c.id %}"
+                     data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier le cours">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-danger" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#deleteModal{{ c.id }}"
+                          data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer le cours">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <button class="btn btn-sm btn-dark" 
+                          type="button" 
+                          data-adv-toggle
+                          data-bs-toggle="tooltip" data-bs-placement="top" title="Options avancées">
+                    <i class="bi bi-gear"></i>
+                  </button>
+                </div>
+
+                <!-- PANEL AVANCÉ -->
+                <div class="adv-panel" data-adv-panel style="display:none;">
+                  <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                      <label class="form-label">Module</label>
+                      <select class="form-select form-select-sm" data-mod-sel disabled>
+                        <option>—</option>
+                      </select>
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">Leçon</label>
+                      <select class="form-select form-select-sm" data-les-sel disabled>
+                        <option>—</option>
+                      </select>
+                    </div>
+                    <div class="col-md-12 d-flex gap-2 flex-wrap">
+                      <a class="btn btn-sm btn-primary" data-create-lesson>
+                        <i class="bi bi-plus-lg me-1"></i> Leçon
+                      </a>
+                      <a class="btn btn-sm btn-outline-primary" data-add-video>
+                        <i class="bi bi-camera-video me-1"></i> Vidéo
+                      </a>
+                      <a class="btn btn-sm btn-outline-success" data-create-exercise disabled>
+                        <i class="bi bi-list-task me-1"></i> Exercice
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">
+                Aucun cours pour le moment
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+  
+  <!-- Modales de confirmation de suppression -->
+  {% for c in courses %}
+  <div class="modal fade" id="deleteModal{{ c.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ c.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="deleteModalLabel{{ c.id }}">Confirmer la suppression</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <p>Êtes-vous sûr de vouloir supprimer le cours <strong>{{ c.title }}</strong> ?</p>
+          <p class="text-danger">Cette action est irréversible et supprimera également tous les modules, leçons et ressources associés.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <form action="{% url 'courses:course_delete' c.id %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Supprimer définitivement</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Modal d'ajout de module -->
+  <div class="modal fade" id="addModuleModal" tabindex="-1" aria-labelledby="addModuleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="addModuleModalLabel">Ajouter un module</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Vous allez ajouter un module au cours : <strong id="courseTitleInModal"></strong></p>
+          <form id="moduleForm" method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="course_id" id="courseIdInput" value="">
+            <div class="mb-3">
+              <label for="moduleTitle" class="form-label">Titre du module</label>
+              <input type="text" class="form-control" id="moduleTitle" name="title" required>
+            </div>
+            <div class="mb-3">
+              <label for="moduleDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="moduleDescription" name="description" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="moduleOrder" class="form-label">Ordre</label>
+              <input type="number" class="form-control" id="moduleOrder" name="order" min="1" value="1">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de création de leçon -->
+  <div class="modal fade" id="createLessonModal" tabindex="-1" aria-labelledby="createLessonModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="createLessonModalLabel">Ajouter une leçon</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <div class="card bg-light mb-3">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-center mb-2">
+                  <i class="bi bi-book me-2 text-primary"></i>
+                  <span class="text-muted">Cours:</span> 
+                  <span id="courseTitleDisplay" class="fw-bold ms-2"></span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-folder me-2 text-warning"></i>
+                  <span class="text-muted">Module:</span> 
+                  <span id="moduleTitleDisplay" class="fw-bold ms-2"></span>
+                  <small class="text-muted ms-2">(ID: <span id="moduleIdDisplay"></span>)</small>
+                </div>
+              </div>
+            </div>
+            <div class="mt-3" id="existingLessonsContainer" style="display: none;">
+              <div class="card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                  <div>
+                    <i class="bi bi-diagram-3 me-2"></i>
+                    <span class="fw-bold">Structure du module</span>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleTreeView">
+                    <i class="bi bi-arrows-collapse"></i> Réduire/Développer
+                  </button>
+                </div>
+                <div class="card-body p-0">
+                  <div class="tree-view" id="moduleTree">
+                    <div class="p-3 border-bottom">
+                      <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-book me-2 text-primary"></i>
+                        <strong id="treeCourseTitle"></strong>
+                      </div>
+                      <div class="ms-4">
+                        <div class="d-flex align-items-center mb-2">
+                          <i class="bi bi-folder me-2 text-warning"></i>
+                          <strong id="treeModuleTitle"></strong>
+                        </div>
+                        <ul class="list-group list-group-flush small mt-2" id="existingLessonsList">
+                          <!-- Les leçons seront ajoutées ici dynamiquement -->
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <style>
+              .tree-view {
+                font-size: 0.9rem;
+              }
+              .tree-view ul {
+                list-style: none;
+                padding-left: 1.5rem;
+                margin-bottom: 0;
+                position: relative;
+              }
+              .tree-view ul:before {
+                content: '';
+                position: absolute;
+                left: 0.5rem;
+                top: 0;
+                bottom: 0;
+                border-left: 2px dashed #dee2e6;
+              }
+              .tree-view .list-group-item {
+                padding: 0.25rem 0.5rem;
+                border: none;
+                margin: 0.25rem 0;
+                background: none;
+                position: relative;
+              }
+              .tree-view .list-group-item:before {
+                content: '';
+                position: absolute;
+                left: -1.5rem;
+                top: 50%;
+                width: 1rem;
+                border-top: 2px dashed #dee2e6;
+              }
+              }
+              .tree-view .list-group-item:last-child::before {
+                content: '';
+                position: absolute;
+                left: -2px;
+                top: 0;
+                bottom: 50%;
+                width: 2px;
+                background: #dee2e6;
+              }
+              .tree-view .list-group-item:not(:last-child)::before {
+                content: '';
+                position: absolute;
+                left: -2px;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: #dee2e6;
+              }
+              .tree-view .list-group-item::after {
+                content: '';
+                position: absolute;
+                left: -2px;
+                top: 50%;
+                width: 12px;
+                height: 2px;
+                background: #dee2e6;
+              }
+              .tree-view .lesson-item {
+                display: flex;
+                align-items: center;
+                padding-left: 1rem;
+              }
+              .tree-view .lesson-order {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 24px;
+                height: 24px;
+                background-color: #e9ecef;
+                border-radius: 50%;
+                margin-right: 0.5rem;
+                font-size: 0.75rem;
+                font-weight: bold;
+              }
+              .tree-view .lesson-title {
+                flex-grow: 1;
+              }
+              .tree-view .lesson-id {
+                font-size: 0.7rem;
+                color: #6c757d;
+                background: #f8f9fa;
+                padding: 0.1rem 0.3rem;
+                border-radius: 3px;
+                margin-left: 0.5rem;
+              }
+            </style>
+          </div>
+          <form id="lessonForm" method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="module_id" id="moduleIdInput" value="">
+            <input type="hidden" name="course_id" id="courseIdInput" value="">
+            <div class="mb-3">
+              <label for="lessonTitle" class="form-label">Titre de la leçon</label>
+              <input type="text" class="form-control" id="lessonTitle" name="title" required>
+            </div>
+            <div class="mb-3">
+              <label for="lessonDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="lessonDescription" name="description" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="lessonOrder" class="form-label">Ordre</label>
+              <input type="number" class="form-control" id="lessonOrder" name="order" min="1" value="1">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+              <button type="submit" class="btn btn-primary">Créer la leçon</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================
+   JS
+================================================== -->
+<script>
+(function(){
+  async function fetchJSON(url){
+    const r = await fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}});
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  }
+
+  document.querySelectorAll('tr[data-course-id]').forEach(row=>{
+    const courseId=row.dataset.courseId;
+    const btn=row.querySelector('[data-adv-toggle]');
+    const panel=row.querySelector('[data-adv-panel]');
+    const selM=row.querySelector('[data-mod-sel]');
+    const selL=row.querySelector('[data-les-sel]');
+    const btnV=row.querySelector('[data-add-video]');
+    const btnE=row.querySelector('[data-create-exercise]');
+    let loaded=false;
+
+    btn.onclick=async()=>{
+      panel.style.display=panel.style.display==='none'?'block':'none';
+      if(loaded) return;
+      const data=await fetchJSON('{% url "courses:api_modules_for_course" 0 %}'.replace('/0/','/'+courseId+'/'));
+      selM.innerHTML='<option value="">—</option>';
+      data.modules.forEach(m=>{
+        const o=document.createElement('option');
+        o.value=m.id;o.textContent=m.title;selM.appendChild(o);
+      });
+      selM.disabled=false;
+      loaded=true;
+    };
+
+    selM.onchange=async()=>{
+      selL.innerHTML='<option value="">—</option>';
+      selL.disabled=!selM.value;
+      if(!selM.value) return;
+      const data=await fetchJSON('{% url "courses:api_lessons_for_module" 0 %}'.replace('/0/','/'+selM.value+'/'));
+      data.lessons.forEach(l=>{
+        const o=document.createElement('option');
+        o.value=l.id;o.textContent=l.title;selL.appendChild(o);
+      });
+    };
+
+    selL.onchange=()=>{
+      btnV.disabled=!selL.value;
+      btnE.disabled=!selL.value;
+    };
+
+    // Suppression du gestionnaire d'événements en double
+
+    // Gestionnaire pour le bouton d'ajout de vidéo
+    const addVideoBtn = row.querySelector('[data-add-video]');
+    if (addVideoBtn) {
+      addVideoBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const moduleSelect = row.querySelector('select[name="module"], [data-mod-sel]');
+        const lessonSelect = row.querySelector('select[data-les-sel]');
+        
+        if (!moduleSelect) {
+          console.error('Module select non trouvé');
+          return;
+        }
+        
+        // Récupérer les valeurs
+        const moduleId = moduleSelect.value;
+        const moduleTitle = moduleSelect.options[moduleSelect.selectedIndex].text;
+        const lessonId = lessonSelect ? lessonSelect.value : '';
+        const lessonTitle = lessonSelect && lessonSelect.value ? 
+          lessonSelect.options[lessonSelect.selectedIndex].text : 'Aucune leçon sélectionnée';
+        
+        // Mettre à jour l'interface
+        document.getElementById('videoModuleId').value = moduleId;
+        document.getElementById('videoLessonId').value = lessonId;
+        document.getElementById('videoModuleTitle').textContent = moduleTitle || 'Non spécifié';
+        document.getElementById('videoLessonTitle').textContent = lessonTitle;
+        
+        // Réinitialiser le formulaire
+        document.getElementById('videoForm').reset();
+        document.getElementById('videoError').classList.add('d-none');
+        
+        // Afficher le modal
+        const modal = new bootstrap.Modal(document.getElementById('addVideoModal'));
+        modal.show();
+      });
+    }
+
+    const createLessonBtn = row.querySelector('[data-create-lesson]');
+    createLessonBtn.onclick = () => {
+      if(selM.value) {
+        // Récupérer l'ID du cours depuis l'attribut data-course-id de la ligne
+        const rowCourseId = row.getAttribute('data-course-id');
+        
+        // Afficher la modale de création de leçon
+        const modal = new bootstrap.Modal(document.getElementById('createLessonModal'));
+        const modalElement = document.getElementById('createLessonModal');
+        
+        // Mettre à jour les données dans la modale
+        modalElement.querySelector('#moduleIdInput').value = selM.value;
+        modalElement.querySelector('#courseIdInput').value = rowCourseId;
+        
+        // Mettre à jour l'affichage du cours et du module
+        const courseTitle = row.querySelector('td:first-child').textContent.trim();
+        const moduleSelect = row.querySelector('[data-mod-sel]');
+        const selectedModuleText = moduleSelect.options[moduleSelect.selectedIndex].text;
+        
+        modalElement.querySelector('#courseTitleDisplay').textContent = courseTitle;
+        modalElement.querySelector('#moduleTitleDisplay').textContent = selectedModuleText;
+        modalElement.querySelector('#moduleIdDisplay').textContent = selM.value;
+        
+        // Charger les leçons existantes pour ce module
+        fetch(`/courses/api/modules/${selM.value}/lessons/`)
+          .then(response => response.json())
+          .then(data => {
+            console.log('Données des leçons reçues:', data); // Log de débogage
+            const container = modalElement.querySelector('#existingLessonsContainer');
+            const list = modalElement.querySelector('#existingLessonsList');
+            
+            // Vider la liste actuelle
+            list.innerHTML = '';
+            
+            if (data.lessons && data.lessons.length > 0) {
+              // Trier les leçons par ordre
+              const sortedLessons = [...data.lessons].sort((a, b) => a.order - b.order);
+              
+              // Mettre à jour les titres dans l'arborescence
+              document.getElementById('treeCourseTitle').textContent = courseTitle;
+              document.getElementById('treeModuleTitle').textContent = selectedModuleText;
+              
+              // Ajouter chaque leçon à la liste sous forme d'arborescence
+              sortedLessons.forEach((lesson, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item border-0 ps-4 py-1 d-flex align-items-center';
+                
+                // Vérifier et formater les valeurs
+                const order = lesson.order !== undefined ? lesson.order : (index + 1);
+                const title = lesson.title || 'Sans titre';
+                
+                li.innerHTML = `
+                  <div class="d-flex align-items-center w-100">
+                    <span class="badge bg-primary rounded-pill me-2">${order}</span>
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-file-earmark-text me-2 text-muted"></i>
+                      <span class="lesson-title">${title}</span>
+                    </div>
+                  </div>
+                `;
+                list.appendChild(li);
+              });
+              
+              // Gestion du bouton pour réduire/développer l'arborescence
+              const toggleButton = modalElement.querySelector('#toggleTreeView');
+              const treeView = modalElement.querySelector('#moduleTree');
+              let isExpanded = true;
+              
+              toggleButton.addEventListener('click', () => {
+                isExpanded = !isExpanded;
+                treeView.style.display = isExpanded ? 'block' : 'none';
+                toggleButton.innerHTML = isExpanded 
+                  ? '<i class="bi bi-arrows-collapse"></i> Réduire/Développer'
+                  : '<i class="bi bi-arrows-expand"></i> Afficher la structure';
+              });
+              
+              // Afficher le conteneur
+              container.style.display = 'block';
+            } else {
+              // Cacher le conteneur si aucune leçon
+              container.style.display = 'none';
+            }
+          })
+          .catch(error => {
+            console.error('Erreur lors du chargement des leçons:', error);
+            modalElement.querySelector('#existingLessonsContainer').style.display = 'none';
+          });
+        
+        // Réinitialiser le formulaire
+        const form = modalElement.querySelector('#lessonForm');
+        form.reset();
+        
+        // Afficher la modale
+        modal.show();
+      } else {
+        alert('Veuillez d\'abord sélectionner un module');
+      }
+    };
+
+    btnE.onclick=()=>{
+      if(selL.value){
+        window.location.href=`/courses/lessons/${selL.value}/exercises/create/`;
+      }
+    };
+  });
+  
+  // Gestion de la soumission du formulaire de création de leçon
+  const lessonForm = document.getElementById('lessonForm');
+  if (lessonForm) {
+    lessonForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const submitButton = this.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.innerHTML;
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Création...';
+      
+      const formData = new FormData(this);
+      const courseId = formData.get('course_id');
+      const moduleId = formData.get('module_id');
+      
+      // Vérifier que les IDs sont valides
+      if (!courseId || !moduleId) {
+        alert('Erreur: Impossible de déterminer le cours ou le module');
+        console.error('Course ID ou Module ID manquant', { courseId, moduleId });
+        return;
+      }
+      
+      // URL pour créer directement une leçon dans le module
+      const url = `/courses/api/lessons/create/`;
+      console.log('Envoi de la requête à:', url, { courseId, moduleId });
+      
+      // Créer un nouvel objet FormData avec les champs nécessaires
+      const newFormData = new FormData();
+      newFormData.append('module_id', moduleId);
+      newFormData.append('title', this.querySelector('#lessonTitle').value);
+      newFormData.append('description', this.querySelector('#lessonDescription').value || '');
+      newFormData.append('order', this.querySelector('#lessonOrder').value || '1');
+      
+      fetch('/courses/api/lessons/create/', {
+        method: 'POST',
+        body: newFormData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        credentials: 'same-origin'
+      })
+      .then(async response => {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return response.json().then(data => {
+            if (!response.ok) {
+              throw new Error(data.error || 'Erreur serveur');
+            }
+            return data;
+          });
+        } else {
+          const text = await response.text();
+          console.error('Réponse non-JSON reçue:', {
+            status: response.status,
+            statusText: response.statusText,
+            headers: Object.fromEntries(response.headers.entries()),
+            body: text
+          });
+          throw new Error(`Erreur serveur (${response.status}): ${response.statusText}`);
+        }
+      })
+      .then(data => {
+        if (data.success) {
+          // Afficher un message de succès et recharger la page
+          const successDiv = document.createElement('div');
+          successDiv.className = 'alert alert-success mt-3';
+          successDiv.textContent = 'Leçon créée avec succès !';
+          lessonForm.appendChild(successDiv);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          throw new Error(data.error || 'Une erreur est survenue');
+        }
+      })
+      .catch(error => {
+        console.error('Erreur détaillée:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        });
+        
+        let errorMessage = 'Erreur lors de la création de la leçon: ';
+        if (error.message.includes('Failed to fetch')) {
+          errorMessage += 'Impossible de se connecter au serveur';
+        } else {
+          errorMessage += error.message || 'Erreur inconnue';
+        }
+        
+        // Afficher l'erreur dans l'interface
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mt-3';
+        errorDiv.textContent = errorMessage;
+        
+        const form = document.getElementById('lessonForm');
+        const existingAlert = form.querySelector('.alert');
+        if (existingAlert) {
+          form.removeChild(existingAlert);
+        }
+        form.prepend(errorDiv);
+      })
+      .finally(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+      });
+    });
+  }
+
+  // Gestion de la modale d'ajout de module
+  var addModuleModal = document.getElementById('addModuleModal');
+  if (addModuleModal) {
+    addModuleModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var courseId = button.getAttribute('data-course-id');
+      var courseTitle = button.getAttribute('data-course-title');
+      
+      // Mettre à jour le contenu de la modale
+      var modalTitle = addModuleModal.querySelector('.modal-title');
+      var courseTitleInModal = addModuleModal.querySelector('#courseTitleInModal');
+      var courseIdInput = addModuleModal.querySelector('#courseIdInput');
+      
+      modalTitle.textContent = 'Ajouter un module';
+      courseTitleInModal.textContent = courseTitle;
+      courseIdInput.value = courseId;
+    });
+
+    // Gestion de la soumission du formulaire
+    var moduleForm = document.getElementById('moduleForm');
+    if (moduleForm) {
+      moduleForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Désactiver le bouton de soumission
+        const submitButton = moduleForm.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enregistrement...';
+        
+        const formData = new FormData(moduleForm);
+        const url = "/courses/" + formData.get('course_id') + "/modules/create/";
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger mt-3 d-none';
+        moduleForm.appendChild(errorDiv);
+        
+        fetch(url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+          },
+          credentials: 'same-origin'
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(err => {
+              throw new Error(err.error || 'Erreur lors de la création du module');
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            // Afficher un message de succès
+            const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success mt-3';
+            successDiv.textContent = 'Module créé avec succès !';
+            moduleForm.appendChild(successDiv);
+            
+            // Recharger la page après un court délai
+            setTimeout(() => {
+              window.location.reload();
+            }, 1500);
+          } else {
+            throw new Error(data.error || 'Une erreur est survenue');
+          }
+        })
+        .catch(error => {
+          console.error('Erreur:', error);
+          errorDiv.textContent = 'Erreur: ' + error.message;
+          errorDiv.classList.remove('d-none');
+          
+          // Faire défiler jusqu'à l'erreur
+          errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        })
+        .finally(() => {
+          // Réactiver le bouton de soumission
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonText;
+        });
+      });
+    }
+  }
+
+  // Initialisation des tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  // Gestion de l'ouverture du modal d'ajout de vidéo
+  document.querySelectorAll('[data-add-video]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      console.log('Bouton vidéo cliqué');
+      
+      const row = this.closest('tr[data-course-id]');
+      console.log('Ligne du cours:', row);
+      
+      // Récupérer les informations du cours
+      const courseTitle = row.querySelector('td:first-child').textContent.trim();
+      
+      // Récupérer les sélecteurs
+      const moduleSelect = row.querySelector('select[name="module"], [data-mod-sel]');
+      const lessonSelect = row.querySelector('select[data-les-sel]');
+      console.log('Éléments sélectionnés:', { moduleSelect, lessonSelect });
+      
+      // Récupérer les informations du module
+      const moduleId = moduleSelect ? parseInt(moduleSelect.value, 10) : null;
+      const moduleTitle = moduleSelect ? moduleSelect.options[moduleSelect.selectedIndex].text : '';
+      
+      // Récupérer les informations de la leçon
+      const lessonId = lessonSelect ? lessonSelect.value : null;
+      const lessonTitle = lessonSelect && lessonSelect.value ? lessonSelect.options[lessonSelect.selectedIndex].text : 'Aucune leçon sélectionnée';
+      
+      console.log('ID du module sélectionné (numérique):', moduleId, 'type:', typeof moduleId);
+      
+      // Vérifier si un module valide est sélectionné
+      if (!moduleId || isNaN(moduleId)) {
+        console.error('Aucun module valide sélectionné', { 
+          moduleSelectValue: moduleSelect ? moduleSelect.value : 'null',
+          moduleIdParsed: moduleId
+        });
+        alert('Veuillez d\'abord sélectionner un module valide');
+        return;
+      }
+      
+      console.log('Module valide sélectionné, poursuite du traitement...');
+      
+      // Mettre à jour l'affichage de l'arborescence
+      document.getElementById('videoCourseTitle').textContent = courseTitle;
+      document.getElementById('videoModuleTitle').textContent = moduleTitle;
+      document.getElementById('videoModuleIdDisplay').textContent = moduleId;
+      document.getElementById('videoLessonTitle').textContent = lessonTitle;
+      document.getElementById('videoLessonIdDisplay').textContent = lessonId || 'N/A';
+      
+      // Désactiver le champ de formulaire si aucune leçon n'est sélectionnée
+      if (!lessonId) {
+        const videoForm = document.getElementById('videoForm');
+        if (videoForm) {
+          const inputs = videoForm.querySelectorAll('input, textarea, button');
+          inputs.forEach(input => {
+            if (input.id !== 'videoModuleId') {
+              input.disabled = true;
+            }
+          });
+        }
+        alert('Veuillez d\'abord sélectionner une leçon');
+        return;
+      }
+      
+      // Réinitialiser le formulaire
+      const videoForm = document.getElementById('videoForm');
+      if (videoForm) videoForm.reset();
+      
+      // Mettre à jour l'ID du module dans le formulaire
+      const moduleIdInput = document.getElementById('videoModuleId');
+      if (moduleIdInput) moduleIdInput.value = moduleId;
+      
+      // Afficher le modal avec une meilleure gestion de l'accessibilité
+      const modalElement = document.getElementById('addVideoModal');
+      const modal = new bootstrap.Modal(modalElement, {
+        backdrop: 'static',
+        keyboard: false
+      });
+
+      // Supprimer l'attribut aria-hidden problématique
+      modalElement.removeAttribute('aria-hidden');
+
+      // Gérer correctement la fermeture du modal
+      modalElement.addEventListener('hidden.bs.modal', function () {
+        modalElement.setAttribute('aria-hidden', 'true');
+      });
+
+      // Afficher le modal
+      modal.show();
+    });
+  });
+
+  // ===================================================================
+  // DÉBUT DU DÉBOGAGE BOUTON ENREGISTRER
+  // ===================================================================
+  console.log('=== DÉMARRAGE DU SCRIPT DE DÉBOGAGE ===');
+  
+  // Vérifier si le bouton existe
+  const saveVideoBtn = document.getElementById('saveVideoBtn');
+  const videoForm = document.getElementById('videoForm');
+  
+  console.log('Éléments trouvés:', {
+    saveVideoBtn: saveVideoBtn ? 'Trouvé' : 'Non trouvé',
+    videoForm: videoForm ? 'Trouvé' : 'Non trouvé'
+  });
+  
+  if (!saveVideoBtn) {
+    console.error('ERREUR: Le bouton avec l\'ID saveVideoBtn n\'a pas été trouvé');
+    console.log('Boutons disponibles:', document.querySelectorAll('button, [type="button"], [type="submit"]'));
+    
+    // Afficher une alerte visible pour l'utilisateur
+    const alertDiv = document.createElement('div');
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '10px';
+    alertDiv.style.right = '10px';
+    alertDiv.style.padding = '15px';
+    alertDiv.style.backgroundColor = '#f8d7da';
+    alertDiv.style.color = '#721c24';
+    alertDiv.style.border = '1px solid #f5c6cb';
+    alertDiv.style.borderRadius = '4px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.innerHTML = '<strong>ERREUR:</strong> Le bouton Enregistrer n\'a pas été trouvé. Voir la console pour plus de détails.';
+    document.body.appendChild(alertDiv);
+    
+    // Supprimer l'alerte après 10 secondes
+    setTimeout(() => {
+      alertDiv.remove();
+    }, 10000);
+    
+    // Arrêter l'exécution du script
+    throw new Error('Le bouton Enregistrer est introuvable');
+  }
+  
+  // Ajouter un style au bouton pour le rendre plus visible
+  saveVideoBtn.style.border = '3px solid red';
+  saveVideoBtn.style.padding = '8px 16px';
+  saveVideoBtn.style.fontWeight = 'bold';
+  
+  // Ajouter un gestionnaire d'événement simple
+  saveVideoBtn.onclick = function(event) {
+    console.log('=== CLIC SUR LE BOUTON ENREGISTRER ===');
+    console.log('Événement:', event);
+    
+    // Empêcher le comportement par défaut
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
+    // Afficher une alerte de test
+    alert('Le bouton Enregistrer fonctionne !');
+    
+    // Vérifier si le formulaire est valide
+    if (videoForm) {
+      console.log('Validation du formulaire...');
+      
+      // Vérifier les champs requis
+      const titleInput = videoForm.querySelector('[name="title"]');
+      const videoInput = videoForm.querySelector('[name="video_file"]');
+      
+      console.log('Champs du formulaire:', {
+        titre: titleInput ? titleInput.value : 'Non trouvé',
+        video: videoInput && videoInput.files.length > 0 ? 
+          `Fichier: ${videoInput.files[0].name} (${videoInput.files[0].size} octets)` : 
+          'Aucun fichier sélectionné'
+      });
+      
+      // Afficher un message si le formulaire n'est pas valide
+      if (!titleInput || !titleInput.value.trim()) {
+        alert('Veuillez entrer un titre pour la vidéo');
+        return false;
+      }
+      
+      if (!videoInput || videoInput.files.length === 0) {
+        alert('Veuillez sélectionner un fichier vidéo');
+        return false;
+      }
+      
+      // Si on arrive ici, le formulaire est valide
+      console.log('Le formulaire est valide, envoi des données...');
+      
+      // Désactiver le bouton pendant l'envoi
+      const originalText = saveVideoBtn.innerHTML;
+      saveVideoBtn.disabled = true;
+      saveVideoBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Envoi en cours...';
+      
+      // Simuler un envoi (à remplacer par le vrai code d'envoi)
+      setTimeout(() => {
+        console.log('Envoi simulé terminé');
+        alert('La vidéo a été enregistrée avec succès !');
+        
+        // Réactiver le bouton
+        saveVideoBtn.disabled = false;
+        saveVideoBtn.innerHTML = originalText;
+        
+        // Fermer le modal si nécessaire
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addVideoModal'));
+        if (modal) {
+          modal.hide();
+        }
+      }, 2000);
+      
+    } else {
+      console.error('Le formulaire n\'a pas été trouvé');
+      alert('Erreur: Impossible de trouver le formulaire');
+    }
+    
+    return false;
+  };
+  
+  console.log('=== FIN DU SCRIPT DE DÉBOGAGE ===');
+
+  // Gestionnaire pour le formulaire de vidéo (déclaré une seule fois)
+  const videoFormElement = document.getElementById('videoForm');
+  if (videoFormElement) {
+    videoFormElement.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const submitBtn = videoFormElement.querySelector('#saveVideoBtn');
+      const buttonText = submitBtn.querySelector('.button-text');
+      const spinner = submitBtn.querySelector('.spinner-border');
+      const errorDiv = document.getElementById('videoError');
+      
+      // Activer l'état de chargement
+      submitBtn.disabled = true;
+      buttonText.textContent = 'Enregistrement...';
+      spinner.classList.remove('d-none');
+      errorDiv.classList.add('d-none');
+      
+      try {
+        const formData = new FormData(videoFormElement);
+        const response = await fetch(videoFormElement.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Erreur lors de l\'enregistrement');
+        }
+        
+        // Succès
+        showToast('Succès', 'La vidéo a été enregistrée avec succès', 'success');
+        
+        // Fermer le modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addVideoModal'));
+        modal.hide();
+        
+        // Recharger la page après 1,5 secondes
+        setTimeout(() => window.location.reload(), 1500);
+        
+      } catch (error) {
+        console.error('Erreur:', error);
+        errorDiv.textContent = error.message || 'Une erreur est survenue';
+        errorDiv.classList.remove('d-none');
+      } finally {
+        // Réinitialiser le bouton
+        submitBtn.disabled = false;
+        buttonText.textContent = 'Enregistrer';
+        spinner.classList.add('d-none');
+      }
+    });
+  }
+
+  // Fonction utilitaire pour afficher des notifications
+  function showToast(title, message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer') || (() => {
+      const container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.style.position = 'fixed';
+      container.style.top = '20px';
+      container.style.right = '20px';
+      container.style.zIndex = '9999';
+      document.body.appendChild(container);
+      return container;
+    })();
+
+    const toast = document.createElement('div');
+    toast.className = `toast show align-items-center text-white bg-${type} border-0`;
+    toast.role = 'alert';
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          <strong>${title}</strong><br>${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Supprimer le toast après 5 secondes
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 150);
+    }, 5000);
+  }
+
+  // Gestionnaire direct pour le bouton Enregistrer
+  document.addEventListener('DOMContentLoaded', function() {
+    const saveBtn = document.getElementById('saveVideoBtn');
+    if (saveBtn) {
+      console.log('Bouton Enregistrer trouvé, ajout du gestionnaire direct');
+      
+      // Style pour le rendre visible
+      saveBtn.style.border = '3px solid red';
+      saveBtn.style.padding = '10px';
+      saveBtn.style.fontWeight = 'bold';
+      
+      // Gestionnaire direct
+      saveBtn.onclick = function(e) {
+        console.log('Clic direct sur le bouton Enregistrer');
+        e.preventDefault();
+        e.stopPropagation();
+        alert('Le bouton Enregistrer fonctionne ! (gestionnaire direct)');
+        return false;
+      };
+      
+      // Vérifier si le bouton est dans le DOM
+      console.log('Bouton dans le DOM?', document.body.contains(saveBtn));
+      console.log('Type du bouton:', saveBtn.type);
+    } else {
+      console.error('ERREUR: Impossible de trouver le bouton Enregistrer');
+    }
+  });
+})();
+</script>
+
+<!-- Modal d'ajout de vidéo -->
+<div class="modal fade" id="addVideoModal" tabindex="-1" aria-labelledby="addVideoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="addVideoModalLabel">Ajouter une vidéo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="videoForm" method="post" enctype="multipart/form-data" action="{% url 'courses:add_video' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div id="videoError" class="alert alert-danger d-none mb-3" role="alert"></div>
+          
+          <!-- Champ caché pour l'ID de la leçon -->
+          <input type="hidden" id="videoLessonId" name="lesson_id">
+          
+          <!-- Affichage de l'arborescence -->
+          <div class="card bg-light mb-4">
+            <div class="card-body p-3">
+              <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-folder me-2 text-warning"></i>
+                <span class="text-muted">Module:</span> 
+                <span id="videoModuleTitle" class="fw-bold ms-2"></span>
+              </div>
+              <div class="d-flex align-items-center">
+                <i class="fas fa-file-alt me-2 text-success"></i>
+                <span class="text-muted">Leçon:</span> 
+                <span id="videoLessonTitle" class="fw-bold ms-2">Sélectionnez une leçon</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Champs du formulaire -->
+          <div class="mb-3">
+            <label for="videoTitle" class="form-label">Titre de la vidéo <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="videoTitle" name="title" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="videoFile" class="form-label">Fichier vidéo <span class="text-danger">*</span></label>
+            <input type="file" class="form-control" id="videoFile" name="video_file" accept="video/*" required>
+            <div class="form-text">Formats acceptés : MP4, WebM (max 100MB)</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="videoOrder" class="form-label">Ordre d'affichage</label>
+            <input type="number" class="form-control" id="videoOrder" name="order" value="1" min="1">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary" id="saveVideoBtn">
+            <span class="button-text">Enregistrer</span>
+            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Script pour gérer l'ajout de vidéo -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const videoForm = document.getElementById('videoForm');
+  const saveButton = document.getElementById('saveVideoBtn');
+  
+  // Gestionnaire pour le formulaire de vidéo
+  if (videoForm) {
+    videoForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      console.log('Tentative de soumission du formulaire');
+      
+      // Désactiver le bouton et afficher le spinner
+      if (saveButton) {
+        const buttonText = saveButton.querySelector('.button-text');
+        const spinner = saveButton.querySelector('.spinner-border');
+        
+        saveButton.disabled = true;
+        if (buttonText) buttonText.textContent = 'Enregistrement...';
+        if (spinner) spinner.classList.remove('d-none');
+      }
+      
+      try {
+        const formData = new FormData(videoForm);
+        
+        // Afficher les données du formulaire dans la console pour le débogage
+        console.log('Données du formulaire:');
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}:`, value);
+        }
+        
+        // Vérifier que tous les champs requis sont remplis
+        const requiredFields = ['lesson_id', 'title', 'video_file'];
+        const missingFields = requiredFields.filter(field => {
+          const value = formData.get(field);
+          return !value || (value instanceof File && value.size === 0);
+        });
+        
+        if (missingFields.length > 0) {
+          throw new Error('Tous les champs obligatoires doivent être remplis. Champs manquants: ' + missingFields.join(', '));
+        }
+        
+        // Envoyer la requête
+        const response = await fetch(videoForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Une erreur est survenue lors de l\'enregistrement de la vidéo.');
+        }
+        
+        // Afficher un message de succès
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: 'La vidéo a été ajoutée avec succès !',
+          confirmButtonText: 'OK'
+        }).then(() => {
+          // Recharger la page pour afficher la nouvelle vidéo
+          window.location.reload();
+        });
+        
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi du formulaire:', error);
+        
+        // Afficher l'erreur à l'utilisateur
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: error.message || 'Une erreur est survenue lors de l\'enregistrement de la vidéo.',
+          confirmButtonText: 'OK'
+        });
+      } finally {
+        // Réactiver le bouton et masquer le spinner
+        if (saveButton) {
+          saveButton.disabled = false;
+          const buttonText = saveButton.querySelector('.button-text');
+          const spinner = saveButton.querySelector('.spinner-border');
+          
+          if (buttonText) buttonText.textContent = 'Enregistrer';
+          if (spinner) spinner.classList.add('d-none');
+        }
+      }
+    });
+  }
+  
+  // Gestionnaire pour le bouton d'ajout de vidéo
+  document.querySelectorAll('[data-add-video]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      console.log('Bouton vidéo cliqué');
+      
+      const row = this.closest('tr[data-course-id]');
+      const lessonSelect = row.querySelector('select[data-les-sel]');
+      const moduleSelect = row.querySelector('select[data-mod-sel]');
+      
+      // Récupérer les informations de la leçon
+      const lessonId = lessonSelect ? lessonSelect.value : null;
+      const lessonTitle = lessonSelect && lessonSelect.value ? 
+        lessonSelect.options[lessonSelect.selectedIndex].text : 'Aucune leçon sélectionnée';
+      
+      // Récupérer les informations du module
+      const moduleTitle = moduleSelect ? 
+        moduleSelect.options[moduleSelect.selectedIndex].text : 'Module inconnu';
+      
+      // Mettre à jour l'affichage
+      document.getElementById('videoModuleTitle').textContent = moduleTitle;
+      document.getElementById('videoLessonTitle').textContent = lessonTitle;
+      
+      // Mettre à jour l'ID de la leçon dans le formulaire
+      const lessonIdInput = document.getElementById('videoLessonId');
+      if (lessonIdInput) {
+        lessonIdInput.value = lessonId;
+        console.log('ID de la leçon défini:', lessonId);
+      }
+      
+      // Réinitialiser le formulaire
+      if (videoForm) videoForm.reset();
+      
+      // Afficher le modal
+      const modal = new bootstrap.Modal(document.getElementById('addVideoModal'));
+      modal.show();
+    });
+  });
+});
+</script>
+
+<!-- Console de débogage -->
+<div id="debug-console"></div>
+<button class="debug-toggle">Debug Console</button>
+
+<script>
+// Fonction utilitaire de débogage
+function debugLog(message, data = null) {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] ${message}`;
+    console.log(logMessage);
+    if (data) {
+        console.log('Données:', data);
+    }
+    
+    // Afficher aussi dans une zone de débogage dans la page
+    const debugDiv = document.getElementById('debug-console');
+    const logEntry = document.createElement('div');
+    logEntry.textContent = logMessage;
+    if (debugDiv) {
+        debugDiv.prepend(logEntry);
+        
+        // Limiter le nombre d'entrées pour éviter de surcharger
+        const entries = debugDiv.querySelectorAll('div');
+        if (entries.length > 50) {
+            debugDiv.removeChild(entries[entries.length - 1]);
+        }
+    }
+}
+
+// Initialisation de la console de débogage
+document.addEventListener('DOMContentLoaded', function() {
+    debugLog('Script de débogage initialisé');
+    
+    // Initialiser le bouton de basculement de la console
+    const debugToggle = document.querySelector('.debug-toggle');
+    const debugConsole = document.getElementById('debug-console');
+    
+    if (debugToggle && debugConsole) {
+        debugToggle.addEventListener('click', function() {
+            debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+    
+    // Vérifier si Bootstrap est chargé
+    debugLog('Bootstrap est ' + (typeof bootstrap !== 'undefined' ? 'chargé' : 'NON chargé'));
+    
+    // Vérifier si le modal existe
+    const modalElement = document.getElementById('addVideoModal');
+    debugLog('Élément modal trouvé:', !!modalElement);
+    
+    if (modalElement) {
+        debugLog('Attributs du modal:', {
+            id: modalElement.id,
+            classList: modalElement.className,
+            style: modalElement.getAttribute('style')
+        });
+    }
+});
+
+// Remplacer le gestionnaire d'événements existant pour le bouton d'ajout de vidéo
+document.querySelectorAll('[data-add-video]').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        debugLog('=== Début du clic sur le bouton vidéo ===');
+        
+        try {
+            const row = this.closest('tr[data-course-id]');
+            debugLog('Ligne du cours trouvée:', !!row);
+            
+            if (!row) {
+                debugLog('ERREUR: Impossible de trouver la ligne du cours');
+                return;
+            }
+            
+            // Récupérer les informations du cours
+            const courseTitle = row.querySelector('td:first-child')?.textContent.trim();
+            debugLog('Titre du cours:', courseTitle);
+            
+            // Récupérer les sélecteurs
+            const moduleSelect = row.querySelector('select[name="module"], [data-mod-sel]');
+            const lessonSelect = row.querySelector('select[data-les-sel]');
+            debugLog('Sélecteurs trouvés:', {
+                moduleSelect: !!moduleSelect,
+                lessonSelect: !!lessonSelect
+            });
+            
+            // Récupérer les informations du module
+            const moduleId = moduleSelect ? parseInt(moduleSelect.value, 10) : null;
+            const moduleTitle = moduleSelect ? moduleSelect.options[moduleSelect.selectedIndex]?.text : '';
+            debugLog('Informations du module:', { moduleId, moduleTitle });
+            
+            // Vérifier si un module valide est sélectionné
+            if (!moduleId || isNaN(moduleId)) {
+                debugLog('ERREUR: Aucun module valide sélectionné', {
+                    moduleSelectValue: moduleSelect?.value,
+                    moduleIdParsed: moduleId
+                });
+                alert('Veuillez d\'abord sélectionner un module valide');
+                return;
+            }
+            
+            // Récupérer les informations de la leçon
+            const lessonId = lessonSelect?.value;
+            const lessonTitle = lessonSelect?.value ? 
+                lessonSelect.options[lessonSelect.selectedIndex]?.text : 'Aucune leçon sélectionnée';
+            debugLog('Informations de la leçon:', { lessonId, lessonTitle });
+            
+            // Mettre à jour l'affichage
+            const updateField = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                    debugLog(`Champ ${id} mis à jour avec:`, value);
+                } else {
+                    debugLog(`ERREUR: Élément non trouvé: ${id}`);
+                }
+            };
+            
+            updateField('videoCourseTitle', courseTitle);
+            updateField('videoModuleTitle', moduleTitle);
+            updateField('videoModuleIdDisplay', moduleId);
+            updateField('videoLessonTitle', lessonTitle);
+            updateField('videoLessonIdDisplay', lessonId || 'N/A');
+            
+            // Mettre à jour le champ caché module_id
+            const videoModuleId = document.getElementById('videoModuleId');
+            if (videoModuleId) {
+                videoModuleId.value = moduleId;
+                debugLog('Champ caché videoModuleId mis à jour avec:', moduleId);
+            }
+            
+            // Activer/désactiver les champs selon la sélection de la leçon
+            const videoForm = document.getElementById('videoForm');
+            if (videoForm) {
+                const isDisabled = !lessonId;
+                debugLog('Désactivation des champs:', isDisabled);
+                
+                const inputs = videoForm.querySelectorAll('input, textarea, button');
+                inputs.forEach(input => {
+                    if (input.id !== 'videoModuleId') {
+                        input.disabled = isDisabled;
+                    }
+                });
+                
+                if (isDisabled) {
+                    debugLog('Aucune leçon sélectionnée, affichage du message');
+                    alert('Veuillez d\'abord sélectionner une leçon');
+                    return;
+                }
+            }
+            
+            // Initialiser le modal s'il n'est pas déjà initialisé
+            const modalElement = document.getElementById('addVideoModal');
+            if (modalElement) {
+                debugLog('Initialisation du modal...');
+                const addVideoModal = new bootstrap.Modal(modalElement);
+                debugLog('Affichage du modal...');
+                addVideoModal.show();
+                debugLog('Modal affiché avec succès');
+            } else {
+                debugLog('ERREUR: Élément modal non trouvé');
+            }
+            
+        } catch (error) {
+            debugLog('ERREUR CRITIQUE:', error);
+            console.error('Erreur lors de l\'ouverture du modal:', error);
+        }
+        
+        debugLog('=== Fin du clic sur le bouton vidéo ===');
+    });
+});
+</script>
+
+{% endblock %}

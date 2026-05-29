@@ -1,0 +1,148 @@
+/* CSS personnalisé pour l'interface Django Admin */
+
+/* Correction des backgrounds transparents des select et inputs */
+.form-control,
+.form-select,
+select,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+    color: #333 !important;
+}
+
+/* Focus states */
+.form-control:focus,
+.form-select:focus,
+select:focus,
+input:focus,
+textarea:focus {
+    background-color: #ffffff !important;
+    border-color: #80bdff !important;
+    color: #333 !important;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25) !important;
+    outline: 0 !important;
+}
+
+/* Options des select */
+select option {
+    background-color: #ffffff !important;
+    color: #333 !important;
+}
+
+/* Placeholder */
+.form-control::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: #6c757d !important;
+    opacity: 1 !important;
+}
+
+/* Select multiples */
+select[multiple] {
+    background-color: #ffffff !important;
+}
+
+/* Input groups */
+.input-group-text {
+    background-color: #e9ecef !important;
+    border: 1px solid #ced4da !important;
+    color: #495057 !important;
+}
+
+/* Disabled states */
+.form-control:disabled,
+.form-select:disabled,
+select:disabled,
+input:disabled,
+textarea:disabled {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+}
+
+/* Readonly states */
+.form-control[readonly],
+input[readonly],
+textarea[readonly] {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+}
+
+/* Champs de recherche dans l'admin */
+#searchbar {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+    color: #333 !important;
+}
+
+#searchbar:focus {
+    background-color: #ffffff !important;
+    border-color: #80bdff !important;
+}
+
+/* Filtres dans l'admin */
+#changelist-filter select {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+    color: #333 !important;
+}
+
+/* Date/time widgets */
+.calendarbox,
+.clockbox {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+}
+
+.calendarbox table,
+.clockbox table {
+    background-color: #ffffff !important;
+}
+
+.calendarbox a,
+.clockbox a {
+    color: #007bff !important;
+}
+
+/* Related widget lookups */
+.related-lookup {
+    background-color: #ffffff !important;
+}
+
+/* V-Select et autres widgets personnalisés */
+.v-select {
+    background-color: #ffffff !important;
+}
+
+.v-select .vs__dropdown-toggle {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+}
+
+.v-select .vs__selected {
+    color: #333 !important;
+}
+
+.v-select .vs__search {
+    color: #333 !important;
+}
+
+.v-select .vs__dropdown-menu {
+    background-color: #ffffff !important;
+    border: 1px solid #ddd !important;
+}
+
+.v-select .vs__dropdown-option {
+    color: #333 !important;
+}
+
+.v-select .vs__dropdown-option--highlight {
+    background-color: #f8f9fa !important;
+    color: #333 !important;
+}

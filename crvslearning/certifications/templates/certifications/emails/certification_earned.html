@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Félicitations - Certification obtenue</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            margin: -30px -30px 30px -30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .celebration {
+            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .celebration h2 {
+            color: #28a745;
+            margin: 0 0 15px 0;
+            font-size: 24px;
+        }
+        .trophy {
+            font-size: 48px;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        .certification-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+        .certification-info h3 {
+            margin: 0 0 15px 0;
+            color: #007bff;
+            font-size: 20px;
+        }
+        .cert-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .detail-item strong {
+            color: #495057;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-beginner {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-intermediate {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-advanced {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Félicitations !</h1>
+            <p>{{ site_name }}</p>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour <strong>{{ user.get_full_name|default:user.username }}</strong>,</p>
+            
+            <div class="celebration">
+                <div class="trophy">🏆</div>
+                <h2>Vous avez obtenu votre certification !</h2>
+                <p>Félicitations pour avoir terminé avec succès votre parcours d'apprentissage.</p>
+            </div>
+            
+            <div class="certification-info">
+                <h3>📋 Détails de la certification</h3>
+                
+                <div class="cert-details">
+                    <div class="detail-item">
+                        <strong>Code :</strong>
+                        {{ certification.code }}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Niveau :</strong>
+                        <span class="badge badge-{{ certification.level }}">{{ certification.get_level_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <strong>Parcours :</strong>
+                        {{ certification.course.title }}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Date d'obtention :</strong>
+                        {{ certification.issued_at|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+                
+                {% if certification.title %}
+                <p><strong>Titre :</strong><br>{{ certification.title }}</p>
+                {% endif %}
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="{{ certificate_url }}" class="cta-button">
+                    📄 Voir mon certificat
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Cette certification atteste de votre réussite dans le parcours d'apprentissage.</p>
+            <p>© 2026 {{ site_name }}. Tous droits réservés.</p>
+            <p><a href="{{ login_url }}">Se connecter</a> | <a href="#">Télécharger le PDF</a></p>
+        </div>
+    </div>
+</body>
+</html>

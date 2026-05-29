@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+<style>
+    /* Thème PS5 */
+    :root {
+        --ps5-blue: #0072ce;
+        --ps5-dark: #0f0f12;
+        --ps5-card: #1a1a1f;
+        --ps5-text: #f5f5f7;
+        --ps5-gray: #2a2a2f;
+        --ps5-hover: #2a2a35;
+    }
+
+    body {
+        background-color: var(--ps5-dark);
+        color: var(--ps5-text);
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* En-tête */
+    .page-header {
+        background: linear-gradient(135deg, #0f0f12 0%, #1a1a1f 100%);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Cartes */
+    .card {
+        background-color: var(--ps5-card);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 114, 206, 0.3);
+        border-color: var(--ps5-blue);
+    }
+
+    .card-header {
+        background: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 15px 20px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    /* Boutons */
+    .btn {
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: var(--ps5-blue);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0088ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 114, 206, 0.4);
+    }
+
+    .btn-outline-secondary {
+        background-color: transparent;
+        border: 1px solid var(--ps5-blue);
+        color: var(--ps5-blue);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: rgba(0, 114, 206, 0.1);
+        color: #0088ff;
+        border-color: #0088ff;
+    }
+
+    /* Formulaire */
+    #exercise-form {
+        background: var(--ps5-card);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Champs de formulaire */
+    .form-control, .form-select {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--ps5-text);
+        border-radius: 8px;
+        padding: 12px 15px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: var(--ps5-blue);
+        color: white;
+        box-shadow: 0 0 0 0.25rem rgba(0, 114, 206, 0.25);
+    }
+
+    /* Liste des questions */
+    .list-group-item {
+        background-color: var(--ps5-card);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--ps5-text);
+        margin-bottom: 10px;
+        border-radius: 8px !important;
+        transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: var(--ps5-hover);
+        transform: translateX(5px);
+    }
+
+    /* Checkbox personnalisé */
+    .form-check-input:checked {
+        background-color: var(--ps5-blue);
+        border-color: var(--ps5-blue);
+    }
+
+    /* Animation pour les boutons */
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(0, 114, 206, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(0, 114, 206, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 114, 206, 0); }
+    }
+
+    .btn-pulse {
+        animation: pulse 2s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Bouton de retour -->
+<div class="mb-3">
+    <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+    </a>
+</div>
+<div class="container mt-4">
+    <div class="page-header">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>{% if form.instance.pk %}Modifier{% else %}Ajouter{% endif %} un exercice</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-secondary me-2">
+                <i class="fas fa-times"></i> Annuler
+            </a>
+        </div>
+    </div>
+    
+    <!-- Liste des questions existantes -->
+    {% if exercises %}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Questions existantes ({{ exercises|length }})</h5>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for exercise in exercises %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Question #{{ forloop.counter }}</strong>: {{ exercise.question|truncatechars:80 }}
+                        <br>
+                        <small class="text-muted">{{ exercise.choices.count }} choix de réponses</small>
+                    </div>
+                    <div>
+                        <a href="{% url 'exercices:exercise_edit' pk=exercise.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    <form method="post" class="mt-4" id="exercise-form">
+        {% csrf_token %}
+        {{ form|crispy }}
+        
+        <h4 class="mt-4">Choix de réponses</h4>
+        {{ formset.management_form }}
+        <div id="choices-container">
+            {% for choice_form in formset %}
+                <div class="card mb-3 choice-form {% if forloop.first %}default-choice{% endif %}" {% if forloop.first %}data-default="true"{% endif %}>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-1 text-center">
+                                <div class="form-check">
+                                    {{ choice_form.is_correct|as_crispy_field }}
+                                    <label class="form-check-label" for="{{ choice_form.is_correct.id_for_label }}">
+                                        <i class="fas fa-check-circle"></i>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-9">
+                                {{ choice_form.text|as_crispy_field }}
+                            </div>
+                            <div class="col-1">
+                                {{ choice_form.order|as_crispy_field }}
+                            </div>
+                            <div class="col-1 text-end">
+                                {% if not forloop.first and formset.can_delete %}
+                                    {{ choice_form.DELETE|as_crispy_field }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-sm btn-outline-secondary mb-2 toggle-explanation">
+                                    <i class="fas fa-comment-dots"></i> Ajouter une explication
+                                </button>
+                                <div class="explanation-field" style="display: none;">
+                                    {{ choice_form.explanation|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                        {% for hidden in choice_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button type="button" class="btn btn-primary" id="add-choice">
+                        <i class="fas fa-plus-circle"></i> Ajouter un choix
+                    </button>
+                </div>
+                <div>
+                    <button type="button" onclick="window.history.back();" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </button>
+                    <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-success" id="submit-btn" onclick="return validateForm()">
+                        <i class="fas fa-save"></i> Enregistrer l'exercice
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Scripts personnalisés -->
+<script src="{% static 'exercices/js/exercise_form.js' %}"></script>
+
+<!-- Initialisation des messages Django -->
+<script>
+//<![CDATA[
+    document.addEventListener('DOMContentLoaded', function() {
+        // Afficher les messages Django
+        const messages = [];
+        {% if messages %}
+            {% for message in messages %}
+            messages.push({
+                tags: '{{ message.tags|escapejs }}',
+                content: '{{ message|escapejs }}'
+            });
+            {% endfor %}
+        {% endif %}
+        
+        // Afficher les messages
+        messages.forEach(message => {
+            window.showMessage({
+                type: message.tags || 'info',
+                message: message.content
+            });
+        });
+    });
+//]]>
+</script>
+// Fonction pour afficher un message avec SweetAlert2
+function showMessage({ type = 'info', message }) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        width: '400px',
+        padding: '1rem',
+        customClass: {
+            popup: 'custom-swal-popup',
+            title: 'custom-swal-title',
+            htmlContainer: 'custom-swal-html'
+        },
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+
+    Toast.fire({
+        icon: type,
+        title: message
+    });
+}
+
+// Exposer la fonction au scope global
+window.showMessage = showMessage;
+// Initialisation des événements une fois le DOM chargé
+document.addEventListener('DOMContentLoaded', function() {
+    // Fonction pour initialiser les événements d'un choix
+    function initChoiceEvents(choiceElement) {
+    // Bouton pour afficher/masquer l'explication
+    const toggleBtn = choiceElement.querySelector('.toggle-explanation');
+    const explanationField = choiceElement.querySelector('.explanation-field');
+    
+    if (toggleBtn && explanationField) {
+        toggleBtn.addEventListener('click', function() {
+            const isVisible = explanationField.style.display === 'block';
+            explanationField.style.display = isVisible ? 'none' : 'block';
+            toggleBtn.innerHTML = isVisible 
+                ? '<i class="fas fa-comment-dots"></i> Ajouter une explication'
+                : '<i class="fas fa-eye-slash"></i> Masquer l\'explication';
+        });
+    }
+
+    // Bouton de suppression
+    const deleteBtn = choiceElement.querySelector('.delete-choice');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const formCount = document.getElementById('id_choices-TOTAL_FORMS');
+            const container = choiceElement.closest('#choices-container');
+            
+            // Si c'est un formulaire existant, on le marque pour suppression
+            const deleteInput = choiceElement.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.checked = true;
+                choiceElement.style.display = 'none';
+            } else {
+                // Sinon on le supprime directement
+                container.removeChild(choiceElement);
+                updateFormIndices();
+            }
+        });
+    }
+}
+
+// Fonction pour mettre à jour les indices des formulaires après suppression
+function updateFormIndices() {
+    const container = document.getElementById('choices-container');
+    const forms = container.querySelectorAll('.choice-form');
+    
+    forms.forEach((form, index) => {
+        // Mettre à jour les IDs et noms des champs
+        const elements = form.querySelectorAll('[id^="id_choices-"]');
+        elements.forEach(element => {
+            const oldId = element.id;
+            const newId = oldId.replace(/\d+/, index);
+            element.id = newId;
+            
+            // Mettre à jour les labels correspondants
+            const labels = form.querySelectorAll(`label[for="${oldId}"]`);
+            labels.forEach(label => {
+                label.htmlFor = newId;
+            });
+            
+            // Mettre à jour l'attribut name pour la soumission du formulaire
+            if (element.name) {
+                element.name = element.name.replace(/\d+/, index);
+            }
+        });
+        
+        // Mettre à jour l'ordre
+        const orderInput = form.querySelector('input[name$="-order"]');
+        if (orderInput) {
+            orderInput.value = index + 1;
+        }
+    });
+    
+    // Mettre à jour le compteur total de formulaires
+    document.getElementById('id_choices-TOTAL_FORMS').value = forms.length;
+}
+
+// Fonction de validation du formulaire
+function validateForm() {
+    const forms = document.querySelectorAll('.choice-form');
+    let hasCorrectAnswer = false;
+    
+    // Vérifier qu'au moins une réponse est marquée comme correcte
+    forms.forEach(form => {
+        if (form.style.display !== 'none') { // Ne pas vérifier les formulaires supprimés
+            const isCorrectInput = form.querySelector('input[type="checkbox"][name$="-is_correct"]');
+            if (isCorrectInput && isCorrectInput.checked) {
+                hasCorrectAnswer = true;
+            }
+        }
+    });
+    
+    if (!hasCorrectAnswer) {
+        alert('Veuillez sélectionner au moins une réponse correcte.');
+        return false;
+    }
+    
+    // Vérifier que chaque choix a un texte
+    for (let i = 0; i < forms.length; i++) {
+        const form = forms[i];
+        if (form.style.display === 'none') continue; // Ignorer les formulaires supprimés
+        
+        const textInput = form.querySelector('input[type="text"][name$="-text"]');
+        if (textInput && !textInput.value.trim()) {
+            alert('Veuillez remplir le texte pour tous les choix de réponses.');
+            textInput.focus();
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Initialisation quand le DOM est chargé
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les événements pour les choix existants
+    document.querySelectorAll('.choice-form').forEach(choice => {
+        initChoiceEvents(choice);
+    });
+
+    // Ajouter un nouveau choix
+    const addButton = document.getElementById('add-choice');
+    if (addButton) {
+        addButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const formCount = document.getElementById('id_choices-TOTAL_FORMS');
+            const totalForms = parseInt(formCount.value);
+            const container = document.getElementById('choices-container');
+            
+            // Utiliser le premier formulaire comme modèle
+            const template = document.querySelector('.choice-form');
+            if (!template) return;
+            
+            // Créer un nouvel élément de formulaire
+            const newForm = template.cloneNode(true);
+            
+            // Mettre à jour tous les IDs et noms dans le nouveau formulaire
+            const elements = newForm.querySelectorAll('[id^="id_choices-"]');
+            elements.forEach(element => {
+                const oldId = element.id;
+                const newId = oldId.replace(/\d+/, totalForms);
+                element.id = newId;
+                
+                // Mettre à jour les labels correspondants
+                const labels = newForm.querySelectorAll(`label[for="${oldId}"]`);
+                labels.forEach(label => {
+                    label.htmlFor = newId;
+                });
+                
+                // Mettre à jour l'attribut name pour la soumission du formulaire
+                if (element.name) {
+                    element.name = element.name.replace(/\d+/, totalForms);
+                }
+            });
+            
+            // Réinitialiser les valeurs
+            const textInputs = newForm.querySelectorAll('input[type="text"], textarea');
+            textInputs.forEach(input => {
+                input.value = '';
+            });
+            
+            // Réinitialiser les cases à cocher
+            const checkboxes = newForm.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (!checkbox.name || !checkbox.name.includes('DELETE')) {
+                    checkbox.checked = false;
+                }
+                // Mettre à jour le nom et l'ID de la case à cocher
+                if (checkbox.name) {
+                    checkbox.name = checkbox.name.replace(/\d+/, totalForms);
+                    checkbox.id = `id_${checkbox.name}`;
+                }
+            });
+            
+            // Ajouter le bouton de suppression
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn btn-sm btn-outline-danger delete-choice';
+            deleteBtn.title = 'Supprimer ce choix';
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            
+            // Ajouter le bouton dans la colonne de droite
+            const actionCol = newForm.querySelector('.col-1.text-end');
+            if (actionCol) {
+                actionCol.innerHTML = ''; // Nettoyer la colonne
+                actionCol.appendChild(deleteBtn);
+                
+                // Ajouter la case à cocher DELETE cachée
+                const deleteCheckbox = document.createElement('input');
+                deleteCheckbox.type = 'checkbox';
+                deleteCheckbox.name = `choices-${totalForms}-DELETE`;
+                deleteCheckbox.id = `id_choices-${totalForms}-DELETE`;
+                deleteCheckbox.style.display = 'none';
+                actionCol.appendChild(deleteCheckbox);
+                
+                // Ajouter l'ID du formulaire
+                const formIdInput = document.createElement('input');
+                formIdInput.type = 'hidden';
+                formIdInput.name = `choices-${totalForms}-id`;
+                formIdInput.id = `id_choices-${totalForms}-id`;
+                actionCol.appendChild(formIdInput);
+            }
+            
+            // Pour le premier formulaire, masquer le bouton de suppression
+            if (totalForms === 0) {
+                deleteBtn.style.display = 'none';
+            }
+            
+            // Masquer l'explication par défaut
+            const explanationField = newForm.querySelector('.explanation-field');
+            if (explanationField) {
+                explanationField.style.display = 'none';
+            }
+            
+            // Réinitialiser le bouton d'explication
+            const toggleBtn = newForm.querySelector('.toggle-explanation');
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="fas fa-comment-dots"></i> Ajouter une explication';
+            }
+            
+            // Ajouter le nouveau formulaire
+            container.appendChild(newForm);
+            
+            // Mettre à jour le compteur de formulaires
+            formCount.value = totalForms + 1;
+            
+            // Initialiser les événements pour le nouveau formulaire
+            initChoiceEvents(newForm);
+        });
+    });
+    
+    // Initialiser les événements pour chaque choix existant
+    document.querySelectorAll('.choice-form').forEach(choice => {
+        initChoiceEvents(choice);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="category-form">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                {{ form.name.label }}
+                                {% if form.name.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.help_text %}
+                                <div class="form-text">{{ form.name.help_text }}</div>
+                            {% endif %}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">
+                                {{ form.image.label }}
+                            </label>
+                            {{ form.image }}
+                            {% if form.image.help_text %}
+                                <div class="form-text">{{ form.image.help_text }}</div>
+                            {% endif %}
+                            {% if form.image.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.image.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                            {% if form.instance.image %}
+                                <div class="mt-2">
+                                    <small class="text-muted">Image actuelle :</small><br>
+                                    <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" 
+                                         style="max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 5px; border: 1px solid #ddd;">
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'courses:course_create' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion de la soumission du formulaire en AJAX
+    const form = document.getElementById('category-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Désactiver le bouton pendant la soumission
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enregistrement...';
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Mettre à jour la liste déroulante des catégories
+                    const select = document.querySelector('select[name="category"]');
+                    if (select) {
+                        const option = new Option(data.category.name, data.category.id, true, true);
+                        select.add(option);
+                        
+                        // Déclencher l'événement change
+                        const event = new Event('change');
+                        select.dispatchEvent(event);
+                    }
+                    
+                    // Afficher un message de succès
+                    showAlert('success', data.message);
+                    
+                    // Fermer la modale si on est dans une modale
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('category-modal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // Réinitialiser le formulaire
+                    form.reset();
+                } else {
+                    showAlert('danger', data.message || 'Une erreur est survenue');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showAlert('danger', 'Une erreur est survenue lors de la communication avec le serveur');
+            })
+            .finally(() => {
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            });
+        });
+    }
+    
+    // Fonction pour afficher des alertes
+    function showAlert(type, message) {
+        // Supprimer les anciennes alertes
+        document.querySelectorAll('.alert-dismissible').forEach(alert => {
+            alert.remove();
+        });
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        // Ajouter l'alerte avant le formulaire
+        const form = document.querySelector('form');
+        if (form) {
+            form.parentNode.insertBefore(alertDiv, form);
+            
+            // Supprimer l'alerte après 5 secondes
+            setTimeout(() => {
+                try {
+                    alertDiv.remove();
+                } catch (e) {
+                    console.error('Erreur lors de la suppression de l\'alerte:', e);
+                }
+            }, 5000);
+        } else {
+            // Si le formulaire n'est pas trouvé, ajouter l'alerte au début du body
+            document.body.insertBefore(alertDiv, document.body.firstChild);
+        }
+    }
+});
+</script>
+{% endblock %}

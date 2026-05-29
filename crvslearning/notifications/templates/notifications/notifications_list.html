@@ -1,0 +1,1652 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+  @media (max-width: 992px) {
+
+  .backdrop-container {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow: auto !important;
+  }
+
+  /* Sidebar devient horizontale ou compacte */
+  .notification-sidebar {
+    min-height: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .notification-sidebar-content {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .notification-sidebar .nav {
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+  }
+
+  .notification-sidebar .nav-link {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  /* Liste notifications full width */
+  .col-md-4.col-lg-5 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Detail passe sous la liste */
+  #notification-detail-panel {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    border-top: 1px solid #dee2e6;
+  }
+
+  /* Buttons plus petits */
+  .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  /* Liste scroll naturelle */
+  .notifications-list-container {
+    max-height: none !important;
+    height: auto !important;
+  }
+}
+.notification-sidebar {
+    background-image: url('{% static 'img/scrub.jpg' %}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.notification-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+.notification-sidebar-content {
+    position: relative;
+    z-index: 2;
+}
+
+.notification-sidebar .nav-link {
+    position: relative;
+    z-index: 2;
+}
+
+.notification-sidebar .border-bottom {
+    position: relative;
+    z-index: 2;
+}
+
+/* Backdrop blur pour le container principal */
+.container.backdrop-container {
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Effet de flou pour le body */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.05));
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: -1;
+    pointer-events: none;
+}
+@media (min-width: 768px) and (max-width: 992px) {
+
+  .notification-sidebar {
+    flex-direction: column !important;
+    width: 20% !important;
+  }
+
+  .col-md-4.col-lg-5 {
+    width: 40% !important;
+  }
+
+  #notification-detail-panel {
+    width: 40% !important;
+  }
+
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'courses/partials/course_loader.html' %}
+<!-- Token CSRF caché pour JavaScript -->
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+<!-- Script pour définir le token CSRF -->
+<script>
+  // S'assurer que le token est disponible globalement
+  window.CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+
+<div class="container p-0 m-0 bg-white rounded backdrop-container" style="height: 90vh; overflow: hidden; max-width: 1400px; margin: 0 auto; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.75); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+
+  <div class="row g-0 h-100 m-0">
+
+
+
+    <!-- ===== SIDEBAR ===== -->
+
+    <div class="col-md-3 col-lg-2 d-md-block text-white p-0 notification-sidebar">
+
+      <div class="notification-sidebar-content p-3 border-bottom border-secondary">
+
+        <h5 class="mb-0">CRVS Learning</h5>
+
+      </div>
+
+
+
+      <ul class="nav flex-column nav-pills p-2 notification-sidebar-content">
+
+
+
+        <li class="nav-item">
+
+          <a href="?filter=all"
+
+             class="nav-link text-white {% if not current_filter or current_filter == 'all' %}active bg-primary{% endif %}">
+
+            <i class="fas fa-bell me-2"></i>
+
+            Toutes
+
+            <span class="badge bg-light text-dark float-end">{{ total_count }}</span>
+
+          </a>
+
+        </li>
+
+
+
+        <li class="nav-item">
+
+          <a href="?filter=unread"
+
+             class="nav-link text-white {% if current_filter == 'unread' %}active bg-primary{% endif %}">
+
+            <i class="fas fa-envelope me-2"></i>
+
+            Non lues
+
+            <span class="badge bg-light text-dark float-end">{{ unread_count }}</span>
+
+          </a>
+
+        </li>
+
+
+
+        <li class="nav-item">
+
+          <a href="?filter=read"
+
+             class="nav-link text-white {% if current_filter == 'read' %}active bg-primary{% endif %}">
+
+            <i class="fas fa-envelope-open me-2"></i>
+
+            Lues
+
+            <span class="badge bg-light text-dark float-end">{{ read_count }}</span>
+
+          </a>
+
+        </li>
+
+
+
+        <hr class="text-secondary">
+
+
+
+        <li class="nav-item">
+
+          <a href="?filter=certifications"
+
+             class="nav-link text-white {% if current_filter == 'certifications' %}active bg-primary{% endif %}">
+
+            <i class="fas fa-certificate me-2"></i>
+
+            Certifications
+
+            <span class="badge bg-light text-dark float-end">{{ certifications_count }}</span>
+
+          </a>
+
+        </li>
+
+
+
+        <li class="nav-item">
+
+          <a href="?filter=courses"
+
+             class="nav-link text-white {% if current_filter == 'courses' %}active bg-primary{% endif %}">
+
+            <i class="fas fa-graduation-cap me-2"></i>
+
+            Cours
+
+            <span class="badge bg-light text-dark float-end">{{ courses_count }}</span>
+
+          </a>
+
+        </li>
+
+
+
+      </ul>
+
+      <!-- Actions globales -->
+      <div class="p-2 border-top border-secondary">
+        <button class="btn btn-outline-danger btn-sm w-100 mb-2" onclick="clearAllNotifications()">
+          <i class="fas fa-trash-alt me-2"></i>
+          Supprimer tout
+        </button>
+        <button class="btn btn-outline-secondary btn-sm w-100" onclick="markAllAsRead()">
+          <i class="fas fa-envelope-open me-2"></i>
+          Tout marquer comme lu
+        </button>
+      </div>
+    </div>
+
+
+
+    <!-- ===== LISTE DES NOTIFICATIONS ===== -->
+
+    <div class="col-md-4 col-lg-5 p-0 d-flex flex-column border-end">
+
+
+
+      <!-- TOP NAVBAR -->
+
+      <nav class="navbar navbar-light bg-white border-bottom px-4">
+
+        <span class="navbar-brand mb-0 h6">
+
+          {{ current_filter_title|default:"Toutes les notifications" }}
+
+        </span>
+
+
+
+        <div>
+
+          <button class="btn btn-outline-secondary btn-sm me-2" onclick="selectAll()">
+
+            <i class="fas fa-check"></i>
+
+          </button>
+
+
+
+          <button class="btn btn-outline-secondary btn-sm me-2" onclick="markAllAsRead()">
+
+            <i class="fas fa-envelope-open"></i>
+
+          </button>
+
+
+
+          <button class="btn btn-outline-danger btn-sm me-2" onclick="deleteSelected()">
+
+            <i class="fas fa-trash"></i>
+
+          </button>
+
+
+
+          <button class="btn btn-outline-secondary btn-sm" onclick="refreshNotifications()">
+
+            <i class="fas fa-sync"></i>
+
+          </button>
+
+        </div>
+
+      </nav>
+
+
+
+      <!-- CONTENT LISTE -->
+
+      <div class="notifications-list-container" style="flex: 1; height: 100%; max-height: calc(100vh - 60px); overflow-y: auto; overflow-x: hidden; position: relative;">
+        
+        <!-- Styles pour le scroll -->
+        <style>
+          .notifications-list-container {
+            min-height: 400px; /* Hauteur minimale garantie */
+          }
+          
+          .notifications-list-container::-webkit-scrollbar {
+            width: 8px;
+          }
+          
+          .notifications-list-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+          }
+          
+          .notifications-list-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+          }
+          
+          .notifications-list-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+          }
+          
+          /* Pour Firefox */
+          @supports (scrollbar-width: thin) {
+            .notifications-list-container {
+              scrollbar-width: thin;
+              scrollbar-color: #c1c1c1 #f1f1f1;
+            }
+          }
+          
+          /* Animation de transition pour les notifications */
+          .notification-item {
+            transition: all 0.2s ease;
+          }
+          
+          .notification-item:hover {
+            background-color: #f8f9fa !important;
+            transform: translateX(2px);
+          }
+          
+          .notification-item.unread:hover {
+            background-color: #e9ecef !important;
+          }
+          
+          /* S'assurer que le conteneur parent a une hauteur */
+          .col-md-4.col-lg-5.p-0.d-flex.flex-column {
+            height: 100vh !important;
+            max-height: 100vh !important;
+            overflow: hidden !important;
+          }
+        </style>
+
+        {% for notification in notifications %}
+
+
+
+        <div class="notification-item {% if not notification.is_read %}unread{% endif %}"
+
+             onclick="showNotificationDetail({{ notification.id }})"
+
+             data-subject="{{ notification.subject|escapejs }}"
+
+             data-message="{{ notification.message|escapejs }}"
+
+             data-sender="{{ notification.sender|default:'CRVS Learning'|escapejs }}"
+
+             data-time="{{ notification.created_at|timesince }} ago"
+
+             data-url="{{ notification.url|default:"#" }}"
+
+             data-read="{{ notification.is_read|yesno:"true,false" }}"
+
+             data-attachment="{% if notification.attachment %}{{ notification.attachment.url }}{% endif %}"
+
+             data-attachment-name="{% if notification.attachment %}{{ notification.attachment.name }}{% endif %}"
+
+             data-has-attachment="{% if notification.attachment %}true{% else %}false{% endif %}"
+
+             style="cursor: pointer; padding: 15px; border-bottom: 1px solid #dee2e6; {% if not notification.is_read %}background-color: #f8f9fa;{% endif %}">
+
+
+
+          <div class="d-flex align-items-start">
+
+
+
+            <input type="checkbox" class="form-check-input me-3 gmail-checkbox mt-1" onclick="event.stopPropagation()">
+
+
+
+            <div class="flex-grow-1">
+
+              <div class="d-flex justify-content-between align-items-start mb-1">
+
+                <div class="fw-bold text-dark">
+
+                  <i class="fas fa-envelope text-primary me-2"></i>
+
+                  CRVS Learning
+
+                </div>
+
+                <small class="text-muted">
+
+                  {{ notification.created_at|timesince }} ago
+
+                </small>
+
+              </div>
+
+              
+
+              <div class="mb-1">
+
+                <small class="{% if not notification.is_read %}fw-medium{% endif %} text-dark">
+
+                  {% if not notification.is_read %}
+
+                  {{ notification.subject|truncatechars:80 }}
+
+                  {% else %}
+
+                  {{ notification.subject|truncatechars:80 }}
+
+                  {% endif %}
+
+                </small>
+
+              </div>
+
+              
+
+      
+
+            </div>
+
+
+
+            {% if not notification.is_read %}
+
+            <span class="badge bg-primary ms-2">Nouveau</span>
+
+            {% endif %}
+
+
+
+          </div>
+
+        </div>
+
+
+
+        {% empty %}
+
+
+
+        <div class="text-center py-5">
+
+          <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+
+          <p class="text-muted">Aucune notification</p>
+
+        </div>
+
+
+
+        {% endfor %}
+
+
+
+      </div>
+
+
+
+    </div>
+
+
+
+    <!-- ===== DETAIL NOTIFICATION ===== -->
+
+    <div class="col-md-5 col-lg-5 p-0 d-flex flex-column" id="notification-detail-panel">
+
+
+
+      <!-- HEADER DETAIL -->
+
+      <div class="bg-white border-bottom p-4">
+
+        {% if selected_notification %}
+
+        <div class="d-flex justify-content-between align-items-start">
+
+          <div>
+
+            <h5 class="mb-2">{{ selected_notification.message }}</h5>
+
+            <small class="text-muted">
+
+              <i class="fas fa-clock me-1"></i>
+
+              {{ selected_notification.created_at|date:"d/m/Y H:i" }}
+
+            </small>
+
+          </div>
+
+          <div>
+
+            {% if not selected_notification.is_read %}
+
+            <span class="badge bg-primary">Non lue</span>
+
+            {% else %}
+
+            <span class="badge bg-secondary">Lue</span>
+
+            {% endif %}
+
+          </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="text-center text-muted">
+
+          <i class="fas fa-envelope-open fa-2x mb-3"></i>
+
+          <p>Sélectionnez une notification pour voir les détails</p>
+
+        </div>
+
+        {% endif %}
+
+      </div>
+
+
+
+      <!-- CONTENT DETAIL -->
+
+      <div class="notification-detail-content p-4" style="overflow-y: auto; overflow-x: hidden; flex-grow-1; height: calc(100vh - 200px);">
+
+        <!-- Styles pour le scroll du détail -->
+
+        <style>
+
+          .notification-detail-content::-webkit-scrollbar {
+
+            width: 8px;
+
+          }
+
+          .notification-detail-content::-webkit-scrollbar-track {
+
+            background: #f1f1f1;
+
+            border-radius: 10px;
+
+          }
+
+          .notification-detail-content::-webkit-scrollbar-thumb {
+
+            background: #c1c1c1;
+
+            border-radius: 10px;
+
+            transition: background 0.3s ease;
+
+          }
+
+          .notification-detail-content::-webkit-scrollbar-thumb:hover {
+
+            background: #a8a8a8;
+
+          }
+
+          /* Pour Firefox */
+
+          @supports (scrollbar-width: thin) {
+
+            .notification-detail-content {
+
+              scrollbar-width: thin;
+
+              scrollbar-color: #c1c1c1 #f1f1f1;
+
+            }
+
+          }
+
+        </style>
+
+        {% if selected_notification %}
+
+        <div class="notification-content">
+
+          <div class="mb-4">
+
+            <p class="lead">{{ selected_notification.message }}</p>
+
+          </div>
+
+
+
+          <div class="mb-4">
+
+            <ul class="list-unstyled">
+
+              <li class="mb-2">
+
+                <i class="fas fa-calendar me-2 text-muted"></i>
+
+                <strong>Date :</strong> {{ selected_notification.created_at|date:"l d F Y à H:i" }}
+
+              </li>
+
+              <li class="mb-2">
+
+                <i class="fas fa-clock me-2 text-muted"></i>
+
+                <strong>Il y a :</strong> {{ selected_notification.created_at|timesince }}
+
+              </li>
+
+              <li class="mb-2">
+
+                <i class="fas fa-envelope me-2 text-muted"></i>
+
+                <strong>Statut :</strong> 
+
+                {% if selected_notification.is_read %}
+
+                  <span class="text-success">Lue</span>
+
+                {% else %}
+
+                  <span class="text-primary">Non lue</span>
+
+                {% endif %}
+
+              </li>
+
+              {% if selected_notification.url %}
+
+              <li class="mb-2">
+
+                <i class="fas fa-link me-2 text-muted"></i>
+
+                <strong>Lien :</strong> 
+
+                <a href="{{ selected_notification.url }}" class="text-primary">{{ selected_notification.url }}</a>
+
+              </li>
+
+              {% endif %}
+
+            </ul>
+
+          </div>
+
+
+
+          <div class="d-flex gap-2">
+
+            {% if not selected_notification.is_read %}
+
+            <button class="btn btn-primary" onclick="markAsRead({{ selected_notification.id }})">
+
+              <i class="fas fa-envelope-open me-2"></i>
+
+              Marquer comme lu
+
+            </button>
+
+            {% endif %}
+
+            
+
+            {% if selected_notification.url %}
+
+            <a href="{{ selected_notification.url }}" class="btn btn-outline-primary">
+
+              <i class="fas fa-external-link-alt me-2"></i>
+
+              Voir le lien
+
+            </a>
+
+            {% endif %}
+
+            
+
+            <button class="btn btn-outline-secondary" onclick="deleteNotification({{ selected_notification.id }})">
+
+              <i class="fas fa-trash me-2"></i>
+
+              Supprimer
+
+            </button>
+
+          </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="text-center text-muted mt-5">
+
+          <i class="fas fa-mouse-pointer fa-2x mb-3"></i>
+
+          <p>Cliquez sur une notification dans la liste pour voir son contenu détaillé ici</p>
+
+        </div>
+
+        {% endif %}
+
+      </div>
+
+
+
+    </div>
+
+
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+let selectedNotificationId = null;
+
+
+
+function showNotificationDetail(id) {
+  selectedNotificationId = id;
+  
+  // Trouver l'élément cliqué par son ID
+  const selectedItem = document.querySelector(`[onclick*="showNotificationDetail(${id})"]`);
+  
+  if (!selectedItem) {
+    console.error('Élément de notification non trouvé');
+    return;
+  }
+  
+  // Mettre à jour l'interface
+  document.querySelectorAll('.notification-item').forEach(item => {
+    item.classList.remove('active');
+    item.style.backgroundColor = '';
+    item.style.borderLeft = '';
+  });
+  
+  // Mettre en surbrillance l'élément sélectionné
+  selectedItem.classList.add('active');
+  selectedItem.style.backgroundColor = '#e3f2fd';
+  selectedItem.style.borderLeft = '4px solid #2196f3';
+  
+  // Récupérer les données depuis les attributs data
+  const sender = selectedItem.dataset.sender || 'CRVS Learning';
+  const subject = selectedItem.dataset.subject || '';
+  const message = selectedItem.dataset.message || '';
+  const time = selectedItem.dataset.time || '';
+  const url = selectedItem.dataset.url || '';
+  const isRead = selectedItem.dataset.read === 'true';
+  const attachmentUrl = selectedItem.dataset.attachment || '';
+  const attachmentName = selectedItem.dataset.attachmentName || '';
+  const hasAttachment = selectedItem.dataset.hasAttachment === 'true';
+  
+  // Debug: Afficher les données récupérées
+  console.log('Données de notification:', {
+    id, sender, subject, message, time, url, isRead, 
+    attachmentUrl, attachmentName, hasAttachment
+  });
+  
+  // Mettre à jour le panneau de détails
+  const detailPanel = document.getElementById('notification-detail-panel');
+  
+  if (!detailPanel) {
+    console.error('Panneau de détail non trouvé');
+    return;
+  }
+  
+  const htmlContent = `
+    <!-- HEADER DETAIL -->
+    <div class="bg-white border-bottom p-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="d-flex align-items-center mb-2">
+            <div class="icon-circle me-3">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div>
+              <h6 class="mb-0">${sender}</h6>
+              <small class="text-muted">Plateforme E-Learning</small>
+            </div>
+          </div>
+          <h6 class="mb-2 fw-bold">Objet : ${subject}</h6>
+          <small class="text-muted">
+            <i class="fas fa-clock me-1"></i>
+            ${time}
+          </small>
+        </div>
+        <div>
+          ${!isRead ? '<span class="badge bg-primary">Non lue</span>' : '<span class="badge bg-secondary">Lue</span>'}
+        </div>
+      </div>
+    </div>
+    
+    <!-- CONTENT DETAIL -->
+    <div class="p-4" style="overflow-y: auto; height: calc(100vh - 64px);">
+      <div class="notification-content">
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">
+            <i class="fas fa-file-alt me-2"></i>
+            Message complet
+          </h6>
+          <p class="mb-0">${message}</p>
+        </div>
+        
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">
+            <i class="fas fa-info-circle me-2"></i>
+            Informations
+          </h6>
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              <i class="fas fa-user-circle me-2 text-muted"></i>
+              <strong>Expéditeur :</strong> ${sender}
+            </li>
+            <li class="mb-2">
+              <i class="fas fa-calendar-alt me-2 text-muted"></i>
+              <strong>Date :</strong> ${time}
+            </li>
+            <li class="mb-2">
+              <i class="fas fa-envelope-open-text me-2 text-muted"></i>
+              <strong>Statut :</strong> 
+              ${isRead ? '<span class="text-success">Lue</span>' : '<span class="text-primary">Non lue</span>'}
+            </li>
+            ${url && url !== '#' ? `
+            <li class="mb-2">
+              <i class="fas fa-link me-2 text-muted"></i>
+              <strong>Lien associé :</strong> 
+              <a href="${url}" class="text-primary">${url}</a>
+            </li>
+            ` : ''}
+          </ul>
+        </div>
+        
+        <!-- Pièce jointe -->
+        <div class="mb-4">
+          <h6 class="text-muted mb-3">
+            <i class="fas fa-paperclip me-2"></i>
+            Pièce jointe
+          </h6>
+          <div id="attachment-section">
+            <!-- La pièce jointe sera ajoutée ici via JavaScript -->
+          </div>
+        </div>
+        
+        <div class="d-flex gap-2">
+          ${!isRead ? `
+          <button class="btn btn-primary" onclick="markAsRead(${id})">
+            <i class="fas fa-envelope-open me-2"></i>
+            Marquer comme lu
+          </button>
+          ` : ''}
+          
+          ${url && url !== '#' ? `
+          <a href="${url}" class="btn btn-outline-primary">
+            <i class="fas fa-external-link-alt me-2"></i>
+            Voir le lien
+          </a>
+          ` : ''}
+          
+          <button class="btn btn-outline-secondary" onclick="deleteNotification(${id})">
+            <i class="fas fa-trash me-2"></i>
+            Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Debug: Afficher le HTML généré
+  console.log('HTML généré:', htmlContent.substring(0, 200) + '...');
+  
+  detailPanel.innerHTML = htmlContent;
+  
+  // Afficher la pièce jointe si elle existe
+  if (hasAttachment && attachmentUrl) {
+    const attachmentSection = document.getElementById('attachment-section');
+    if (attachmentSection) {
+      // Déterminer l'icône selon le type de fichier
+      let fileIcon = 'fa-file';
+      const fileExt = attachmentName.split('.').pop().toLowerCase();
+      
+      if (['pdf'].includes(fileExt)) {
+        fileIcon = 'fa-file-pdf';
+      } else if (['doc', 'docx'].includes(fileExt)) {
+        fileIcon = 'fa-file-word';
+      } else if (['xls', 'xlsx'].includes(fileExt)) {
+        fileIcon = 'fa-file-excel';
+      } else if (['ppt', 'pptx'].includes(fileExt)) {
+        fileIcon = 'fa-file-powerpoint';
+      } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+        fileIcon = 'fa-file-image';
+      } else if (['zip', 'rar'].includes(fileExt)) {
+        fileIcon = 'fa-file-archive';
+      }
+      
+      // Extraire le nom de fichier sans le chemin
+      const fileName = attachmentName.split('/').pop(); // Prendre le dernier segment après le dernier /
+      
+      attachmentSection.innerHTML = `
+        <div class="border rounded p-3 bg-light">
+          <div class="d-flex align-items-center">
+            <div class="me-3">
+              <i class="fas ${fileIcon} fa-2x text-primary"></i>
+            </div>
+            <div class="flex-grow-1">
+              <div class="fw-bold">${fileName}</div>
+              <small class="text-muted">Pièce jointe</small>
+              <div class="mt-1">
+                <small class="text-muted">Type: ${fileExt.toUpperCase()}</small>
+                <small class="text-muted ms-3">Taille: ${formatFileSize(attachmentUrl)}</small>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+  <!-- Bouton de visualisation pour tous les types de fichiers -->
+  <button class="btn btn-sm btn-outline-info" onclick="previewAttachment('${attachmentUrl}', '${fileName}')" title="Visualiser">
+    <i class="fas fa-eye me-1"></i>
+    Visualiser
+  </button>
+  
+  <!-- Bouton de téléchargement -->
+  <a href="${attachmentUrl}" 
+     target="_blank" 
+     class="btn btn-sm btn-outline-primary"
+     title="Télécharger la pièce jointe"
+     download="${fileName}">
+    <i class="fas fa-download me-1"></i>
+    Télécharger
+  </a>
+  
+  <!-- Bouton d'ouverture dans un nouvel onglet -->
+  <a href="${attachmentUrl}" 
+     target="_blank" 
+     class="btn btn-sm btn-outline-secondary"
+     title="Ouvrir dans un nouvel onglet">
+    <i class="fas fa-external-link-alt me-1"></i>
+    Ouvrir
+  </a>
+</div>
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    const attachmentSection = document.getElementById('attachment-section');
+    if (attachmentSection) {
+      attachmentSection.innerHTML = `
+        <div class="text-muted text-center py-3">
+          <i class="fas fa-paperclip fa-2x mb-2"></i>
+          <p class="mb-0">Aucune pièce jointe</p>
+        </div>
+      `;
+    }
+  }
+}
+
+// Fonction pour vérifier si c'est un fichier image
+function isImageFile(ext) {
+  return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
+}
+
+// Fonction pour vérifier si c'est un fichier PDF
+function isPdfFile(ext) {
+  return ['pdf'].includes(ext);
+}
+
+// Fonction pour vérifier si c'est un fichier texte
+function isTextFile(ext) {
+  return ['txt', 'md', 'csv'].includes(ext);
+}
+
+// Fonction pour formater la taille du fichier
+function formatFileSize(url) {
+  // Extraire la taille depuis l'URL si disponible (approximation)
+  const commonSizes = {
+    'pdf': '2-5 MB',
+    'doc': '1-3 MB',
+    'docx': '1-3 MB',
+    'xls': '1-2 MB',
+    'xlsx': '1-2 MB',
+    'ppt': '2-5 MB',
+    'pptx': '2-5 MB',
+    'jpg': '500KB-2MB',
+    'jpeg': '500KB-2MB',
+    'png': '500KB-2MB',
+    'gif': '500KB-2MB',
+    'txt': '1-50KB',
+    'md': '1-10KB',
+    'csv': '10-100KB',
+    'zip': '1-10 MB',
+    'rar': '1-10 MB'
+  };
+  
+  const ext = url.split('.').pop().toLowerCase();
+  return commonSizes[ext] || 'Inconnue';
+}
+
+// Fonction pour télécharger un fichier
+function downloadFile(url, fileName) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Fonction pour fermer la modal
+function closeModal() {
+  const modal = document.querySelector('.modal-overlay');
+  if (modal) {
+    document.body.removeChild(modal);
+  }
+}
+
+// Fonction pour vérifier si c'est un fichier Microsoft Office
+function isOfficeFile(ext) {
+  return ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
+}
+
+// Fonction pour prévisualiser l'attachment dans une modal
+function previewAttachment(url, fileName) {
+  const fileExt = fileName.split('.').pop().toLowerCase();
+  
+  // Créer une modale de prévisualisation
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    cursor: pointer;
+  `;
+  
+  let content = '';
+  
+  if (isImageFile(fileExt)) {
+    // Image
+    content = `
+      <img src="${url}" style="
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      ">
+    `;
+  } else if (isPdfFile(fileExt)) {
+    // PDF avec visualisation directe
+    content = `
+      <div style="
+        width: 90%;
+        height: 90%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      ">
+        <div style="
+          padding: 15px;
+          border-bottom: 1px solid #ddd;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #f8f9fa;
+        ">
+          <h5 style="margin: 0; color: #333;">
+            <i class="fas fa-file-pdf me-2"></i>
+            ${fileName}
+          </h5>
+          <div>
+            <button onclick="downloadFile('${url}', '${fileName}')" style="
+              background: #dc3545;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-right: 10px;
+            ">
+              <i class="fas fa-download me-1"></i>
+              Télécharger
+            </button>
+            <button onclick="closeModal()" style="
+              background: #6c757d;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+            ">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div style="
+          flex: 1;
+          padding: 0;
+          position: relative;
+          background: #525659;
+        ">
+          <iframe src="${url}" style="
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0 0 8px 8px;
+          "></iframe>
+          <div style="
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+          ">
+            <i class="fas fa-info-circle me-1"></i>
+            Utilisez la molette pour zoomer
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (isTextFile(fileExt)) {
+    // Fichier texte
+    content = `
+      <div style="
+        width: 90%;
+        height: 90%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      ">
+        <div style="
+          padding: 15px;
+          border-bottom: 1px solid #ddd;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        ">
+          <h5 style="margin: 0; color: #333;">
+            <i class="fas fa-file-alt me-2"></i>
+            ${fileName}
+          </h5>
+          <div>
+            <button onclick="window.open('${url}', '_blank')" style="
+              background: #dc3545;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-right: 10px;
+            ">
+              <i class="fas fa-download me-1"></i>
+              Télécharger
+            </button>
+            <button onclick="closeModal()" style="
+              background: #6c757d;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+            ">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div style="
+          flex: 1;
+          padding: 20px;
+          overflow: auto;
+        ">
+          <iframe src="${url}" style="
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 4px;
+          "></iframe>
+        </div>
+      </div>
+    `;
+  } else if (isOfficeFile(fileExt)) {
+    // Fichiers Microsoft Office avec Google Docs Viewer
+    const googleViewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
+    content = `
+      <div style="
+        width: 90%;
+        height: 90%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      ">
+        <div style="
+          padding: 15px;
+          border-bottom: 1px solid #ddd;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #f8f9fa;
+        ">
+          <h5 style="margin: 0; color: #333;">
+            <i class="fas fa-file-word me-2"></i>
+            ${fileName}
+          </h5>
+          <div>
+            <button onclick="downloadFile('${url}', '${fileName}')" style="
+              background: #dc3545;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-right: 10px;
+            ">
+              <i class="fas fa-download me-1"></i>
+              Télécharger
+            </button>
+            <button onclick="closeModal()" style="
+              background: #6c757d;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+            ">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div style="
+          flex: 1;
+          padding: 0;
+          position: relative;
+        ">
+          <iframe src="${googleViewerUrl}" style="
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 0 0 8px 8px;
+          "></iframe>
+          <div style="
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+          ">
+            <i class="fas fa-info-circle me-1"></i>
+            Prévisualisation Google Docs
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    // Autres types de fichiers
+    content = `
+      <div style="
+        width: 90%;
+        height: 90%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+      ">
+        <div style="
+          padding: 15px;
+          border-bottom: 1px solid #ddd;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #f8f9fa;
+        ">
+          <h5 style="margin: 0; color: #333;">
+            <i class="fas fa-file me-2"></i>
+            ${fileName}
+          </h5>
+          <div>
+            <button onclick="downloadFile('${url}', '${fileName}')" style="
+              background: #dc3545;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-right: 10px;
+            ">
+              <i class="fas fa-download me-1"></i>
+              Télécharger
+            </button>
+            <button onclick="closeModal()" style="
+              background: #6c757d;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+            ">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div style="
+          flex: 1;
+          padding: 20px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+        ">
+          <i class="fas fa-file fa-4x text-secondary mb-3"></i>
+          <h6 style="color: #333; margin-bottom: 15px;">Fichier ${fileExt.toUpperCase()}</h6>
+          <p style="color: #666; margin-bottom: 20px;">
+            Ce type de fichier ne peut pas être prévisualisé directement.<br>
+            Cliquez sur "Télécharger" pour ouvrir le fichier avec l'application appropriée.
+          </p>
+          <div>
+            <button onclick="downloadFile('${url}', '${fileName}')" style="
+              background: #007bff;
+              color: white;
+              border: none;
+              padding: 12px 25px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 16px;
+              margin-right: 10px;
+            ">
+              <i class="fas fa-download me-2"></i>
+              Télécharger
+            </button>
+            <button onclick="window.open('${url}', '_blank')" style="
+              background: #28a745;
+              color: white;
+              border: none;
+              padding: 12px 25px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 16px;
+            ">
+              <i class="fas fa-external-link-alt me-2"></i>
+              Ouvrir
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  modal.innerHTML = content;
+  modal.className = 'modal-overlay';
+  
+  // Gestion du clic sur le fond pour fermer
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  };
+  
+  // Gestion du clic sur les boutons pour éviter la fermeture
+  const buttons = modal.querySelectorAll('button');
+  buttons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation(); // Empêche la propagation au modal
+    });
+  });
+  
+  document.body.appendChild(modal);
+  
+  // Fermer avec Escape
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+}
+
+function selectAll() {
+  document.querySelectorAll('.gmail-checkbox').forEach(cb => {
+    cb.checked = !cb.checked;
+  });
+}
+
+
+function markAllAsRead() {
+  // Créer un formulaire pour marquer tout comme lu
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/notifications/mark-all-read/';
+  
+  // Ajouter le token CSRF depuis l'élément caché
+  const csrfToken = document.getElementById('csrf-token');
+  if (csrfToken) {
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken.value;
+    form.appendChild(csrfInput);
+  }
+  
+  document.body.appendChild(form);
+  form.submit();
+}
+
+
+
+function refreshNotifications() {
+
+  window.location.reload();
+
+}
+
+
+
+function markAsRead(id) {
+
+  window.location.href = "/notifications/" + id + "/read/";
+
+}
+
+
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+function deleteNotification(id) {
+  if (confirm("Êtes-vous sûr de vouloir supprimer cette notification ?")) {
+    // Créer un formulaire pour la suppression
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/notifications/${id}/delete/`;
+    
+    // Ajouter le token CSRF depuis le cookie
+    const csrfToken = getCookie('csrftoken');
+    if (csrfToken) {
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'csrfmiddlewaretoken';
+      csrfInput.value = csrfToken;
+      form.appendChild(csrfInput);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+function deleteSelected() {
+  const checkboxes = document.querySelectorAll('.gmail-checkbox:checked');
+  if (checkboxes.length === 0) {
+    alert("Veuillez sélectionner au moins une notification à supprimer.");
+    return;
+  }
+  
+  // Debug: Afficher le token CSRF
+  let csrfToken = window.CSRF_TOKEN; // Priorité au token global
+  if (!csrfToken) {
+    csrfToken = document.getElementById('csrf-token')?.value;
+  }
+  if (!csrfToken) {
+    csrfToken = getCookie('csrftoken');
+  }
+  
+  console.log('CSRF Token:', csrfToken);
+  console.log('Window CSRF Token:', window.CSRF_TOKEN);
+  console.log('Element CSRF Token:', document.getElementById('csrf-token')?.value);
+  console.log('Cookie CSRF Token:', getCookie('csrftoken'));
+  console.log('Cookies:', document.cookie);
+  
+  if (confirm(`Êtes-vous sûr de vouloir supprimer les ${checkboxes.length} notification(s) sélectionnée(s) ?`)) {
+    if (!csrfToken) {
+      alert('Erreur: Token CSRF non trouvé. Veuillez recharger la page.');
+      return;
+    }
+    
+    // Créer un formulaire pour la suppression multiple
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/notifications/delete-selected/';
+    
+    // Ajouter le token CSRF
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    // Debug: Afficher les données du formulaire
+    console.log('Form data:', new FormData(form));
+    
+    // Ajouter les IDs des notifications sélectionnées
+    checkboxes.forEach(checkbox => {
+      const notificationItem = checkbox.closest('.notification-item');
+      const notificationId = notificationItem.onclick.toString().match(/showNotificationDetail\((\d+)\)/)?.[1];
+      
+      if (notificationId) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'notification_ids';
+        input.value = notificationId;
+        form.appendChild(input);
+        console.log('Adding notification ID:', notificationId);
+      }
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+function markAllAsRead() {
+  // Créer un formulaire pour marquer tout comme lu
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/notifications/mark-all-read/';
+  
+  // Ajouter le token CSRF depuis le cookie
+  const csrfToken = getCookie('csrftoken');
+  if (csrfToken) {
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+  }
+  
+  document.body.appendChild(form);
+  form.submit();
+}
+
+function clearAllNotifications() {
+  if (confirm("Êtes-vous sûr de vouloir supprimer TOUTES vos notifications ? Cette action est irréversible.")) {
+    // Créer un formulaire pour tout supprimer
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/notifications/clear-all/';
+    
+    // Ajouter le token CSRF depuis le cookie
+    const csrfToken = getCookie('csrftoken');
+    if (csrfToken) {
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'csrfmiddlewaretoken';
+      csrfInput.value = csrfToken;
+      form.appendChild(csrfInput);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+
+</script>
+
+{% endblock %}

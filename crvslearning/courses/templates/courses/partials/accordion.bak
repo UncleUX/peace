@@ -1,0 +1,112 @@
+{% load course_extras %}
+<div class="lessons-container mt-2">
+  {% if modules %}
+    {% for module in modules %}
+      {% if module.lessons.all %}
+        <div class="module-lessons-block {% if module.is_locked and module.order > 1 %}locked-lesson{% endif %} {% if module.is_paid %}paid-lesson{% endif %}">
+          <!-- Header du module avec bouton de terminé -->
+          <div class="module-header mt-3">
+            <div class="module-title">
+              <h5 class="mb-2">
+                {% if module.is_locked and module.order > 1 %}
+                  🔒 Module verrouillé
+                {% else %}
+                  📚 Module {{ module.order }} - {{ module.lessons.all|length }} leçon{{ module.lessons.all|length|pluralize }}
+                {% endif %}
+                {% if module.is_paid %}
+                  <span class="badge bg-success ms-2">💳 Premium {{ module.price|format_price }}</span>
+                {% endif %}
+              </h5>
+            </div>
+            
+            <!-- Bouton pour marquer le module comme terminé -->
+            {% if is_enrolled and not module.is_locked %}
+              <form method="post" action="{% url 'courses:mark_module_completed' course.id module.id %}" class="d-inline-block">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-success" type="submit" title="Marquer ce module comme terminé">
+                  <i class="bi bi-check-circle me-1"></i>
+                  <span>Module terminé</span>
+                </button>
+              </form>
+            {% elif not is_enrolled and module.order == 1 %}
+              <div class="alert alert-info p-2 d-inline-block" style="font-size: 0.8rem;">
+                <i class="bi bi-info-circle me-1"></i>
+                Inscrivez-vous pour accéder
+              </div>
+            {% endif %}
+          </div>
+          
+          <!-- Liste des leçons dans le même bloc -->
+          <div class="lessons-list">
+            {% with active_lessons=module.lessons.all %}
+              {% if active_lessons %}
+                {% for lesson in active_lessons %}
+                  {% if lesson.is_active %}
+                    <div class="lesson-row {% if forloop.last %}lesson-row-last{% endif %}">
+                      <div class="lesson-content">
+                        {% if is_enrolled or forloop.first and forloop.parentloop.first %}
+                          <a href="{% url 'courses:lesson_detail' lesson.id %}" class="lesson-link text-decoration-none">
+                            {% if is_enrolled %}📺{% else %}📺{% endif %} {{ lesson.title }}
+                            {% if completed_lesson_ids and lesson.id in completed_lesson_ids %}
+                              <span class="pill" style="margin-left:8px;">Lu</span>
+                            {% endif %}
+                          </a>
+                        {% else %}
+                          <span class="locked">🔒 {{ lesson.title }}</span>
+                        {% endif %}
+                      </div>
+                      
+                      {% if is_enrolled or forloop.first and forloop.parentloop.first %}
+                        <div class="lesson-details">
+                          {% if lesson.videos.all %}
+                            <div class="videos-row">
+                              {% for v in lesson.videos.all %}
+                                {% if v.video_file %}
+                                  <span class="video-item">
+                                    <a href="{% url 'courses:lesson_detail' lesson.id %}" class="v-title text-decoration-none">📹 {{ v.title|default:lesson.title }}</a>
+                                    {% if v.duration %}<span class="v-dur">{{ v.duration }}</span>{% endif %}
+                                  </span>
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                          {% elif lesson.video_file %}
+                            <div class="videos-row">
+                              <span class="video-item">
+                                <a href="{% url 'courses:lesson_detail' lesson.id %}" class="v-title text-decoration-none">📹 {{ lesson.title }}</a>
+                                {% if lesson.duration %}<span class="v-dur">{{ lesson.duration }}</span>{% endif %}
+                              </span>
+                            </div>
+                          {% endif %}
+                          
+                          {% if is_enrolled and lesson.exercises.exists %}
+                            <div class="quiz-row">
+                              <button 
+                                onclick="confirmQuizStart({{ lesson.id }}, {{ lesson.exercises.count }}, '{{ lesson.title|escapejs }}'); return false;"
+                                class="btn-mark-completed {% if request.user in lesson.exercices_completed_by.all %}completed{% endif %}"
+                                style="margin: 0;"
+                              >
+                                <i class="bi {% if request.user in lesson.exercices_completed_by.all %}bi-check-circle-fill{% else %}bi-question-circle{% endif %} me-1"></i>
+                                <span>{% if request.user in lesson.exercices_completed_by.all %}Quiz réussi{% else %} Prêt à débloquer le module suivant ? {% endif %}</span>
+                                {% if request.user in lesson.exercices_completed_by.all %}
+                                  <span class="badge bg-transparent ms-1">✓</span>
+                                {% endif %}
+                              </button>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <div class="muted p-3">Aucune leçon active dans ce module.</div>
+              {% endif %}
+            {% endwith %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <p class="muted">Aucun module disponible.</p>
+  {% endif %}
+</div>

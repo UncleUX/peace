@@ -1,0 +1,1510 @@
+{% extends "base.html" %}
+{% load static %}
+{% load course_extras %}
+
+{% block content %}
+<!-- Variables du template Django -->
+<script type="application/json" id="template-vars">
+{
+  "first_lesson_id": {% if first_lesson %}{{ first_lesson.id|safe }}{% else %}null{% endif %},
+  "is_enrolled": {% if is_enrolled %}true{% else %}false{% endif %}
+}
+</script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+        .sidebar { height: 100vh; border-right: 1px solid #dee2e6; }
+        .video-placeholder { background: #e9ecef; height: 400px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+        .course-list { border-left: 1px solid #dee2e6; height: 100vh; overflow-y: auto; }
+        @media (max-width: 768px) { 
+        .logo { display: none}
+        .line-small { display: none}
+        .video-info-header{
+            margin-top: -30px !important;
+        }
+        .rate{
+          display: none !important;
+        }
+        .bg-professional{
+          margin-top: -120px !important;
+          flex-grow: 1;
+        }
+        .btn-sm {
+        font-size: 12px !important;      /* réduction texte */
+        padding: 5px 10px !important; /* bouton plus compact */
+        line-height: 1.2 !important;
+        }
+        .ghost {
+            padding: 0.25rem 0.5rem;
+        }
+        }
+        .bg-professional{
+        background: #f1f3f5;
+        border-left: 1px solid #dee2e6;
+
+        
+}
+</style>
+
+<!-- Loader circulaire fluide -->
+{% include 'courses/partials/course_loader.html' %}
+<div class="container-fluid px-0 w-100">
+    <div class="row g-0 min-vh-100">
+        <!-- SIDEBAR -->
+        <div class="col-12 col-md-2 col-lg-1 sidebar d-flex flex-row flex-md-column align-items-center py-3">        
+            <div class="mb-md-5 me-3 me-md-0 logo">  
+            </div>
+            {% include 'courses/partials/sidebar.html' %}
+          </div>
+
+        <!-- MAIN CONTENT -->
+        <main class="col-12 col-md-7 col-lg-8 py-3 px-3 px-md-4 px-lg-5">
+
+            <div class="video-info-header p-3 rounded bg-white shadow-sm">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+
+                    <div>
+                        <h6 class="fw-semibold mb-1">
+                            {{ lesson.title }}
+                        </h6>
+
+                        <div class="text-muted small line-small">
+                            {{ lesson.module.title }} • {{ video_views_count }} vue(s)
+                        </div>
+                    </div>
+
+                    <a href="{% url 'courses:course_detail' course.id %}"
+                       class="btn btn-sm ghost">
+                        <i class="bi bi-arrow-left"></i>
+                        <span class="d-none d-md-inline">Retour</span>
+                    </a>
+
+                </div>
+            </div>
+
+            <div class=" rate d-flex gap-3 text-muted mb-3 mt-3 justify-content-md-end flex-wrap">
+                <span>⭐ 4.5</span>
+                <span>👥 321,195</span>
+                <span>⏱️ 1.2h</span>
+            </div>
+
+            {% include 'courses/partials/ld-main.html' %}
+
+        </main>
+
+        <!-- COURSE LIST -->
+          <div class="col-12 col-md-5 col-lg-3 course-list py-3 py-md-5 mt-0 mt-md-4 px-0 bg-professional flex-grow-1">
+
+            <div class="w-100">
+                {% include 'courses/partials/ld-aside.html' %}
+            </div>
+
+          </div>
+
+    </div>
+</div>
+
+</body>
+</html>
+
+{% endblock content %}
+
+{% block extra_js %}
+{{ combined_playlist|json_script:"combined-data" }}
+{{ completed_lesson_ids|json_script:"completed-ids" }}
+{{ simple_playlist|json_script:"simple-playlist-data" }}
+
+
+
+<script>
+// Fonction pour afficher la playlist simple (style YouTube)
+function renderSimplePlaylist() {
+    console.log('Début de renderSimplePlaylist()');
+    
+    const playlistEl = document.getElementById('simple-playlist');
+    if (!playlistEl) {
+        console.error('Élément simple-playlist non trouvé!');
+        return;
+    }
+    
+    console.log('Élément simple-playlist trouvé:', playlistEl);
+    
+    const playlistDataElement = document.getElementById('simple-playlist-data');
+    console.log('Élément simple-playlist-data:', playlistDataElement);
+    
+    if (!playlistDataElement) {
+        console.error('Élément simple-playlist-data non trouvé!');
+        playlistEl.innerHTML = '<div class="muted" style="padding:8px;">Erreur: données de playlist non trouvées</div>';
+        return;
+    }
+    
+    const playlistDataText = playlistDataElement.textContent;
+    console.log('Texte des données:', playlistDataText);
+    
+    const playlistData = JSON.parse(playlistDataText || '[]');
+    console.log('Données de la playlist simple:', playlistData);
+    
+    if (!playlistData.length) {
+        playlistEl.innerHTML = '<div class="muted" style="padding:8px;">Aucune leçon disponible</div>';
+        console.log('Playlist vide');
+        return;
+    }
+    
+    console.log('Génération HTML pour', playlistData.length, 'éléments');
+    
+    let html = '';
+    playlistData.forEach((item, index) => {
+        const isCurrent = item.is_current;
+        const hasVideo = item.has_video;
+        const isCompleted = item.is_completed;
+        
+        console.log(`Item ${index}:`, item);
+        
+        html += `
+            <div class="playlist-item ${isCurrent ? 'current' : ''} ${isCompleted ? 'completed' : ''} ${!hasVideo ? 'no-video' : ''}"
+                 data-lesson-id="${item.id}"
+                 onclick="window.location.href='${item.href}'">
+                <div class="playlist-item-number">${index + 1}</div>
+                <div class="playlist-item-content">
+                    <div class="playlist-item-title">${item.title}</div>
+                    <div class="playlist-item-module">${item.module_title}</div>
+                </div>
+                <div class="playlist-item-status">
+                    <span class="lesson-status lesson-badge">
+                        ${isCurrent ? '<span class="current-badge">Actuelle</span>' : ''}
+                        ${isCompleted ? '<i class="bi bi-check-circle-fill text-success"></i>' : ''}
+                    </span>
+                    ${!hasVideo ? '<i class="bi bi-file-earmark-text text-muted"></i>' : '<i class="bi bi-play-circle text-primary"></i>'}
+                </div>
+            </div>
+        `;
+    });
+    
+    console.log('HTML généré, longueur:', html.length);
+    playlistEl.innerHTML = html;
+    console.log('Playlist simple affichée avec', playlistData.length, 'éléments');
+}
+
+// Fonction pour afficher des notifications toast élégantes
+function showToast(title, message, type = 'info') {
+    // Créer le conteneur de toast s'il n'existe pas
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+    
+    // Créer l'élément toast
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 300px;
+        max-width: 400px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    toast.innerHTML = `
+        <div style="font-size: 18px; font-weight: bold;">${title}</div>
+        <div style="font-size: 14px;">${message}</div>
+    `;
+    
+    // Ajouter au conteneur
+    toastContainer.appendChild(toast);
+    
+    // Animer l'entrée
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Supprimer après 4 secondes
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, 4000);
+}
+
+// Fonction pour basculer l'état de complétion de la leçon
+function toggleLessonCompletion(button) {
+    const lessonId = button.dataset.lessonId;
+    const isCompleted = button.classList.contains('completed');
+    const newState = !isCompleted;
+    const icon = button.querySelector('i');
+    const text = button.querySelector('span');
+    
+    // Si la leçon est déjà marquée comme terminée, ne rien faire
+    if (newState && button.classList.contains('completed')) {
+        return;
+    }
+
+    // Mise à jour immédiate de l'interface utilisateur
+    button.disabled = true;
+    
+    // Mettre à jour l'icône et le texte immédiatement
+    if (newState) {
+        button.classList.add('completed');
+        icon.className = 'bi bi-check-circle-fill text-success me-2';
+        text.textContent = 'Leçon terminée';
+    } else {
+        button.classList.remove('completed');
+        icon.className = 'bi bi-circle me-2';
+        text.textContent = 'Marquer comme terminée';
+    }
+    
+    // Envoyer la requête au serveur
+    fetch(`/courses/lessons/${lessonId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erreur réseau');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Réponse du serveur:', data); // Debug pour voir la réponse
+        
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Erreur lors de la mise à jour');
+        }
+        
+        // Mise à jour de l'interface utilisateur basée sur la réponse du serveur
+        if (data.completed) {
+            button.classList.add('completed');
+            icon.className = 'bi bi-check-circle-fill text-success me-2';
+            text.textContent = 'Leçon terminée';
+            
+            // Afficher un message de succès élégant
+            if (data.course_completed) {
+                showToast('🎉 Félicitations !', 'Vous avez terminé le cours entier !', 'success');
+            } else {
+                showToast('✅ Leçon terminée', 'Votre progression a été enregistrée', 'success');
+            }
+        } else {
+            button.classList.remove('completed');
+            icon.className = 'bi bi-circle me-2';
+            text.textContent = 'Marquer comme terminée';
+            showToast('ℹ️ Leçon non terminée', 'La leçon a été retirée de votre progression', 'info');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        // En cas d'erreur, on remet l'état précédent
+        if (isCompleted) {
+            button.classList.add('completed');
+            icon.className = 'bi bi-check-circle-fill text-success me-2';
+            text.textContent = 'Leçon terminée';
+        } else {
+            button.classList.remove('completed');
+            icon.className = 'bi bi-circle me-2';
+            text.textContent = 'Marquer comme terminée';
+        }
+        showToast('❌ Erreur', 'Une erreur est survenue. Veuillez réessayer.', 'error');
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+// Initialisation des onglets Bootstrap
+var tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+tabEls.forEach(function(tabEl) {
+    tabEl.addEventListener('click', function (e) {
+        e.preventDefault();
+        var tab = new bootstrap.Tab(tabEl);
+        tab.show();
+    });
+
+    // Gestion du formulaire de commentaires
+    const commentForm = document.querySelector('#comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn ? submitBtn.innerHTML : '';
+            
+            try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Envoi en cours...';
+                }
+                
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    }
+                });
+                
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Recharger la page pour afficher le nouveau commentaire
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Une erreur est survenue');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de l\'envoi du commentaire');
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            }
+        });
+    }
+
+    // Gestion du formulaire de notation
+    const ratingForm = document.querySelector('#rating-form');
+    if (ratingForm) {
+        ratingForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        // Mettre à jour l'affichage de la note
+                        const ratingBlock = document.querySelector('.rating-block');
+                        if (ratingBlock) {
+                            const ratingText = ratingBlock.querySelector('.rb-head');
+                            if (ratingText) {
+                                ratingText.textContent = `Note du cours: ${data.average_rating}/5 · ❤ ${data.like_count}`;
+                            }
+                        }
+                        // Afficher un message de succès
+                        alert('Votre note a été enregistrée avec succès !');
+                    } else {
+                        alert('Erreur: ' + (data.message || 'Une erreur est survenue'));
+                    }
+                } else {
+                    throw new Error('Erreur réseau');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de l\'envoi de votre note');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+    }
+    // Gestion de la soumission des exercices
+    document.querySelectorAll('.exercise-form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const exerciseId = form.closest('.exercise-card')?.dataset.exerciseId;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const feedbackDiv = form.querySelector('.feedback');
+            
+            if (!exerciseId || !submitBtn || !feedbackDiv) {
+                console.error('Éléments du formulaire introuvables');
+                return;
+            }
+            
+            const selectedChoice = form.querySelector('input[type="radio"]:checked');
+            if (!selectedChoice) {
+                alert('Veuillez sélectionner une réponse');
+                return;
+            }
+
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Envoi...';
+
+            try {
+                const response = await fetch(`/exercises/exercise/${exerciseId}/submit/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `choice_id=${encodeURIComponent(selectedChoice.value)}` 
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                feedbackDiv.style.display = 'block';
+                if (result.correct) {
+                    feedbackDiv.className = 'feedback alert alert-success mt-2';
+                    feedbackDiv.innerHTML = '<i class="fas fa-check-circle"></i> Bonne réponse !';
+                } else {
+                    feedbackDiv.className = 'feedback alert alert-danger mt-2';
+                    feedbackDiv.innerHTML = '<i class="fas fa-times-circle"></i> Mauvaise réponse. Essayez encore !';
+                }
+                
+                if (result.explanation) {
+                    feedbackDiv.innerHTML += `<div class="mt-2"><strong>Explication :</strong> ${result.explanation}</div>`;
+                }
+            } catch (error) {
+                console.error('Erreur lors de la soumission de l\'exercice:', error);
+                alert('Une erreur est survenue lors de la soumission de votre réponse.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+    });
+
+    // Initialisation des variables globales
+    const video = document.getElementById('lesson-video');
+    const lessonTitle = document.getElementById('lesson-title');
+    const lessonStatus = document.getElementById('lesson-status');
+    const nextUrlInput = document.getElementById('next-url');
+    const layoutEl = document.querySelector('.ld-layout');
+    let currentLessonId = parseInt(layoutEl ? layoutEl.getAttribute('data-current-lesson-id') : '0', 10);
+    
+    // Activer la lecture automatique si possible
+    if (video) {
+        video.autoplay = true;
+        video.muted = true; // Nécessaire pour la lecture automatique sur certains navigateurs
+        
+        // Essayer de démarrer la lecture automatiquement
+        const playPromise = video.play();
+        
+        // Gérer le cas où la lecture automatique est bloquée
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Lecture automatique empêchée, activation du son et nouvelle tentative...');
+                video.muted = false;
+                video.play().catch(e => console.log('Échec de la lecture automatique:', e));
+            });
+        }
+        
+        // Passer à la vidéo suivante à la fin de la lecture
+        video.addEventListener('ended', playNextVideo);
+    }
+
+    // Helper pour récupérer le token CSRF depuis les cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.indexOf(name + '=') === 0) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Récupère la playlist hiérarchique sérialisée en JSON par Django
+    const combinedRaw = JSON.parse(document.getElementById('combined-data') ? 
+        document.getElementById('combined-data').textContent || '[]' : '[]');
+    const completedIdsRaw = JSON.parse(document.getElementById('completed-ids') ? 
+        document.getElementById('completed-ids').textContent || '[]' : '[]');
+    const completedSet = new Set(Array.isArray(completedIdsRaw) ? completedIdsRaw : []);
+    const combinedClean = Array.isArray(combinedRaw) ? 
+        combinedRaw.filter(x => x && x.href) : [];  // Moins restrictif : inclure les leçons sans vidéo
+    
+    // Récupération des variables du template
+    const templateVars = JSON.parse(document.getElementById('template-vars').textContent);
+    const firstLessonId = templateVars.first_lesson_id;
+    const isEnrolled = templateVars.is_enrolled;
+
+    function findCurrentIndex() {
+      if (!video) return -1;
+      
+      // Essayer de trouver par l'URL actuelle
+      const src = (video.querySelector('source') || {}).src || '';
+      if (src) {
+        const idx = combinedClean.findIndex(e => e.media_url === src);
+        if (idx >= 0) return idx;
+      }
+      
+      // Essayer de trouver par l'ID de la leçon courante
+      if (currentLessonId) {
+        const idx = combinedClean.findIndex(e => e.lesson_id === currentLessonId);
+        if (idx >= 0) return idx;
+      }
+      
+      // Si toujours pas trouvé, vérifier l'URL de la page
+      const urlParams = new URLSearchParams(window.location.search);
+      const lessonParam = urlParams.get('lesson');
+      if (lessonParam) {
+        const idx = combinedClean.findIndex(e => String(e.lesson_id) === String(lessonParam));
+        if (idx >= 0) return idx;
+      }
+      
+      // Par défaut, première vidéo
+      return 0;
+    }
+
+    // Fonction pour jouer la vidéo suivante
+    function playNextVideo() {
+        if (!video) return;
+        
+        // Trouver l'index de la vidéo actuelle
+        const currentIndex = findCurrentIndex();
+        if (currentIndex === -1) {
+            console.log('Vidéo actuelle non trouvée, passage à la première vidéo');
+            currentLessonId = combinedClean[0]?.lesson_id;
+            playVideo(0);
+            return;
+        }
+        
+        // Calculer l'index de la prochaine vidéo (avec bouclage)
+        const nextIndex = (currentIndex + 1) % combinedClean.length;
+        
+        // Mettre à jour et lire la vidéo suivante
+        playVideo(nextIndex);
+    }
+    
+    // Fonction pour lire une vidéo spécifique par son index
+    function playVideo(index) {
+        if (index < 0 || index >= combinedClean.length) {
+            console.error('Index de vidéo invalide:', index);
+            return;
+        }
+        
+        const nextVideo = combinedClean[index];
+        if (!nextVideo) {
+            console.error('Aucune vidéo trouvée à l\'index', index);
+            return;
+        }
+        
+        console.log('Lecture de la vidéo:', nextVideo.title, 'URL:', nextVideo.media_url);
+        
+        // Mettre à jour l'interface
+        if (lessonTitle) lessonTitle.textContent = nextVideo.title || 'Vidéo suivante';
+        if (lessonStatus) lessonStatus.innerHTML = '';
+        
+        // Mettre à jour l'URL dans la barre d'adresse
+        if (history && history.replaceState) {
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('lesson', nextVideo.lesson_id);
+            window.history.replaceState({}, '', newUrl);
+        }
+        
+        // Mettre à jour l'ID de la leçon courante
+        currentLessonId = nextVideo.lesson_id;
+        
+        // Mettre à jour la source vidéo
+        const source = video.querySelector('source');
+        if (source) {
+            source.src = nextVideo.media_url;
+        } else {
+            const s = document.createElement('source');
+            s.src = nextVideo.media_url;
+            s.type = 'video/mp4';
+            video.innerHTML = ''; // Supprimer les anciennes sources
+            video.appendChild(s);
+        }
+        
+        // Réinitialiser les gestionnaires d'événements
+        video.onerror = null;
+        video.onloadeddata = null;
+        
+        // Configurer les nouveaux gestionnaires d'événements
+        video.onerror = function() {
+            console.error('Erreur de chargement de la vidéo, passage à la suivante...');
+            setTimeout(() => playNextVideo(), 1000);
+        };
+        
+        video.onloadeddata = function() {
+            console.log('Vidéo chargée, démarrage de la lecture...');
+            video.play().catch(e => {
+                console.log('Erreur de lecture, tentative avec son coupé...', e);
+                video.muted = true;
+                video.play().catch(err => {
+                    console.error('Échec de la lecture:', err);
+                    // Essayer la vidéo suivante en cas d'échec
+                    setTimeout(() => playNextVideo(), 1000);
+                });
+            });
+        };
+        
+        // Recharger la vidéo
+        video.load();
+        
+        // Mettre à jour l'interface
+        renderSidebar();
+        updateActiveVideoInList();
+    }
+    
+    // Mettre à jour l'élément actif dans la liste des vidéos
+    function updateActiveVideoInList() {
+        // Mettre à jour la liste principale
+        document.querySelectorAll('.yt-item').forEach(el => {
+            const itemId = parseInt(el.getAttribute('data-lesson-id'), 10);
+            if (itemId === currentLessonId) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+        
+        // Mettre à jour la liste des vidéos de la leçon
+        document.querySelectorAll('.lv-list .lv-item').forEach(el => {
+            const itemId = parseInt(el.getAttribute('data-lesson-id'), 10);
+            if (itemId === currentLessonId) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+    }
+    
+    function bindPlaylistClicks(container) {
+      container.querySelectorAll('.yt-item').forEach(a => {
+        a.addEventListener('click', function (e) {
+          const newId = this.getAttribute('data-lesson-id');
+          const entry = combinedClean.find(e => String(e.lesson_id) === String(newId));
+          const newUrl = this.getAttribute('data-video-url') || (entry ? entry.media_url : null);
+          const newTitle = this.getAttribute('data-title') || (entry ? entry.title : '');
+          if (this.classList.contains('locked')) return; // laisser navigation serveur
+          if (video && newUrl) {
+            e.preventDefault();
+            const source = video.querySelector('source');
+            try { video.pause(); } catch {}
+            if (source) source.src = newUrl; else { const s = document.createElement('source'); s.src = newUrl; s.type = 'video/mp4'; video.appendChild(s); }
+            video.load(); 
+            video.play().catch(e => {
+                console.log('Erreur lors de la lecture:', e);
+                video.muted = true;
+                video.play().catch(e => console.log('Échec de la lecture:', e));
+            });
+            if (lessonTitle && newTitle) lessonTitle.textContent = newTitle;
+            if (lessonStatus) lessonStatus.innerHTML = '';
+            currentLessonId = parseInt(newId, 10);
+            // Re-rendre la sidebar et mettre à jour l'interface
+            renderSidebar();
+            updateActiveVideoInList();
+          }
+        });
+
+    // Click handler for lesson sub-playlist
+    document.querySelectorAll('.lv-list .lv-item').forEach(a => {
+      a.addEventListener('click', function (e) {
+        const newUrl = this.getAttribute('data-video-url');
+        const newTitle = this.getAttribute('data-title');
+        const newId = this.getAttribute('data-lesson-id');
+        if (video && newUrl) {
+          e.preventDefault();
+          const source = video.querySelector('source');
+          try { video.pause(); } catch {}
+          if (source) source.src = newUrl; else { const s = document.createElement('source'); s.src = newUrl; s.type = 'video/mp4'; video.appendChild(s); }
+          video.load(); video.play();
+          if (lessonTitle && newTitle) lessonTitle.textContent = newTitle;
+          if (lessonStatus) lessonStatus.innerHTML = '';
+          currentLessonId = parseInt(newId, 10);
+          // Active state
+          document.querySelectorAll('.lv-list .lv-item').forEach(el => el.classList.remove('active'));
+          this.classList.add('active');
+          // Réaligner la sidebar
+          renderSidebar();
+        }
+      });
+    });
+      });
+    }
+
+    function renderSidebar() {
+      const listEl = document.getElementById('yt-list');
+      if (!listEl) {
+        console.error('Élément yt-list non trouvé!');
+        return;
+      }
+      listEl.innerHTML = '';
+      
+      console.log('combinedRaw:', combinedRaw);
+      console.log('combinedClean:', combinedClean);
+      
+      if (!combinedClean.length) {
+        listEl.innerHTML = '<div class="muted" style="padding:8px 0;">Aucune leçon suivante.</div>';
+        console.log('Playlist vide - combinedClean est vide');
+        return;
+      }
+      
+      console.log('Playlist contient', combinedClean.length, 'éléments');
+      let idx = findCurrentIndex();
+      if (idx < 0) idx = 0;
+      // Affiche les 8 prochaines entrées dans l'ordre séquentiel
+      const toShow = Math.min(8, combinedClean.length - idx - 1);
+      console.log('Va afficher', toShow, 'éléments à partir de l\'index', idx);
+      for (let i = 0; i < toShow; i++) {
+        const nextIdx = (idx + 1 + i) % combinedClean.length;
+        const ent = combinedClean[nextIdx];
+        console.log('Entrée de la playlist:', ent, 'Index:', nextIdx); // Debug
+        const locked = (!isEnrolled && firstLessonId !== null && ent.lesson_id !== firstLessonId);
+        const watched = completedSet.has(ent.lesson_id);
+        const a = document.createElement('a');
+        a.className = 'yt-item' + (locked ? ' locked' : '') + (watched ? ' watched' : '');
+        a.href = ent.href;
+        a.setAttribute('data-lesson-id', String(ent.lesson_id));
+        if (!locked) a.setAttribute('data-video-url', ent.media_url);
+        a.setAttribute('data-title', ent.title);
+        // Utiliser la miniature de la leçon si disponible, sinon utiliser une image par défaut
+        const placeholderUrl = '{% static "img/video-placeholder.jpg" %}';
+        const thumbnailUrl = ent.thumbnail_url || placeholderUrl;
+        
+        // Créer la structure HTML pour l'élément de la playlist
+        let html = `
+          <div class="thumb" style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; overflow: hidden; border-radius: 4px;">
+            <img src="${thumbnailUrl}" 
+                 alt="Miniature de ${ent.title.replace(/"/g, '&quot;')}" 
+                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">`;
+        
+        if (watched) {
+          html += '<div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: white; padding: 2px 5px; border-radius: 3px; font-size: 10px;">✅</div>';
+        }
+        
+        if (locked) {
+          html += '<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">🔒</div>';
+        }
+        
+        html += `
+          </div>
+          <div class="meta" style="padding: 8px 0;">
+            <div class="t1" style="font-weight: 500; font-size: 14px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; min-height: 40px;">
+              <span class="idx" style="display: inline-block; width: 20px; color: #666; font-size: 12px;">${idx + 1 + i}.</span> ${ent.title}
+            </div>
+            <div class="t2" style="font-size: 12px; color: #666; margin-top: 4px;">
+              ${locked ? '🔒 Réservé aux inscrits' : (watched ? '✅ Déjà vu' : '')}
+            </div>
+          </div>`;
+          
+        a.innerHTML = html;
+        listEl.appendChild(a);
+      }
+      bindPlaylistClicks(listEl);
+    }
+
+    // Première construction de la sidebar à l'ouverture
+    renderSidebar();
+    
+    // Afficher la playlist simple (nouvelle solution)
+    renderSimplePlaylist();
+    
+    // Test simple pour vérifier si les données existent
+    console.log("TEST VÉRIFICATION DONNÉES:");
+    console.log("simple_playlist-data element:", document.getElementById('simple-playlist-data'));
+    console.log("simple-playlist element:", document.getElementById('simple-playlist'));
+    
+    const testData = document.getElementById('simple-playlist-data')?.textContent;
+    console.log("Données brutes:", testData);
+    
+    if (testData) {
+        try {
+            const parsed = JSON.parse(testData);
+            console.log("Données parsées:", parsed);
+            console.log("Nombre d'éléments:", parsed.length);
+        } catch (e) {
+            console.error("Erreur parsing JSON:", e);
+        }
+    }
+
+    // Initialisation du lecteur vidéo et gestion des événements
+    if (video) {
+      // Gestionnaire pour la fin de la vidéo
+      video.addEventListener('ended', function() {
+        console.log('Vidéo terminée, marquage comme complétée...');
+        
+        // Marquer la leçon comme complétée
+        const completeUrl = `/courses/lessons/${currentLessonId}/complete/`;
+        fetch(completeUrl, {
+          method: "POST",
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            console.log('Leçon marquée comme terminée');
+            // Mettre à jour l'interface
+            renderSidebar();
+            updateActiveVideoInList();
+          }
+          // Passer à la vidéo suivante dans tous les cas
+          playNextVideo();
+        })
+        .catch(error => {
+          console.error('Erreur lors du marquage de la leçon comme terminée:', error);
+          // Passer à la vidéo suivante même en cas d'erreur
+          playNextVideo();
+        });
+      });
+      
+      // Gestion des erreurs de lecture
+      video.addEventListener('error', function(e) {
+        console.error('Erreur de lecture vidéo:', e);
+        // Essayer la vidéo suivante en cas d'erreur
+        setTimeout(playNextVideo, 1000);
+      });
+      
+      // Activer la lecture automatique si possible
+      const tryAutoplay = () => {
+        if (video.paused) {
+          video.play().catch(e => {
+            console.log('Lecture automatique échouée, tentative avec son coupé...', e);
+            video.muted = true;
+            video.play().catch(e => console.error('Échec de la lecture automatique:', e));
+          });
+        }
+      };
+      
+        // Gestion des clics sur les éléments de la playlist
+      document.querySelectorAll('.yt-list .yt-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+          const newId = this.getAttribute('data-lesson-id');
+          const entry = combinedClean.find(entry => String(entry.lesson_id) === String(newId));
+          
+          if (!entry) return;
+          
+          if (entry.lesson_id === currentLessonId) {
+            // Même leçon: mise à jour sans rechargement
+            e.preventDefault();
+            const source = video.querySelector('source');
+            if (source) {
+              source.src = entry.media_url;
+            } else {
+              const s = document.createElement('source');
+              s.src = entry.media_url;
+              s.type = 'video/mp4';
+              video.appendChild(s);
+            }
+            
+            video.load();
+            video.play().catch(e => {
+              console.error('Erreur de lecture:', e);
+              video.muted = true;
+              video.play().catch(console.error);
+            });
+            
+            if (lessonTitle && entry.title) {
+              lessonTitle.textContent = entry.title;
+            }
+            if (lessonStatus) {
+              lessonStatus.innerHTML = '';
+            }
+            
+            // Mettre à jour la sidebar
+            renderSidebar();
+          } else {
+            // Autre leçon: navigation
+            window.location.href = entry.href || '#';
+          }
+        });
+      });
+    }
+
+    // Gestion des clics sur les éléments de la playlist
+    function handlePlaylistItemClick(e) {
+      const target = e.currentTarget;
+      const newId = target.getAttribute('data-lesson-id');
+      const entry = combinedClean.find(entry => String(entry.lesson_id) === String(newId));
+      
+      if (!entry) return;
+      
+      if (entry.lesson_id === currentLessonId) {
+        // Même leçon: mise à jour sans rechargement
+        e.preventDefault();
+        const source = video.querySelector('source');
+        if (source) {
+          source.src = entry.media_url;
+        } else {
+          const s = document.createElement('source');
+          s.src = entry.media_url;
+          s.type = 'video/mp4';
+          video.appendChild(s);
+        }
+        
+        video.load();
+        video.play().catch(e => {
+          console.error('Erreur de lecture:', e);
+          video.muted = true;
+          video.play().catch(console.error);
+        });
+        
+        if (lessonTitle && entry.title) {
+          lessonTitle.textContent = entry.title;
+        }
+        if (lessonStatus) {
+          lessonStatus.innerHTML = '';
+        }
+        
+        // Mettre à jour la sidebar
+        renderSidebar();
+      } else {
+        // Autre leçon: navigation
+        window.location.href = entry.href || '#';
+      }
+    }
+    
+    // Ajouter les écouteurs d'événements aux éléments de la playlist
+    document.querySelectorAll('.yt-list .yt-item').forEach(item => {
+      item.addEventListener('click', handlePlaylistItemClick);
+    });
+    
+    // Initialisation du lecteur vidéo
+    if (video) {
+      const source = video.querySelector('source');
+      if (source && source.src) {
+        video.load();
+        video.play().catch(e => {
+          console.error('Erreur de lecture initiale:', e);
+          video.muted = true;
+          video.play().catch(console.error);
+        });
+      }
+    }
+
+    // Tabs (Bootstrap-like) switching sans Bootstrap JS + deep-link support
+    const tabLinks = document.querySelectorAll('.ld-tabs .nav-link');
+    const tabPanes = document.querySelectorAll('.ld-tabs .tab-pane');
+    function activateTab(targetSel){
+      tabLinks.forEach(l => { l.classList.remove('active'); l.setAttribute('aria-selected','false'); });
+      tabPanes.forEach(p => p.classList.remove('show','active'));
+      const link = document.querySelector(`.ld-tabs .nav-link[href="${targetSel}"]`);
+      const pane = document.querySelector(targetSel);
+      if(link){ link.classList.add('active'); link.setAttribute('aria-selected','true'); }
+      if(pane){ pane.classList.add('show','active'); }
+      if (history.pushState) { history.pushState(null, '', targetSel); } else { location.hash = targetSel; }
+    }
+    tabLinks.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetSel = this.getAttribute('href');
+        if (!targetSel) return;
+        activateTab(targetSel);
+      });
+    });
+
+    // Activate tab from hash on load
+    const hash = location.hash;
+    if (hash === '#tab-desc' || hash === '#tab-res' || hash === '#tab-com') {
+      const link = document.querySelector(`.ld-tabs .nav-link[href="${hash}"]`);
+      if (link) link.click();
+    }
+
+    // CTA buttons to open rating/comment
+    const btnOpenRating = document.getElementById('btn-open-rating');
+    const btnOpenComment = document.getElementById('btn-open-comment');
+    btnOpenRating?.addEventListener('click', ()=>{
+      activateTab('#tab-res');
+      const firstStar = document.getElementById('star5') || document.querySelector('#rating-form input[name="rating"]');
+      try{ firstStar?.focus(); }catch(_){ }
+      document.getElementById('rating-form')?.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    btnOpenComment?.addEventListener('click', ()=>{
+      activateTab('#tab-com');
+      // Attendre que l'onglet soit visible
+      setTimeout(() => {
+        // Essayer de trouver la zone de texte du commentaire
+        const commentTextarea = document.querySelector('#tab-com textarea[name="comment"]');
+        if (commentTextarea) {
+          try { 
+            commentTextarea.focus();
+            commentTextarea.scrollIntoView({behavior: 'smooth', block: 'center'});
+          } catch(e) { 
+            console.error('Erreur lors du focus sur la zone de commentaire:', e);
+          }
+        } else {
+          console.error('Zone de commentaire introuvable');
+        }
+      }, 100);
+    });
+  });
+
+  // Fonction pour avancer/reculer la vidéo
+  function seekVideo(seconds) {
+    const video = document.querySelector('video');
+    if (!video) return;
+    
+    video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + seconds));
+    
+    // Afficher un retour visuel
+    showSeekFeedback(seconds > 0 ? 'forward' : 'backward', Math.abs(seconds) + 's');
+  }
+
+  // Fonction pour afficher un retour visuel
+  function showSeekFeedback(direction, time) {
+    // Supprimer l'élément de feedback s'il existe déjà
+    const existingFeedback = document.querySelector('.seek-feedback');
+    if (existingFeedback) {
+      existingFeedback.remove();
+    }
+    
+    // Créer l'élément de feedback
+    const feedback = document.createElement('div');
+    feedback.className = `seek-feedback seek-${direction}`;
+    feedback.innerHTML = `${direction === 'forward' ? '⏩' : '⏪'} ${time}`;
+    
+    // Ajouter au DOM
+    const videoContainer = document.querySelector('.ld-player') || document.body;
+    videoContainer.appendChild(feedback);
+    
+    // Supprimer après l'animation
+    setTimeout(() => {
+      feedback.style.opacity = '0';
+      setTimeout(() => feedback.remove(), 500);
+    }, 1000);
+  }
+
+  // 🎯 FONCTION DE MISE À JOUR DYNAMIQUE DU BOUTON
+  function updateLessonButtonState(progressData) {
+    const button = document.getElementById('mark-lesson-done');
+    if (!button) return;
+
+    const icon = button.querySelector('i');
+    const text = button.querySelector('.btn-text');
+    const statusIndicator = document.getElementById('lesson-status-indicator');
+    const statusMessage = document.getElementById('status-message');
+
+    // Extraire les données de progression
+    const {
+      watch_percentage = 0,
+      auto_completed = false,
+      manually_marked = false,
+      fully_completed = false
+    } = progressData;
+
+    console.log('🎯 MISE À JOUR BOUTON - Progression:', {
+      watch_percentage,
+      auto_completed,
+      manually_marked,
+      fully_completed
+    });
+
+    // Réinitialiser toutes les classes
+    button.className = 'btn mark-lesson-btn';
+    
+    // Déterminer l'état et mettre à jour
+    if (fully_completed || manually_marked) {
+      // État : Leçon terminée
+      button.classList.add('btn-success', 'disabled');
+      button.disabled = true;
+      icon.className = 'bi bi-check-circle-fill me-2';
+      text.textContent = 'Leçon terminée';
+      
+      // Cacher l'indicateur
+      if (statusIndicator) statusIndicator.style.display = 'none';
+      
+    } else if (auto_completed && !manually_marked) {
+      // État : Prêt à valider (80% atteint mais pas encore validé)
+      button.classList.add('ready-to-validate');
+      button.disabled = false;
+      icon.className = 'bi bi-check-circle me-2';
+      text.textContent = 'Valider la leçon';
+      
+      // Afficher l'indicateur
+      if (statusIndicator && statusMessage) {
+        statusIndicator.style.display = 'block';
+        statusMessage.textContent = '🎯 Vidéo terminée ! Cliquez pour valider la leçon.';
+      }
+      
+    } else if (watch_percentage > 0) {
+      // État : En progression
+      button.classList.add('in-progress');
+      button.disabled = false;
+      icon.className = 'bi bi-play-circle me-2';
+      text.textContent = `Marquer comme terminée (${Math.round(watch_percentage)}%)`;
+      
+      // Afficher la progression
+      if (statusIndicator && statusMessage) {
+        statusIndicator.style.display = 'block';
+        statusMessage.textContent = `📺 Progression : ${Math.round(watch_percentage)}% - Continuez à regarder ou validez quand vous êtes prêt.`;
+      }
+      
+    } else {
+      // État : Non commencé
+      button.classList.add('btn-outline-secondary');
+      button.disabled = false;
+      icon.className = 'bi bi-circle me-2';
+      text.textContent = 'Marquer comme terminée';
+      
+      // Cacher l'indicateur
+      if (statusIndicator) statusIndicator.style.display = 'none';
+    }
+
+    console.log('✅ BOUTON MIS À JOUR - Classe:', button.className);
+    console.log('✅ BOUTON MIS À JOUR - Texte:', text.textContent);
+  }
+
+  // Gestion des sous-titres
+  document.addEventListener('DOMContentLoaded', function() {
+      const video = document.getElementById('lesson-video');
+      const subtitleSelector = document.getElementById('subtitle-selector');
+      const downloadSubtitleBtn = document.getElementById('download-subtitle');
+      const subtitleTrack = document.getElementById('subtitle-track');
+
+      if (subtitleSelector && video) {
+          subtitleSelector.addEventListener('change', function() {
+              if (this.value === 'none') {
+                  if (subtitleTrack) subtitleTrack.mode = 'hidden';
+              } else {
+                  if (subtitleTrack) {
+                      subtitleTrack.mode = 'showing';
+                      // Ici, vous pouvez ajouter la logique pour changer la langue des sous-titres
+                      // si vous avez plusieurs fichiers de sous-titres
+                  }
+              }
+          });
+      }
+
+      if (downloadSubtitleBtn && '{{ subtitle_url }}') {
+          downloadSubtitleBtn.addEventListener('click', function() {
+              const a = document.createElement('a');
+              a.href = '{{ subtitle_url }}';
+              a.download = 'sous-titres.vtt';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+          });
+      }
+  });
+
+  // Activer/désactiver les sous-titres avec la touche C
+  document.addEventListener('keydown', function(e) {
+      if (e.code === 'KeyC' && video) {
+          const track = video.querySelector('track');
+          if (track) {
+              track.mode = track.mode === 'showing' ? 'hidden' : 'showing';
+              showToast('Sous-titres', track.mode === 'showing' ? 'Sous-titres activés' : 'Sous-titres désactivés');
+          }
+      }
+  });
+
+  // Écouter les touches du clavier
+  document.addEventListener('keydown', (e) => {
+    // Ne pas déclencher si on est dans un champ de formulaire
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+      return;
+    }
+    
+    const video = document.querySelector('video');
+    if (!video) return;
+    
+    switch(e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        seekVideo(-10); // Reculer de 10 secondes
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        seekVideo(10); // Avancer de 10 secondes
+        break;
+      case ' ':
+      case 'Spacebar':
+        // Gérer la barre d'espace pour mettre en pause/reprendre
+        if (document.activeElement === video) {
+          e.preventDefault();
+          if (video.paused) video.play();
+          else video.pause();
+        }
+        break;
+    }
+  });
+
+  // Gestion du formulaire de marquage de la leçon comme terminée
+  document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.mark-lesson-completed-form');
+    
+    forms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const button = this.querySelector('button[type="submit"]');
+        const icon = button.querySelector('i');
+        const text = button.querySelector('span');
+        const formData = new FormData(this);
+        
+        // Récupérer l'ID de la leçon depuis le bouton ou le formulaire
+        const lessonId = button.dataset.lessonId || this.dataset.lessonId;
+        
+        // Désactiver le bouton pendant la requête
+        button.disabled = true;
+        
+        // Créer une requête AJAX avec XMLHttpRequest pour un meilleur contrôle
+        const xhr = new XMLHttpRequest();
+        console.log('Sending request to:', this.action);  // Debug
+        console.log('Form data:', Object.fromEntries(formData));  // Debug
+        xhr.open('POST', this.action, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('X-CSRFToken', formData.get('csrfmiddlewaretoken'));
+        
+        xhr.onload = function() {
+          console.log('XHR Status:', xhr.status);  // Debug
+          console.log('XHR Response:', xhr.responseText);  // Debug
+          
+          try {
+            console.log('DEBUG: Entrée dans le bloc try'); // Debug
+            if (xhr.status >= 200 && xhr.status < 300) {
+              console.log('DEBUG: XHR status OK, parsing response'); // Debug
+              const data = JSON.parse(xhr.responseText);
+              console.log('DEBUG: Response parsed:', data); // Debug
+              
+              if (data.status !== 'success') {
+                throw new Error(data.message || 'Erreur inconnue');
+              }
+              
+              // Mettre à jour l'interface utilisateur avec la nouvelle fonction
+              const isCompleted = data.completed || data.fully_completed || false;
+              console.log('DEBUG: isCompleted =', isCompleted); // Debug
+              console.log('DEBUG: data =', data); // Debug
+              
+              // 🎯 UTILISER LA NOUVELLE FONCTION DE MISE À JOUR
+              updateLessonButtonState({
+                watch_percentage: 100, // 100% car validé manuellement
+                auto_completed: true,
+                manually_marked: isCompleted,
+                fully_completed: isCompleted
+              });
+              
+              console.log('DEBUG: Après mise à jour - button.className:', button.className); // Debug
+              console.log('DEBUG: Après mise à jour - icon.className:', icon.className); // Debug
+              console.log('DEBUG: Après mise à jour - text.textContent:', text.textContent); // Debug
+              
+              // Mettre à jour le badge de statut de la leçon
+              const lessonStatus = document.getElementById('lesson-status');
+              if (lessonStatus) {
+                lessonStatus.innerHTML = isCompleted ? 
+                  '<span class="pill done">✅ Leçon terminée</span>' : 
+                  '';
+              }
+              
+              // 🔄 SYNCHRONISER LA PLAYLIST : Mettre à jour l'icône de la leçon dans la playlist
+              const playlistItem = document.querySelector(`.playlist-item[data-lesson-id="${lessonId}"]`);
+              if (playlistItem) {
+                const statusElement = playlistItem.querySelector('.lesson-status');
+                if (statusElement) {
+                  if (isCompleted) {
+                    playlistItem.classList.add('completed');
+                    statusElement.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+                  } else {
+                    playlistItem.classList.remove('completed');
+                    statusElement.innerHTML = '';
+                  }
+                }
+                
+                // Mettre à jour le numéro de la leçon dans la playlist
+                const numberElement = playlistItem.querySelector('.playlist-item-number');
+                if (numberElement) {
+                  if (isCompleted) {
+                    numberElement.style.backgroundColor = '#28a745';
+                  } else {
+                    numberElement.style.backgroundColor = '#2196f3';
+                  }
+                }
+              }
+              
+              // Afficher un message de succès
+              showToast('Succès', data.message || 'Progression mise à jour avec succès', 'success');
+              
+              // Empêcher toute autre exécution
+              return;
+            } else {
+              console.error('Server returned status:', xhr.status);  // Debug
+              console.error('Response text:', xhr.responseText);  // Debug
+              throw new Error(`Erreur serveur: ${xhr.status} - ${xhr.responseText}`);
+            }
+          } catch (error) {
+            console.error('Erreur:', error);
+            console.error('Erreur message:', error.message);
+            console.error('Erreur stack:', error.stack);
+            console.error('XHR Status:', xhr.status);
+            console.error('XHR Response:', xhr.responseText);
+            showToast('Erreur', error.message || 'Échec de la mise à jour de la progression.', 'error');
+          } finally {
+            // Réactiver le bouton dans tous les cas
+            button.disabled = false;
+          }
+        };
+        
+        xhr.onerror = function() {
+          showToast('Erreur', 'Erreur de connexion. Veuillez réessayer.', 'error');
+          button.disabled = false;
+        };
+        
+        xhr.send(formData);
+      });
+    });
+  });
+  
+  // Fonction utilitaire pour afficher des notifications
+  function showToast(title, message, type = 'info') {
+    // Utiliser SweetAlert2 si disponible
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: title,
+        text: message,
+        icon: type,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    } 
+    // Sinon, utiliser Toastify si disponible
+    else if (typeof Toastify !== 'undefined') {
+      Toastify({
+        text: `${title}: ${message}`,
+        duration: 3000,
+        gravity: "top",
+        position: 'right',
+        backgroundColor: type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#17a2b8',
+        stopOnFocus: true
+      }).showToast();
+    } 
+    // Sinon, utiliser une alerte native
+    else {
+      alert(`${title}: ${message}`);
+    }
+  }
+</script>
+
+<!-- Script de suivi de progression des leçons -->
+{% if is_enrolled %}
+<script src="{% static 'js/lesson_progress_fixed.js' %}"></script>
+<script>
+// Données pour le suivi de progression
+document.body.dataset.lessonId = "{{ lesson.id }}";
+document.body.dataset.courseId = "{{ lesson.module.course.id }}";
+
+// Token CSRF disponible globalement
+window.csrfToken = "{{ csrf_token }}";
+
+console.log('🔧 Données configurées dans lesson_detail.html');
+console.log('- lessonId:', document.body.dataset.lessonId);
+console.log('- courseId:', document.body.dataset.courseId);
+console.log('- csrfToken:', window.csrfToken);
+
+// 🎯 INTÉGRATION AVEC LE SYSTÈME DE PROGRESSION VIDÉO
+// Intercepter les mises à jour de progression pour mettre à jour le bouton
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialiser l'état du bouton au chargement
+  const lessonId = document.body.dataset.lessonId;
+  if (lessonId) {
+    // Récupérer la progression initiale
+    fetch(`/courses/progress/lesson/${lessonId}/progress/`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('🎯 PROGRESSION INITIALE:', data);
+          updateLessonButtonState(data);
+        }
+      })
+      .catch(error => console.error('Erreur lors du chargement de la progression:', error));
+  }
+
+  // Écouter les mises à jour de progression (depuis lesson_progress_fixed.js)
+  window.addEventListener('lessonProgressUpdated', function(event) {
+    const progressData = event.detail;
+    console.log('🎯 PROGRESSION VIDÉO MISE À JOUR:', progressData);
+    updateLessonButtonState(progressData);
+  });
+
+  // Écouter la complétion automatique à 80%
+  window.addEventListener('lessonAutoCompleted', function(event) {
+    const progressData = event.detail;
+    console.log('🎯 COMPLÉTION AUTOMATIQUE À 80%:', progressData);
+    
+    // Mettre à jour le bouton pour l'état "prêt à valider"
+    updateLessonButtonState({
+      ...progressData,
+      auto_completed: true,
+      manually_marked: false
+    });
+
+    // Afficher une notification spéciale
+    showToast('🎯 Vidéo terminée !', 'Cliquez sur "Valider la leçon" pour marquer cette leçon comme terminée.', 'info');
+  });
+
+  // Écouter la validation manuelle
+  window.addEventListener('lessonManuallyCompleted', function(event) {
+    const progressData = event.detail;
+    console.log('🎯 LEÇON VALIDÉE MANUELLEMENT:', progressData);
+    
+    // Mettre à jour le bouton pour l'état "terminé"
+    updateLessonButtonState({
+      ...progressData,
+      manually_marked: true,
+      fully_completed: true
+    });
+  });
+});
+
+// 🎯 SURCHARGER LA FONCTION updateUI DE lesson_progress_fixed.js POUR INTÉGRATION
+if (typeof window.updateLessonProgressUI === 'undefined') {
+  window.updateLessonProgressUI = function(progressData) {
+    console.log('🎯 updateLessonProgressUI appelé avec:', progressData);
+    
+    // Mettre à jour le bouton
+    updateLessonButtonState(progressData);
+    
+    // Émettre un événement pour les autres composants
+    window.dispatchEvent(new CustomEvent('lessonProgressUpdated', {
+      detail: progressData
+    }));
+  };
+}
+</script>
+{% endif %}
+{% endblock %}

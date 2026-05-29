@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load extras %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Quiz : {{ lesson.title }}</h2>
+                    <p class="mb-0">{{ course.title }} - Module {{ lesson.module.title }}</p>
+                </div>
+                
+                <div class="card-body">
+                    {% if exercises %}
+                        <form method="post" id="quiz-form">
+                            {% csrf_token %}
+                            
+                            {% for exercise in exercises %}
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Question {{ forloop.counter }}</h5>
+                                        <p class="card-text">{{ exercise.question }}</p>
+                                        
+                                        <div class="choices-container ms-3">
+                                            {% if exercise.choices.count == 2 and "Vrai" in exercise.choices.first.text and "Faux" in exercise.choices.last.text %}
+                                                <!-- Mode Vrai/Faux spécial -->
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="card h-100 border-2 choice-card border-secondary" 
+                                                             data-choice-id="{{ exercise.choices.first.id }}"
+                                                             onclick="selectChoice({{ exercise.id }}, {{ exercise.choices.first.id }})">
+                                                            <div class="card-body text-center p-3">
+                                                                <input class="form-check-input d-none" 
+                                                                       type="radio" 
+                                                                       name="exercise_{{ exercise.id }}" 
+                                                                       id="choice_{{ exercise.choices.first.id }}" 
+                                                                       value="{{ exercise.choices.first.id }}"
+                                                                       {% if user_attempts|get_item:exercise.id == exercise.choices.first.id %}checked{% endif %}>
+                                                                <label class="form-check-label d-block h4 mb-0 text-success fw-bold cursor-pointer" 
+                                                                       for="choice_{{ exercise.choices.first.id }}"
+                                                                       style="cursor: pointer;">
+                                                                    <i class="bi bi-check-circle-fill me-2"></i>VRAI
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="card h-100 border-2 choice-card border-secondary" 
+                                                             data-choice-id="{{ exercise.choices.last.id }}"
+                                                             onclick="selectChoice({{ exercise.id }}, {{ exercise.choices.last.id }})">
+                                                            <div class="card-body text-center p-3">
+                                                                <input class="form-check-input d-none" 
+                                                                       type="radio" 
+                                                                       name="exercise_{{ exercise.id }}" 
+                                                                       id="choice_{{ exercise.choices.last.id }}" 
+                                                                       value="{{ exercise.choices.last.id }}"
+                                                                       {% if user_attempts|get_item:exercise.id == exercise.choices.last.id %}checked{% endif %}>
+                                                                <label class="form-check-label d-block h4 mb-0 text-danger fw-bold cursor-pointer" 
+                                                                       for="choice_{{ exercise.choices.last.id }}"
+                                                                       style="cursor: pointer;">
+                                                                    <i class="bi bi-x-circle-fill me-2"></i>FAUX
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <!-- Mode QCM normal -->
+                                                {% for choice in exercise.choices.all %}
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" 
+                                                               type="radio" 
+                                                               name="exercise_{{ exercise.id }}" 
+                                                               id="choice_{{ choice.id }}" 
+                                                               value="{{ choice.id }}"
+                                                               {% if user_attempts|get_item:exercise.id == choice.id %}checked{% endif %}>
+                                                        <label class="form-check-label" for="choice_{{ choice.id }}">
+                                                            {{ choice.text }}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send-check me-2"></i>Soumettre le quiz
+                                </button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Aucun exercice disponible pour cette leçon pour le moment.
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <a href="{% url 'courses:course_detail' course.id %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Retour au cours
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<style>
+.choice-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    transform: scale(1);
+}
+
+.choice-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.choice-card.selected-true {
+    border-color: #198754 !important;
+    background-color: #d1e7dd !important;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.25);
+    transform: scale(1.05);
+}
+
+.choice-card.selected-false {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
+    transform: scale(1.05);
+}
+
+.choice-card .card-body {
+    position: relative;
+}
+
+.choice-card.selected-true .card-body::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #198754;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.choice-card.selected-false .card-body::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.choice-card.selecting {
+    animation: pulse 0.3s ease-in-out;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Restaurer les sélections précédentes SANS effet visuel au chargement
+    const checkedRadios = document.querySelectorAll('input[type="radio"]:checked');
+    checkedRadios.forEach(radio => {
+        const card = document.querySelector(`[data-choice-id="${radio.value}"]`);
+        if (card) {
+            // Ne PAS ajouter les classes visuelles, juste garder le radio coché
+            // L'utilisateur verra tout neutre au départ
+            console.log('Réponse précédente restaurée silencieusement:', radio.value);
+        }
+    });
+    
+    // Fonction pour sélectionner un choix
+    window.selectChoice = function(exerciseId, choiceId) {
+        console.log('Sélection:', exerciseId, choiceId);
+        
+        // Trouver toutes les cartes pour cet exercice
+        const exerciseCards = document.querySelectorAll(`[data-choice-id][onclick*="${exerciseId}"]`);
+        
+        // Retirer la sélection de toutes les cartes
+        exerciseCards.forEach(card => {
+            card.classList.remove('selected-true', 'selected-false', 'selecting');
+            card.classList.add('border-secondary');
+            // Retirer aussi les backgrounds
+            card.classList.remove('bg-light');
+        });
+        
+        // Ajouter la sélection à la carte cliquée
+        const selectedCard = document.querySelector(`[data-choice-id="${choiceId}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('selecting');
+            
+            // Déterminer si c'est Vrai ou Faux
+            const isTrue = selectedCard.querySelector('.text-success');
+            
+            setTimeout(() => {
+                selectedCard.classList.remove('selecting');
+                selectedCard.classList.remove('border-secondary');
+                
+                if (isTrue) {
+                    selectedCard.classList.add('selected-true');
+                } else {
+                    selectedCard.classList.add('selected-false');
+                }
+            }, 150);
+            
+            // Cocher le radio button correspondant
+            const radioButton = selectedCard.querySelector('input[type="radio"]');
+            if (radioButton) {
+                radioButton.checked = true;
+            }
+        }
+    };
+    
+    // Vérifier que tous les champs sont remplis avant de soumettre
+    const form = document.getElementById('quiz-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const unanswered = [];
+            const exerciseInputs = form.querySelectorAll('input[type="radio"]:checked');
+            const totalExercises = {{ exercises|length }};
+            
+            if (exerciseInputs.length < totalExercises) {
+                e.preventDefault();
+                alert('Veuillez répondre à toutes les questions avant de soumettre.');
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

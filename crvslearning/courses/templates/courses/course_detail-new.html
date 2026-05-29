@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% load static %}
+{% load payment_tags %}
+{% load course_extras %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Loader circulaire fluide -->
+{% include 'courses/partials/course_loader.html' %}
+    <style>
+        footer  {
+            display: none;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap');
+
+        :root {
+            --primary: #0056D2;
+            --bg-gradient: linear-gradient(135deg, #cbdcd7 0%, #dcd6eb 100%);
+            --glass: rgba(255, 255, 255, 0.6);
+            --border-glass: rgba(255, 255, 255, 0.4);
+            /* Rayon de bordure réduit selon ta demande */
+            --radius-bento: 10px; 
+            --radius-inner: 6px;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: #121212;
+            padding-bottom: 50px;
+        }
+
+        /* --- HEADER COURSERA COMPACT --- */
+        .lms-header {
+            background: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1rem 5%;
+            margin-bottom: 30px;
+        }
+
+        /* --- SYSTÈME BENTO --- */
+        .panel-bento {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-bento);
+            border: 1px solid var(--border-glass);
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            height: 100%;
+        }
+
+        .nav-bento-tabs {
+            border: none;
+            gap: 5px;
+            margin-left: 15px;
+        }
+
+        .nav-bento-tabs .nav-link {
+            border: none;
+            background: rgba(255,255,255,0.3);
+            border-radius: var(--radius-bento) var(--radius-bento) 0 0;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .nav-bento-tabs .nav-link.active {
+            background: var(--glass);
+            color: var(--primary);
+        }
+
+        /* --- ACCORDIONS --- */
+        .module-card {
+            background: white;
+            border-radius: var(--radius-inner);
+            margin-bottom: 10px;
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .module-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* --- PROGRESS CIRCLE --- */
+        .circle-progress {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+        }
+
+        .circle-progress svg {
+            transform: rotate(-90deg);
+        }
+
+        .circle-progress .bg {
+            fill: none;
+            stroke: #eee;
+            stroke-width: 8;
+        }
+
+        .circle-progress .bar {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 251.2; /* 2 * pi * r (r=40) */
+            stroke-dashoffset: 62.8; /* 75% progress */
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        /* --- QUIZ RESULTS --- */
+        .quiz-res {
+            background: white;
+            border-radius: var(--radius-inner);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        /* --- BUTTONS --- */
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-inner);
+            padding: 12px;
+            font-weight: 600;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn-action:hover { background: #0044a8; }
+
+        .tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+    </style>
+
+<div class="container-fluid px-md-5">
+    <div class="row g-4">
+        
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <h1 class="fw-bold" style="letter-spacing:-1px">Formation Digitalisation</h1>
+                <p class="text-muted">Parcours d'expertise sur la gestion des données civiles au Cameroun.</p>
+            </div>
+
+            <ul class="nav nav-bento-tabs" id="myTab">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#curriculum">Contenu du cours</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#exam">Examens</button></li>
+            </ul>
+
+            <div class="tab-content panel-bento">
+                <div class="tab-pane fade show active" id="curriculum">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="mb-0">Modules d'apprentissage</h6>
+                        <span class="text-muted small">8/12 Complétés</span>
+                    </div>
+
+                  {% load course_extras %}
+<div class="accordion accordion-bento" id="accLMS">
+  {% if modules %}
+    {% for module in modules %}
+      {% if module.lessons.all %}
+        
+        <div class="module-card {% if module.is_locked and module.order > 1 %}opacity-75{% endif %}">
+          
+          <div class="module-header" 
+               {% if not module.is_locked or module.order == 1 %} 
+               data-bs-toggle="collapse" data-bs-target="#mod-{{ module.id }}" 
+               {% endif %}
+               style="cursor: {% if module.is_locked and module.order > 1 %}not-allowed{% else %}pointer{% endif %};">
+            
+            <div class="d-flex align-items-center gap-3">
+              <div class="fw-bold text-primary" style="font-family:'JetBrains Mono'">
+                {% if module.is_locked and module.order > 1 %}🔒{% else %}{{ module.order|stringformat:"02d" }}{% endif %}
+              </div>
+              <div>
+                <div class="fw-bold small">{{ module.title|default:"Module sans titre" }}</div>
+                <div class="text-muted" style="font-size:0.75rem">
+                  {{ module.lessons.all|length }} leçon{{ module.lessons.all|length|pluralize }} 
+                  {% if module.is_paid %} • <span class="text-success fw-bold">Premium {{ module.price|format_price }}</span>{% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              {% if is_enrolled and not module.is_locked %}
+                {% if module.is_completed %}
+                  <span class="tag bg-success-subtle text-success">Complété ✅</span>
+                {% else %}
+                  <form method="post" action="{% url 'courses:mark_module_completed' course.id module.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn p-0 border-0 text-primary small fw-bold" style="font-size: 0.7rem;">TERMINER ?</button>
+                  </form>
+                {% endif %}
+              {% elif not is_enrolled and module.order == 1 %}
+                <span class="tag bg-info-subtle text-info">Aperçu Gratuit</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div id="mod-{{ module.id }}" class="collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#accLMS">
+            <div class="p-3 border-top bg-light-subtle small">
+              {% with active_lessons=module.lessons.all %}
+                {% if active_lessons %}
+                  {% for lesson in active_lessons %}
+                    {% if lesson.is_active %}
+                      <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-white">
+                        
+                        <div class="lesson-link-wrapper">
+                          {% if is_enrolled or forloop.first and forloop.parentloop.first %}
+                            <a href="{% url 'courses:lesson_detail' lesson.id %}" class="text-decoration-none text-dark fw-medium">
+                              📺 {{ lesson.title }}
+                              {% if completed_lesson_ids and lesson.id in completed_lesson_ids %}
+                                <span class="ms-1 text-success">✅</span>
+                              {% endif %}
+                            </a>
+                          {% else %}
+                            <span class="text-muted">🔒 {{ lesson.title }}</span>
+                          {% endif %}
+                        </div>
+
+                        {% if is_enrolled and lesson.exercises.exists %}
+                          <div class="quiz-action">
+                            <button onclick="confirmQuizStart({{ lesson.id }}, {{ lesson.exercises.count }}, '{{ lesson.title|escapejs }}'); return false;"
+                                    class="btn btn-sm {% if request.user in lesson.exercices_completed_by.all %}text-success{% else %}text-primary{% endif %} p-0 fw-bold"
+                                    style="font-size: 0.7rem;">
+                              {% if request.user in lesson.exercices_completed_by.all %}QUIZ RÉUSSI{% else %}FAIRE LE QUIZ{% endif %}
+                            </button>
+                          </div>
+                        {% endif %}
+
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <div class="text-muted py-2">Aucune leçon disponible.</div>
+                {% endif %}
+              {% endwith %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+  {% else %}
+    <div class="panel-bento text-center py-5">
+      <p class="text-muted">Aucun module n'est encore disponible pour ce cours.</p>
+    </div>
+  {% endif %}
+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div style="height:41px"></div>
+            
+            <div class="panel-bento text-center">
+                <h6 class="text-start mb-4">Progression Globale</h6>
+                
+                <div class="circle-progress">
+                    <svg width="100" height="100">
+                        <circle class="bg" cx="50" cy="50" r="40"></circle>
+                        <circle class="bar" cx="50" cy="50" r="40"></circle>
+                    </svg>
+                    <div class="percentage">75%</div>
+                </div>
+                
+                <p class="small text-muted mb-4">Excellent travail ! Vous avez complété 9 leçons cette semaine.</p>
+                <hr class="opacity-10">
+
+                <div class="text-start">
+                    <h6 class="mb-3 small fw-bold">Résultats Quiz</h6>
+                    
+                    <div class="quiz-res d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold small">Audit de Sécurité</div>
+                            <div class="text-muted" style="font-size:0.7rem">7 Mai 2026</div>
+                        </div>
+                        <div class="fw-bold text-primary">18/20</div>
+                    </div>
+
+                    <div class="quiz-res d-flex justify-content-between align-items-center" style="border-left-color: #ffc107;">
+                        <div>
+                            <div class="fw-bold small">Réseaux IP/MPLS</div>
+                            <div class="text-muted" style="font-size:0.7rem">5 Mai 2026</div>
+                        </div>
+                        <div class="fw-bold text-warning">14/20</div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button class="btn-action">CONTINUER LE COURS</button>
+                    <small class="d-block mt-3 text-primary fw-bold" style="cursor:pointer">Télécharger le certificat provisoire</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

@@ -1,0 +1,639 @@
+{% extends 'base.html' %}
+{% block title %}Créer un cours{% endblock %}
+{% load static%}
+{% block extra_head %}
+{{ block.super }}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container py-1">
+   <div class="mb-4">
+        <a href="{% url 'users:instructor_dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> 
+        </a>
+    </div>
+  <div class="row align-items-center g-5">
+
+    <!-- SECTION GAUCHE : TEXTE -->
+    <div class="col-md-6">
+      <h2 class="fw-bold mb-3">
+        Créer un nouveau cours
+      </h2>
+
+      <p class="text-muted fs-5 mb-4">
+        Configurez les informations principales de votre cours afin de le rendre
+        clair, structuré et attractif pour vos apprenants.
+      </p>
+
+      <ul class="list-unstyled text-muted">
+        <li class="mb-2">
+          <i class="bi bi-check-circle-fill text-primary me-2"></i>
+          Donnez un titre clair et engageant
+        </li>
+        <li class="mb-2">
+          <i class="bi bi-check-circle-fill text-primary me-2"></i>
+          Choisissez la catégorie adaptée
+        </li>
+        <li class="mb-2">
+          <i class="bi bi-check-circle-fill text-primary me-2"></i>
+          Définissez la langue du cours
+        </li>
+      </ul>
+      <img src="" alt="">
+    </div>
+
+    <!-- SECTION DROITE : FORMULAIRE -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-body p-4">
+
+          <h5 class="fw-semibold mb-4">Informations du cours</h5>
+
+          <form method="post" id="courseForm" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if messages %}
+              <div class="mb-3">
+                {% for message in messages %}
+                  <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <!-- TITRE -->
+            <div class="mb-3">
+              <label for="id_title" class="form-label">Titre du cours</label>
+              <input type="text" name="title" class="form-control" id="id_title"
+                     value="{{ form.title.value|default:'' }}" required>
+              {% if form.title.errors %}
+                <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="mb-3">
+              <label for="id_description" class="form-label">Description</label>
+              <textarea name="description" class="form-control" id="id_description"
+                        rows="4">{{ form.description.value|default:'' }}</textarea>
+              {% if form.description.errors %}
+                <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- CATEGORIE -->
+            <div class="mb-3">
+              <label for="id_category" class="form-label">Catégorie</label>
+              <select name="category" class="form-select" id="id_category" required>
+                <option value="" disabled {% if not form.category.value %}selected{% endif %}>
+                  Sélectionnez une catégorie
+                </option>
+                {% for category in categories %}
+                  <option value="{{ category.id }}"
+                    {% if form.category.value|stringformat:'s' == category.id|stringformat:'s' %}selected{% endif %}>
+                    {{ category.name }}
+                  </option>
+                {% endfor %}
+              </select>
+
+              <div class="form-text">
+                <a href="#" id="addCategoryBtn" class="text-primary">
+                  <i class="bi bi-plus-circle"></i> Ajouter une nouvelle catégorie
+                </a>
+              </div>
+
+              {% if form.category.errors %}
+                <div class="text-danger small mt-1">{{ form.category.errors }}</div>
+              {% endif %}
+              <div class="mt-2">
+                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                  <i class="bi bi-plus-circle me-1"></i> Ajouter une catégorie
+                </button>
+              </div>
+            </div>
+
+            <!-- MINIATURE (THUMBNAIL) -->
+            <div class="mb-4">
+              <label for="id_thumbnail" class="form-label">Miniature du cours</label>
+              <div class="input-group">
+                <input type="file" class="form-control" id="id_thumbnail" name="thumbnail" accept="image/*">
+              </div>
+              {% if form.thumbnail.errors %}
+                <div class="text-danger small mt-1">{{ form.thumbnail.errors }}</div>
+              {% endif %}
+              <div class="form-text">Taille recommandée : 1280x720 pixels. Formats acceptés : JPG, PNG, WebP.</div>
+              <div id="thumbnailPreview" class="mt-2 text-center" style="display: none;">
+                <img id="previewImage" src="#" alt="Aperçu de la miniature" class="img-fluid rounded" style="max-height: 200px;">
+              </div>
+            </div>
+
+            <!-- LANGUE -->
+            <div class="mb-4">
+              <label for="id_language" class="form-label">Langue</label>
+              <select name="language" class="form-select" id="id_language" required>
+                <option value="fr" {% if form.language.value == 'fr' %}selected{% endif %}>Français</option>
+                <option value="en" {% if form.language.value == 'en' %}selected{% endif %}>English</option>
+              </select>
+              {% if form.language.errors %}
+                <div class="text-danger small mt-1">{{ form.language.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="{% url 'courses:manage' %}" class="btn btn-light">
+                <i class="bi bi-arrow-left me-1"></i> Retour
+              </a>
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-save me-1"></i> Créer le cours
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal d'ajout de catégorie - Style PS5 -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background: #0f1923; border: 1px solid #2a3a4a; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 149, 218, 0.3);">
+      <div class="modal-header" style="
+          border-bottom: 1px solid #00b2ff;
+          padding: 1.5rem;
+          background: linear-gradient(90deg, rgba(15, 25, 35, 0.9) 0%, rgba(10, 30, 50, 0.9) 100%);
+          position: relative;
+          overflow: hidden;
+        ">
+        <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+              rgba(0, 178, 255, 0.1) 0%, 
+              rgba(0, 178, 255, 0.05) 50%, 
+              rgba(0, 178, 255, 0.1) 100%);
+            opacity: 0.5;
+            pointer-events: none;
+          "></div>
+        <h5 class="modal-title mb-0" style="
+            color: #fff; 
+            font-weight: 700; 
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 178, 255, 0.5);
+            position: relative;
+            display: flex;
+            align-items: center;
+          ">
+          <span style="
+              display: inline-block;
+              width: 8px;
+              height: 30px;
+              background: #00b2ff;
+              margin-right: 12px;
+              border-radius: 2px;
+              box-shadow: 0 0 10px #00b2ff;
+              animation: pulse 2s infinite;
+            "></span>
+          <i class="fas fa-plus-circle me-2" style="color: #00b2ff; font-size: 1.2em;"></i>
+          Nouvelle Catégorie
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer" style="
+            filter: invert(1);
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+          "></button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        <form method="post" id="addCategoryForm" action="{% url 'courses:create_category' %}">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger" style="background-color: #2a0f14; border-color: #7a1c2e; color: #ff5a7d;">
+              {% for error in form.non_field_errors %}
+                <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+              {% endfor %}
+            </div>
+          {% endif %}
+          
+          <div class="mb-4">
+            <label for="id_name" class="form-label mb-2" style="color: #8f9ba8; font-size: 0.9rem; font-weight: 500;">
+              NOM DE LA CATÉGORIE
+              <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text" style="background: #1a2634; border: 1px solid #2a3a4a; color: #8f9ba8;">
+                <i class="fas fa-tag"></i>
+              </span>
+              <input type="text" 
+                     class="form-control ps-3" 
+                     id="id_name" 
+                     name="name"
+                     maxlength="100"
+                     placeholder="Entrez le nom de la catégorie"
+                     required
+                     style="background: #1a2634; 
+                            border: 1px solid #2a3a4a; 
+                            color: #fff;
+                            height: 48px;
+                            border-radius: 0 4px 4px 0 !important;">
+            </div>
+            <div class="form-text mt-2" style="color: #5c6b7f; font-size: 0.8rem;">
+              <i class="fas fa-info-circle me-1"></i> Le nom doit être unique (100 caractères max).
+            </div>
+            <div id="categoryError" class="invalid-feedback d-none"></div>
+          </div>
+          
+          <div class="d-flex justify-content-between mt-4 pt-3" style="border-top: 1px solid #2a3a4a; gap: 1rem;">
+            <button type="button" class="btn btn-ps5-secondary flex-grow-1" data-bs-dismiss="modal">
+              <i class="fas fa-times me-1"></i> Annuler
+            </button>
+            <button type="submit" class="btn btn-ps5-primary flex-grow-1" id="submitCategoryBtn">
+              <i class="fas fa-save me-1"></i> Créer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    /* Style pour le toast personnalisé */
+    .custom-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1100;
+        min-width: 250px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease-in-out;
+    }
+    
+    .custom-toast.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    
+    .toast-success {
+        background-color: #28a745;
+        color: white;
+        border-left: 5px solid #1e7e34;
+    }
+    
+    .toast-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .btn-close-white {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes fadeOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    /* Styles Gaming pour les boutons */
+    .btn-ps5-primary {
+        background: linear-gradient(90deg, #0072ce 0%, #00a6f0 100%);
+        border: 2px solid #00b2ff;
+        color: white;
+        font-weight: 600;
+        padding: 0.7rem 1.8rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 178, 255, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(0, 178, 255, 0.5);
+    }
+    
+    .btn-ps5-primary {
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.85rem;
+        padding: 0.5rem 1.2rem;
+    }
+    
+    .btn-ps5-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, #00a6f0 0%, #00c3ff 100%);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .btn-ps5-primary:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 178, 255, 0.6);
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+    
+    .btn-ps5-primary:hover::before {
+        opacity: 1;
+    }
+    
+    .btn-ps5-primary:active {
+        transform: translateY(1px) scale(0.99);
+        box-shadow: 0 2px 10px rgba(0, 149, 218, 0.5);
+        transition: all 0.1s ease;
+    }
+    
+    /* Effet de vague au survol */
+    .btn-ps5-primary::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        border-radius: 100%;
+        transform: scale(1, 1) translate(-50%, -50%);
+        transform-origin: 50% 50%;
+    }
+    
+    .btn-ps5-primary:hover::after {
+        animation: ripple 1s ease-out;
+    }
+    
+    @keyframes ripple {
+        0% {
+            transform: scale(0, 0);
+            opacity: 0.5;
+        }
+        20% {
+            transform: scale(25, 25);
+            opacity: 0.3;
+        }
+        100% {
+            opacity: 0;
+            transform: scale(40, 40);
+        }
+    }
+    
+    .btn-ps5-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(100, 150, 200, 0.2);
+        color: #8f9ba8;
+        font-weight: 500;
+        padding: 0.5rem 1.2rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-ps5-secondary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, 
+            rgba(100, 150, 255, 0.1) 0%, 
+            rgba(100, 150, 255, 0.05) 50%, 
+            rgba(100, 150, 255, 0.1) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .btn-ps5-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(100, 180, 255, 0.4);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 100, 255, 0.2);
+    }
+    
+    .btn-ps5-secondary:hover::before {
+        opacity: 1;
+    }
+    
+    .btn-ps5-secondary:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 5px rgba(0, 100, 255, 0.1);
+        transition: all 0.1s ease;
+    }
+    
+    /* Effet de bordure animée */
+    .btn-ps5-secondary::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border: 2px solid transparent;
+        border-image: linear-gradient(90deg, #0072ce, #00a6f0);
+        border-image-slice: 1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 9px;
+    }
+    
+    .btn-ps5-secondary:hover::after {
+        opacity: 0.7;
+        animation: border-glow 2s infinite;
+    }
+    
+    @keyframes border-glow {
+        0% { opacity: 0.5; }
+        50% { opacity: 0.9; }
+        100% { opacity: 0.5; }
+    }
+    
+    /* Style pour les champs de formulaire */
+    .form-control:focus {
+        background-color: #1a2634;
+        border-color: #00a6f0;
+        color: #fff;
+        box-shadow: 0 0 0 0.25rem rgba(0, 162, 255, 0.25);
+    }
+    
+    /* Animation de pulsation pour l'en-tête */
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+    
+    /* Animation de lueur pour les boutons */
+    @keyframes btn-glow {
+        0% { 
+            box-shadow: 0 0 5px rgba(0, 178, 255, 0.5), 
+                       0 0 10px rgba(0, 178, 255, 0.3),
+                       0 0 20px rgba(0, 178, 255, 0.1);
+        }
+        50% { 
+            box-shadow: 0 0 10px rgba(0, 178, 255, 0.8), 
+                       0 0 20px rgba(0, 178, 255, 0.5),
+                       0 0 30px rgba(0, 178, 255, 0.2);
+        }
+        100% { 
+            box-shadow: 0 0 5px rgba(0, 178, 255, 0.5), 
+                       0 0 10px rgba(0, 178, 255, 0.3),
+                       0 0 20px rgba(0, 178, 255, 0.1);
+        }
+    }
+    
+    /* Animation de focus pour les champs */
+    @keyframes ps5-glow {
+        0% { box-shadow: 0 0 5px rgba(0, 162, 255, 0.5); }
+        50% { box-shadow: 0 0 20px rgba(0, 162, 255, 0.8); }
+        100% { box-shadow: 0 0 5px rgba(0, 162, 255, 0.5); }
+    }
+    
+    .form-control:focus {
+        animation: ps5-glow 2s infinite;
+    }
+    
+    /* Style pour la modale */
+    .modal-content {
+        border: none;
+    }
+    
+    /* Style pour le bouton de fermeture */
+    .btn-close {
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+<!-- Toast de confirmation -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    <div id="successToast" class="toast custom-toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Succès</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Fermer"></button>
+        </div>
+        <div class="toast-body">
+            <i class="fas fa-check-circle me-2"></i>
+            <span id="toastMessage">Catégorie créée avec succès !</span>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+{{ block.super }}
+<!-- jQuery, Bootstrap JS, Select2, SweetAlert2 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Configuration globale de SweetAlert2
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{% static 'courses/js/course_form.js' %}"></script>
+<script>
+  // Initialisation de Select2
+  $(document).ready(function() {
+    $('select').select2({
+      theme: 'bootstrap-5',
+      width: '100%',
+      placeholder: 'Sélectionnez une option',
+      allowClear: true
+    });
+
+    // Aperçu de la miniature
+    document.getElementById('id_thumbnail').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const preview = document.getElementById('previewImage');
+      const previewContainer = document.getElementById('thumbnailPreview');
+      
+      if (file) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          previewContainer.style.display = 'block';
+        }
+        
+        reader.readAsDataURL(file);
+      } else {
+        preview.src = '#';
+        previewContainer.style.display = 'none';
+      }
+    });
+  });
+</script>
+<script>
+  // Initialisation de Select2 pour les menus déroulants
+  $(document).ready(function() {
+    $('#id_category').select2({
+      placeholder: 'Sélectionnez une catégorie',
+      allowClear: true
+    });
+    
+    $('#id_language').select2({
+      minimumResultsForSearch: Infinity // Désactive la recherche pour ce menu
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CRVSTrainingZ
 
 
@@ -91,3 +92,7 @@ For open source projects, say how it is licensed.
 
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+=======
+# peace
+Voici une description de moins de **350 caractères** :  > PEACE LMS is a modern Django-based Learning Management System designed for online training, course management, learner tracking, assessments, and certification. It provides an intuitive platform for educational institutions, organizations, and professional training programs. (292 caractères)
+>>>>>>> aff6e0e9ba24769e481ad51e09c38a0f9452f05b

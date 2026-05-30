@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% load static %}
+{% load course_extras %}
+
+{% block extra_css %}
+<style>
+    /* Intégration du style spécifique au carrousel et au ticker */
+    :root {
+        --accent: #00f2ff;
+        --bg-dark: #0a0a0a;
+    }
+
+    .stats-ticker {
+        display: flex;
+        gap: 10px;
+        padding: 10px 20px;
+        background: rgba(0, 0, 0, 0.8);
+        border-bottom: 1px solid #333;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.85rem;
+    }
+
+    .ticker-item { display: flex; align-items: center; }
+    .ticker-label { color: #888; margin-right: 5px; }
+    .ticker-value { color: var(--accent); font-weight: bold; }
+
+    .carousel-main {
+        position: relative;
+        height: 60vh;
+        overflow: hidden;
+        background: var(--bg-dark);
+    }
+
+    .slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 0.8s ease-in-out;
+        display: flex;
+        align-items: center;
+        padding: 0 10%;
+    }
+
+    .slide.active { opacity: 1; z-index: 1; }
+
+    .slide-text { flex: 1; z-index: 2; color: white; }
+    .slide-text h1 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 1rem; }
+    .slide-image-wrapper { flex: 1; position: relative; height: 100%; }
+    .slide-image { 
+        width: 100%; height: 100%; object-fit: cover; 
+        mask-image: linear-gradient(to left, black, transparent);
+    }
+
+    .carousel-footer {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        background: #111;
+        border-top: 1px solid #333;
+    }
+
+    .footer-item {
+        padding: 10px;
+        cursor: pointer;
+        border-right: 1px solid #222;
+        transition: background 0.3s;
+        position: relative;
+    }
+
+    .footer-item.active { background: #1a1a1a; }
+    
+    .progress-bar {
+        position: absolute;
+        top: 0; left: 0; height: 3px;
+        background: var(--accent);
+        width: 0%;
+    }
+
+    .footer-item.active .progress-bar {
+        animation: progress 5s linear forwards;
+    }
+
+    @keyframes progress { from { width: 0%; } to { width: 100%; } }
+
+    .btn-more {
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        padding: 12px 24px;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        transition: 0.3s;
+    }
+
+    .btn-more:hover { background: var(--accent); color: black; }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="stats-ticker">
+        <div class="ticker-item">
+            <span class="ticker-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00f2ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                Encryption:
+            </span> 
+            <span class="ticker-value">AES-256-GCM</span>
+        </div>
+        <div class="ticker-item"><span class="ticker-label">Active Nodes:</span> <span class="ticker-value">1,204</span></div>
+        <div class="ticker-item"><span class="ticker-label">Regional Sync:</span> <span class="ticker-value" style="color: #00ff00;">STABLE</span></div>
+    </div>
+
+    <section class="carousel-main">
+        <div class="slides-container" id="slides">
+            <div class="slide active">
+                <div class="slide-text">
+                    <h1>Souveraineté<br><span style="color:var(--accent)">Digitale</span> Totale.</h1>
+                    <p class="lead">Le SaaS CRVS Unified sécurise l'identité citoyenne. Une infrastructure durcie conçue pour une résilience absolue face aux menaces étatiques.</p>
+                    <button class="btn-more">Accéder au Command Center</button>
+                </div>
+                <div class="slide-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80" alt="Cyber" class="slide-image">
+                </div>
+            </div>
+            
+            <div class="slide">
+                <div class="slide-text">
+                    <h1>Défense<br>Proactive.</h1>
+                    <p class="lead">Nos algorithmes de surveillance détectent les anomalies de registre en temps réel. Ne subissez plus, anticipez les brèches.</p>
+                    <button class="btn-more">Voir les Protocoles</button>
+                </div>
+                <div class="slide-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80" alt="Defense" class="slide-image">
+                </div>
+            </div>
+
+            <div class="slide">
+                <div class="slide-text">
+                    <h1>Formation<br>Élite SOC.</h1>
+                    <p class="lead">Certifiez vos techniciens aux standards ISO/IEC 27001 avec nos simulateurs d'attaques en environnement contrôlé.</p>
+                    <button class="btn-more">Démarrer le Cursus</button>
+                </div>
+                <div class="slide-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80" alt="Training" class="slide-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="carousel-footer" id="footerNav">
+        <div class="footer-item active" data-index="0">
+            <div class="progress-bar"></div>
+            <h4 style="color: white; margin: 0;">Current Focus</h4>
+            <p style="color: #888; font-size: 0.8rem; margin: 5px 0 0;">Unified Registry Infrastructure.</p>
+        </div>
+        <div class="footer-item" data-index="1">
+            <div class="progress-bar"></div>
+            <h4 style="color: white; margin: 0;">Security Pulse</h4>
+            <p style="color: #888; font-size: 0.8rem; margin: 5px 0 0;">Threat Intelligence Monitoring.</p>
+        </div>
+        <div class="footer-item" data-index="2">
+            <div class="progress-bar"></div>
+            <h4 style="color: white; margin: 0;">Personnel</h4>
+            <p style="color: #888; font-size: 0.8rem; margin: 5px 0 0;">SOC Certified Masterclass.</p>
+        </div>
+    </footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const slideElements = document.querySelectorAll('.slide');
+    const footerItems = document.querySelectorAll('.footer-item');
+    let currentIndex = 0;
+    const totalSlides = footerItems.length;
+    const intervalTime = 5000;
+
+    function goToSlide(index) {
+        // Nettoyage classes actives
+        document.querySelector('.footer-item.active').classList.remove('active');
+        footerItems[index].classList.add('active');
+        
+        document.querySelector('.slide.active').classList.remove('active');
+        slideElements[index].classList.add('active');
+        
+        currentIndex = index;
+    }
+
+    footerItems.forEach(item => {
+        item.addEventListener('click', () => {
+            goToSlide(parseInt(item.getAttribute('data-index')));
+            resetTimer();
+        });
+    });
+
+    let autoSlideInterval = setInterval(() => {
+        let nextIndex = (currentIndex + 1) % totalSlides;
+        goToSlide(nextIndex);
+    }, intervalTime);
+
+    function resetTimer() {
+        clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(() => {
+            let nextIndex = (currentIndex + 1) % totalSlides;
+            goToSlide(nextIndex);
+        }, intervalTime);
+    }
+</script>
+{% endblock %}

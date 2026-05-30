@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEACE Crvs - Authentification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-color: #0b0114; 
+            --accent: #6d28d9; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; min-height: 100vh;
+            background: url("{% static 'img/bg-profil.png' %}") center/cover no-repeat, var(--bg-color);
+            display: flex; justify-content: center; align-items: center; overflow: hidden;
+        }
+
+        /* Calque sombre pour le style Nixon */
+        .overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(11, 1, 20, 0.75); z-index: 0; }
+
+        /* Texte de fond */
+        .bg-text {
+            position: absolute; top: -1%;letter-spacing: 50px; font-size: 15vw; font-weight: 800; color: rgba(255,255,255,0.03);
+            pointer-events: none; z-index: 1; user-select: none;
+        }
+
+        /* Armoirie */
+        .armoirie { position: absolute; bottom: 40px; width: 150px; opacity: 0.15; z-index: 1; filter: grayscale(1) brightness(0.8); }
+
+        /* Card stylisée */
+        .login-card {
+            width: 340px; z-index: 2;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            padding: 35px; border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .logo-shape { 
+            width: 50px; height: 50px; background: var(--accent); 
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); 
+            margin: 0 auto 15px; box-shadow: 0 0 20px var(--accent);
+        }
+
+        .form-fields { display: flex; flex-direction: column; gap: 14px; margin: 25px 0; }
+
+        input { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px; border-radius: 5px; color: white; 
+            font-size: 14px; transition: 0.3s; width: 100%; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--accent); background: rgba(109, 40, 217, 0.1); outline: none; }
+
+        .btn-submit { 
+            width: 100%; padding: 14px; border-radius: 5px; border: none; 
+            background: linear-gradient(135deg, #6d28d9, #a78bfa); 
+            color: white; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(109, 40, 217, 0.4); }
+
+        .footer-link { font-size: 13px; color: var(--text-muted); margin-top: 15px; }
+        .footer-link a { color: #a78bfa; text-decoration: none; font-weight: 600; }
+
+        .doc-link {
+            position: fixed; right: 30px; bottom: 30px; color: rgba(255,255,255,0.5);
+            text-decoration: none; font-size: 12px; z-index: 10;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay"></div>
+    <div class="bg-text">PEACE</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Coat_of_arms_of_Cameroon.svg" class="armoirie">
+
+    <div class="login-card">
+        <div class="logo-shape"></div>
+        <h2 style="font-size: 18px; margin-bottom: 5px; color: white;">PEACE</h2>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 20px;">CRVS-Learning Authentication</p>
+        
+        <form method="post" action="{% url 'users:login' %}" class="form-fields">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Identifiant" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <button type="submit" class="btn-submit">CONNEXION</button>
+        </form>
+
+        <div class="footer-link">
+            Pas de compte ? <a href="{% url 'users:register' %}">Créer un compte</a>
+        </div>
+    </div>
+
+    <a href="{% url 'documentation:index' %}" class="doc-link">
+        <i class="fas fa-book-open"></i>
+    </a>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+{% load payment_tags %}
+
+{% block title %}Paiement du module - {{ module.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- En-tête du module -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-lock me-2"></i>
+                        Module payant : {{ module.title }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>{{ module.title }}</h5>
+                            <p class="text-muted">{{ module.description|truncatewords:30 }}</p>
+                            <div class="mb-3">
+                                <span class="badge bg-info">Niveau : {{ module.get_level_display }}</span>
+                                <span class="badge bg-warning ms-2">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ module.lessons.count }} leçon{{ module.lessons.count|pluralize }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="price-display">
+                                <h3 class="text-primary mb-0">{{ module.price|format_price }}</h3>
+                                {% if has_access %}
+                                    <span class="badge bg-success">Accès déjà acquis</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if has_access %}
+                <!-- Accès déjà accordé -->
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-check-circle me-2"></i>Accès déjà acquis</h5>
+                    <p class="mb-0">Vous avez déjà accès à ce module. Vous pouvez commencer à apprendre maintenant !</p>
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'courses:module_detail' module.id %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-play me-2"></i>Commencer le module
+                    </a>
+                </div>
+            {% elif pending_payment %}
+                <!-- Paiement en cours -->
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-clock me-2"></i>Paiement en cours</h5>
+                    <p class="mb-0">Vous avez un paiement en attente pour ce module.</p>
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'payments:payment_detail' pending_payment.id %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-credit-card me-2"></i>Continuer le paiement
+                    </a>
+                </div>
+            {% else %}
+                <!-- Formulaire de paiement -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Procéder au paiement
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'payments:initiate_payment' module.id %}">
+                            {% csrf_token %}
+                            
+                            <!-- Récapitulatif -->
+                            <div class="mb-4">
+                                <h6>Récapitulatif de la commande</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>Module</td>
+                                            <td>{{ module.title }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Niveau</td>
+                                            <td>{{ module.get_level_display }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nombre de leçons</td>
+                                            <td>{{ module.lessons.count }}</td>
+                                        </tr>
+                                        <tr class="table-primary fw-bold">
+                                            <td>Total à payer</td>
+                                            <td>{{ module.price|format_price }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Bouton de paiement -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Payer {{ module.price|format_price }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Informations supplémentaires -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle me-2"></i>Informations importantes</h6>
+                        <ul class="mb-0">
+                            <li>Une fois le paiement effectué, vous aurez un accès permanent à ce module.</li>
+                            <li>Plusieurs méthodes de paiement sont disponibles (Orange Money, MTN Mobile Money, Carte bancaire).</li>
+                            <li>Le paiement est sécurisé et crypté.</li>
+                            <li>En cas de problème, contactez notre support technique.</li>
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends "chat/base.html" %}
+{% load static %}
+
+{% block title %}{{ other_user.get_full_name|default:other_user.username }} - Messagerie{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Sidebar gauche - Conversations -->
+        <div class="col-md-4 col-lg-3 border-end bg-light p-0">
+            <div class="p-3 border-bottom bg-white">
+                <h5 class="mb-3">
+                    <i class="fas fa-comments"></i> Messagerie
+                </h5>
+                <a href="{% url 'chat:chat' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+            
+            <!-- Mini liste des conversations récentes -->
+            <div class="p-2">
+                <small class="text-muted">CONVERSATIONS RÉCENTES</small>
+                <!-- Vous pouvez ajouter les conversations récentes ici -->
+            </div>
+        </div>
+        
+        <!-- Zone de conversation principale -->
+        <div class="col-md-8 col-lg-9 d-flex flex-column">
+            <!-- En-tête de conversation -->
+            <div class="p-3 border-bottom bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            {% if other_user.chat_status.is_online %}
+                                <span class="online-indicator"></span>
+                            {% else %}
+                                <span class="offline-indicator" style="width: 10px; height: 10px; background: #6c757d; border-radius: 50%; display: inline-block;"></span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h5 class="mb-1">{{ other_user.get_full_name|default:other_user.username }}</h5>
+                            <small class="text-muted">
+                                {% if other_user.chat_status.is_online %}
+                                    En ligne
+                                {% else %}
+                                    Hors ligne
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Zone des messages -->
+            <div class="flex-grow-1 p-3" style="overflow-y: auto; background: #f8f9fa;">
+                {% for message in messages %}
+                    <div class="message mb-3 {% if message.sender == request.user %}text-end{% else %}text-start{% endif %}">
+                        <div class="d-inline-block max-width-70">
+                            {% if message.sender != request.user %}
+                                <small class="text-muted d-block mb-1">{{ message.sender.get_full_name|default:message.sender.username }}</small>
+                            {% endif %}
+                            
+                            <div class="message-bubble p-3 rounded-3 {% if message.sender == request.user %}bg-primary text-white{% else %}bg-white{% endif %}" style="box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                                <div class="message-content">{{ message.content }}</div>
+                                
+                                {% if message.attachments.all %}
+                                    <div class="attachments mt-2">
+                                        {% for attachment in message.attachments.all %}
+                                            {% if attachment.is_image %}
+                                                <div class="mb-2">
+                                                    <img src="{{ attachment.file.url }}" alt="{{ attachment.filename }}" class="img-fluid rounded" style="max-width: 200px; cursor: pointer;" onclick="window.open('{{ attachment.file.url }}', '_blank')">
+                                                    <div class="mt-1">
+                                                        <small {% if message.sender == request.user %}class="text-white-50"{% endif %}>{{ attachment.filename }}</small>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="mb-2">
+                                                    <a href="{{ attachment.file.url }}" target="_blank" class="btn btn-sm {% if message.sender == request.user %}btn-light{% else %}btn-outline-primary{% endif %}">
+                                                        <i class="fas fa-download"></i> {{ attachment.filename }}
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <small class="{% if message.sender == request.user %}text-white-50{% else %}text-muted{% endif %} d-block mt-1">
+                                {{ message.get_time_display }}
+                                {% if message.is_edited %}• modifié{% endif %}
+                            </small>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucun message. Envoyez le premier !</p>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Zone de saisie -->
+            <div class="p-3 border-top bg-white">
+                <form method="post" action="{% url 'chat:send_message' other_user.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 align-items-end">
+                        <div class="flex-grow-1">
+                            <div class="input-group">
+                                <input type="text" name="content" class="form-control" placeholder="Écrivez votre message..." autocomplete="off" required>
+                                <input type="file" name="file" class="form-control" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style="max-width: 200px;">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-smile"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Envoyer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.max-width-70 {
+    max-width: 70%;
+}
+
+.message-bubble {
+    word-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+    .col-md-4 {
+        display: none;
+    }
+    
+    .max-width-70 {
+        max-width: 85%;
+    }
+}
+</style>
+
+<script>
+// Auto-scroll vers le bas pour voir les nouveaux messages
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.querySelector('.flex-grow-1.p-3');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+});
+
+// Focus automatique sur le champ de saisie
+document.addEventListener('DOMContentLoaded', function() {
+    const messageInput = document.querySelector('input[name="content"]');
+    if (messageInput) {
+        messageInput.focus();
+    }
+});
+</script>
+{% endblock %}

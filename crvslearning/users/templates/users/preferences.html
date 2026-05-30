@@ -1,0 +1,798 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Mes Préférences" %} - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Styles modernes pour les préférences */
+.preferences-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.preferences-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.preferences-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0072ce, #00439c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.preferences-header p {
+    color: #6b7280;
+    font-size: 1.1rem;
+    font-weight: 400;
+}
+
+.preferences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.preferences-section {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 114, 206, 0.1);
+    border: 1px solid rgba(0, 114, 206, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.preferences-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0072ce, #00439c, #0072ce);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: -200% 0; }
+    50% { background-position: 200% 0; }
+}
+
+.preferences-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 114, 206, 0.15);
+}
+
+.preferences-section h3 {
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.preferences-section h3 i {
+    color: #0072ce;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #0072ce, #00439c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Orbitron', sans-serif;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #0072ce;
+    box-shadow: 0 0 0 3px rgba(0, 114, 206, 0.1);
+    background: #ffffff;
+}
+
+.theme-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.theme-option {
+    padding: 1.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #0072ce, #00439c);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.theme-option:hover {
+    border-color: #0072ce;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 114, 206, 0.2);
+}
+
+.theme-option:hover::before {
+    opacity: 0.05;
+}
+
+.theme-option.active {
+    border-color: #0072ce;
+    background: linear-gradient(135deg, rgba(0, 114, 206, 0.05), rgba(0, 67, 156, 0.05));
+    box-shadow: 0 0 0 3px rgba(0, 114, 206, 0.1);
+}
+
+.theme-option i {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+
+.theme-option.light i {
+    color: #fbbf24;
+}
+
+.theme-option.dark i {
+    color: #6366f1;
+}
+
+.theme-option.auto i {
+    color: #10b981;
+}
+
+.theme-option div {
+    font-weight: 600;
+    color: #374151;
+    position: relative;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
+
+.language-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.language-option {
+    padding: 1.5rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.language-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #0072ce, #00439c);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.language-option:hover {
+    border-color: #0072ce;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 114, 206, 0.2);
+}
+
+.language-option:hover::before {
+    opacity: 0.05;
+}
+
+.language-option.active {
+    border-color: #0072ce;
+    background: linear-gradient(135deg, rgba(0, 114, 206, 0.05), rgba(0, 67, 156, 0.05));
+    box-shadow: 0 0 0 3px rgba(0, 114, 206, 0.1);
+}
+
+.language-option i {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    position: relative;
+    z-index: 1;
+    color: #0072ce;
+}
+
+.language-option div {
+    font-weight: 600;
+    color: #374151;
+    position: relative;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.form-check:hover {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
+.form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    accent-color: #0072ce;
+}
+
+.form-check-label {
+    cursor: pointer;
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.favorites-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.favorite-list {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.favorite-list h4 {
+    margin-bottom: 1.5rem;
+    color: #1f2937;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.favorite-list h4 i {
+    color: #0072ce;
+}
+
+.favorite-item {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.favorite-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.favorite-item span {
+    font-weight: 500;
+    color: #374151;
+}
+
+.favorite-item button {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.favorite-item button:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: scale(1.05);
+}
+
+.empty-favorites {
+    color: #6b7280;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+}
+
+.preferences-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0072ce, #00439c);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #00439c, #002d66);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 114, 206, 0.3);
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(107, 114, 128, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .preferences-container {
+        padding: 1rem;
+    }
+    
+    .preferences-header h1 {
+        font-size: 2rem;
+    }
+    
+    .preferences-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .favorites-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .theme-selector,
+    .language-selector {
+        grid-template-columns: 1fr;
+    }
+    
+    .preferences-actions {
+        flex-direction: column;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.preferences-section {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.preferences-section:nth-child(1) { animation-delay: 0.1s; }
+.preferences-section:nth-child(2) { animation-delay: 0.2s; }
+.preferences-section:nth-child(3) { animation-delay: 0.3s; }
+.preferences-section:nth-child(4) { animation-delay: 0.4s; }
+
+/* Thème sombre */
+[data-theme="dark"] .preferences-section {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border-color: rgba(0, 114, 206, 0.2);
+}
+
+[data-theme="dark"] .preferences-section h3 {
+    color: #f9fafb;
+}
+
+[data-theme="dark"] .form-group label {
+    color: #d1d5db;
+}
+
+[data-theme="dark"] .form-control {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+
+[data-theme="dark"] .theme-option,
+[data-theme="dark"] .language-option {
+    background: #374151;
+    border-color: #4b5563;
+}
+
+[data-theme="dark"] .theme-option div,
+[data-theme="dark"] .language-option div {
+    color: #d1d5db;
+}
+
+[data-theme="dark"] .form-check {
+    background: #374151;
+    border-color: #4b5563;
+}
+
+[data-theme="dark"] .form-check-label {
+    color: #d1d5db;
+}
+
+[data-theme="dark"] .favorite-list {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    border-color: #4b5563;
+}
+
+[data-theme="dark"] .favorite-list h4 {
+    color: #f9fafb;
+}
+
+[data-theme="dark"] .favorite-item {
+    background: #374151;
+    border-color: #4b5563;
+}
+
+[data-theme="dark"] .favorite-item span {
+    color: #d1d5db;
+}
+
+[data-theme="dark"] .empty-favorites {
+    background: #374151;
+    border-color: #4b5563;
+    color: #9ca3af;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="preferences-container">
+    <div class="preferences-header">
+        <h1>{% trans "Mes Préférences" %}</h1>
+        <p>Personnalisez votre expérience d'apprentissage</p>
+    </div>
+    
+    <form method="post" id="preferences-form">
+        {% csrf_token %}
+        
+        <div class="preferences-grid">
+            <!-- Section Apparence -->
+            <div class="preferences-section">
+                <h3><i class="fas fa-palette"></i> {% trans "Apparence" %}</h3>
+                
+                <div class="form-group">
+                    <label>{% trans "Thème" %}</label>
+                    <div class="theme-selector">
+                        <div class="theme-option {% if preferences.theme == 'light' %}active{% endif %}" 
+                             data-theme="light" data-theme-toggle>
+                            <i class="fas fa-sun"></i>
+                            <div>{% trans "Clair" %}</div>
+                        </div>
+                        <div class="theme-option {% if preferences.theme == 'dark' %}active{% endif %}" 
+                             data-theme="dark" data-theme-toggle>
+                            <i class="fas fa-moon"></i>
+                            <div>{% trans "Sombre" %}</div>
+                        </div>
+                        <div class="theme-option {% if preferences.theme == 'auto' %}active{% endif %}" 
+                             data-theme="auto" data-theme-toggle>
+                            <i class="fas fa-adjust"></i>
+                            <div>{% trans "Auto" %}</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="theme" id="theme-input" value="{{ preferences.theme }}">
+                </div>
+                
+                <div class="form-group">
+                    <label>{% trans "Langue" %}</label>
+                    <div class="language-selector">
+                        <div class="language-option {% if preferences.language == 'fr' %}active{% endif %}" 
+                             data-language="fr" data-language-select>
+                            <i class="fas fa-flag"></i>
+                            <div>Français</div>
+                        </div>
+                        <div class="language-option {% if preferences.language == 'en' %}active{% endif %}" 
+                             data-language="en" data-language-select>
+                            <i class="fas fa-flag-usa"></i>
+                            <div>English</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="language" id="language-input" value="{{ preferences.language }}">
+                </div>
+            </div>
+            
+            <!-- Section Notifications -->
+            <div class="preferences-section">
+                <h3><i class="fas fa-bell"></i> {% trans "Notifications" %}</h3>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="email_notifications" 
+                           id="email-notifications" data-preference="email_notifications"
+                           {% if preferences.email_notifications %}checked{% endif %}>
+                    <label class="form-check-label" for="email-notifications">
+                        {% trans "Notifications par email" %}
+                    </label>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="push_notifications" 
+                           id="push-notifications" data-preference="push_notifications"
+                           {% if preferences.push_notifications %}checked{% endif %}>
+                    <label class="form-check-label" for="push-notifications">
+                        {% trans "Notifications push" %}
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Section Apprentissage -->
+            <div class="preferences-section">
+                <h3><i class="fas fa-graduation-cap"></i> {% trans "Apprentissage" %}</h3>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="auto_play_video" 
+                           id="auto-play-video" data-preference="auto_play_video"
+                           {% if preferences.auto_play_video %}checked{% endif %}>
+                    <label class="form-check-label" for="auto-play-video">
+                        {% trans "Lecture automatique des vidéos" %}
+                    </label>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="show_progress" 
+                           id="show-progress" data-preference="show_progress"
+                           {% if preferences.show_progress %}checked{% endif %}>
+                    <label class="form-check-label" for="show-progress">
+                        {% trans "Afficher la progression" %}
+                    </label>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="download_for_offline" 
+                           id="download-for-offline" data-preference="download_for_offline"
+                           {% if preferences.download_for_offline %}checked{% endif %}>
+                    <label class="form-check-label" for="download-for-offline">
+                        {% trans "Télécharger pour consultation hors ligne" %}
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Section Favoris -->
+            <div class="preferences-section">
+                <h3><i class="fas fa-heart"></i> {% trans "Mes Favoris" %}</h3>
+                
+                <div class="favorites-section">
+                    <div class="favorite-list">
+                        <h4><i class="fas fa-book"></i> {% trans "Modules favoris" %}</h4>
+                        <div id="favorite-modules">
+                            {% if preferences.favorite_modules %}
+                                {% for module_id in preferences.favorite_modules %}
+                                    <div class="favorite-item">
+                                        <span>Module {{ module_id }}</span>
+                                        <button type="button" onclick="removeFavoriteModule('{{ module_id }}')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-favorites">
+                                    {% trans "Aucun module favori" %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="favorite-list">
+                        <h4><i class="fas fa-folder"></i> {% trans "Catégories favorites" %}</h4>
+                        <div id="favorite-categories">
+                            {% if preferences.favorite_categories %}
+                                {% for category_id in preferences.favorite_categories %}
+                                    <div class="favorite-item">
+                                        <span>Catégorie {{ category_id }}</span>
+                                        <button type="button" onclick="removeFavoriteCategory('{{ category_id }}')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-favorites">
+                                    {% trans "Aucune catégorie favorite" %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Boutons d'action -->
+        <div class="preferences-actions">
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> {% trans "Sauvegarder" %}
+            </button>
+            <button type="button" class="btn-secondary" onclick="resetPreferences()">
+                <i class="fas fa-undo"></i> {% trans "Réinitialiser" %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/preferences.js' %}"></script>
+<script>
+// Gestion du formulaire
+document.getElementById('preferences-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Mettre à jour les champs cachés
+    const activeTheme = document.querySelector('.theme-option.active');
+    if (activeTheme) {
+        document.getElementById('theme-input').value = activeTheme.getAttribute('data-theme');
+    }
+    
+    const activeLanguage = document.querySelector('.language-option.active');
+    if (activeLanguage) {
+        document.getElementById('language-input').value = activeLanguage.getAttribute('data-language');
+    }
+    
+    // Soumettre le formulaire
+    this.submit();
+});
+
+// Fonction pour retirer un module des favoris
+function removeFavoriteModule(moduleId) {
+    if (window.userPreferences) {
+        window.userPreferences.toggleFavoriteModule(moduleId);
+    }
+}
+
+// Fonction pour retirer une catégorie des favoris
+function removeFavoriteCategory(categoryId) {
+    if (window.userPreferences) {
+        window.userPreferences.toggleFavoriteCategory(categoryId);
+    }
+}
+
+// Fonction pour réinitialiser les préférences
+function resetPreferences() {
+    if (confirm('{% trans "Êtes-vous sûr de vouloir réinitialiser toutes vos préférences ?" %}')) {
+        if (window.userPreferences) {
+            window.userPreferences.reset();
+            // Recharger la page après un court délai
+            setTimeout(() => location.reload(), 1000);
+        }
+    }
+}
+
+// Écouter les mises à jour de préférences
+document.addEventListener('preferenceUpdated', function(e) {
+    console.log('Préférence mise à jour:', e.detail);
+});
+</script>
+{% endblock %}

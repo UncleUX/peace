@@ -1,0 +1,20 @@
+from django.urls import path
+from . import views
+
+app_name = 'tracking'
+
+urlpatterns = [
+    # Tableau de bord de suivi des apprenants
+    path('learners/', views.LearnerTrackingView.as_view(), name='learner_tracking'),
+    path('learners/<int:learner_id>/', views.learner_detail, name='learner_detail'),
+    
+    # Tableau de bord de progression des cours
+    path('courses/progress/', views.CourseProgressView.as_view(), name='course_progress'),
+    path('courses/<int:course_id>/', views.course_detail, name='course_detail'),
+    
+    # API pour les rappels de cours inachevés
+    path('api/reminders/', views.get_course_reminders, name='get_course_reminders'),
+    path('api/reminders/<int:reminder_id>/dismiss/', views.dismiss_course_reminder, name='dismiss_course_reminder'),
+    path('api/progress/update/', views.update_course_progress, name='update_course_progress'),
+    path('api/progress/summary/', views.get_user_progress_summary, name='get_user_progress_summary'),
+]

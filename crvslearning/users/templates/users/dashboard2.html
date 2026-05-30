@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrvsLearning - Peace</title>
+    <style>
+        :root {
+            --primary: #0077B5;
+            --bg: #F9FAFB;
+            --text: #1D2226;
+            --white-trans: rgba(255,255,255,0.8);
+            --transition-reveal: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            --transition-carousel: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+            --hero-h: 130px; 
+            --carousel-view-h: calc(var(--hero-h) * 2);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background-color: var(--bg); 
+            font-family: 'Inter', system-ui, sans-serif; 
+            color: var(--text); 
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- MESH BG --- */
+        .mesh-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; opacity: 0.3; }
+        .mesh-ball { position: absolute; border-radius: 50%; filter: blur(80px); animation: moveMesh 20s infinite alternate; }
+        .ball-1 { width: 40vw; height: 40vw; background: rgba(0, 119, 181, 0.2); top: -10%; left: -10%; }
+        .ball-2 { width: 30vw; height: 30vw; background: rgba(0, 160, 220, 0.15); bottom: -5%; right: -5%; }
+        @keyframes moveMesh { 0% { transform: translate(0, 0); } 100% { transform: translate(10%, 15%); } }
+
+        /* --- LOADER --- */
+        #loader-screen { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--bg); z-index: 10000; transition: opacity 0.8s ease; }
+        .peace-logo-square { padding: 0 40px; height: 80px; background: var(--primary); border-radius: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; animation: pulse 2s infinite; }
+        .peace-text { color: white; font-size: 36px; font-weight: 900; letter-spacing: -1.5px; }
+        .crvs-slogan { color: rgba(255,255,255,0.7); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; }
+        .progress-bar { width: 180px; height: 3px; background: #E5E7EB; border-radius: 10px; margin-top: 30px; overflow: hidden; position: relative; }
+        .progress-bar::after { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 0%; background: var(--primary); animation: loadOnce 2.2s forwards ease-in-out; }
+        @keyframes loadOnce { to { width: 100%; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+        .fade-out { opacity: 0 !important; visibility: hidden; }
+
+        /* --- NAVIGATION (GLASS EFFECT UPGRADED) --- */
+        nav {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%); 
+            width: 90%; z-index: 100; 
+            height: 50px;
+            /* background: var(--white-trans);  */
+            background: #000;
+            backdrop-filter: blur(15px) saturate(180%); 
+            padding: 15px 20px; border-radius: 100px; 
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            color: var(--white-trans);
+        }
+
+        /* --- USER PROFILE STYLES --- */
+        .user-profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 119, 181, 0.4);
+        }
+
+        .logout-btn {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 2px;
+        }
+
+        .user-role {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .login-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .login-btn:hover {
+            background: #005a8b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 119, 181, 0.3);
+        }
+
+        .brand-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- REVEAL LOGIC --- */
+        .reveal-section { min-height: 100vh; padding: 30px 10%; opacity: 0; transform: translateY(80px); transition: var(--transition-reveal); position: relative; }
+        .reveal-section.is-visible { opacity: 1; transform: translateY(0); }
+
+        /* --- HERO --- */
+        .hero-split-container { display: flex; align-items: center; gap: 60px; position: relative; z-index: 2; }
+        .carousel-shadow-wrapper { flex: 0 0 450px; position: relative; }
+        .carousel-shadow-wrapper::after { content: ''; position: absolute; top: 50px; left: 50px; width: 100%; height: 100%; background: rgba(0, 119, 181, 0.15); filter: blur(80px); z-index: -1; }
+        .hero-image-carousel { height: 450px; overflow: hidden; border-radius: 40px; box-shadow: 0 30px 60px rgba(0,0,0,0.05); }
+        .image-track { display: flex; flex-direction: column; transition: var(--transition-carousel); }
+        .image-slide img { width: 100%; height: 500px; object-fit: cover; }
+        .hero-slide { font-size: 6rem; letter-spacing: -5px; line-height: 0.85; height: var(--carousel-view-h); display: flex; align-items: center; opacity: 0.1; transition: 0.8s; }
+        .hero-slide.active { opacity: 1; }
+        .hero-stats { display: flex; gap: 40px; margin-top: 45px; padding-top: 30px; border-top: 1px solid rgba(0,0,0,0.06); }
+        .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+
+        /* --- SCROLL INDICATOR --- */
+        .scroll-indicator { position: absolute; bottom: 30px; left: 10%; display: flex; align-items: center; gap: 15px; font-size: 0.7rem; font-weight: 700; opacity: 0.3; text-transform: uppercase; }
+        .mouse { width: 20px; height: 35px; border: 2px solid var(--text); border-radius: 20px; position: relative; }
+        .wheel { width: 2px; height: 6px; background: var(--text); position: absolute; top: 6px; left: 50%; transform: translateX(-50%); animation: scrollWheel 1.5s infinite; }
+        @keyframes scrollWheel { 0% { opacity: 1; top: 6px; } 100% { opacity: 0; top: 15px; } }
+
+        /* --- FLOATING CTA --- */
+        .floating-cta { position: fixed; bottom: 30px; right: 30px; padding: 20px 35px; background: rgba(0, 119, 181, 0.15); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 100px; color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 12px; z-index: 1000; transition: all 0.4s; transform: translateY(100px); }
+        .floating-cta.show { transform: translateY(0); }
+        .floating-cta:hover { background: var(--primary); color: white; transform: scale(1.05) translateY(-5px); }
+        .cta-icon { width: 24px; height: 24px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+        /* --- SCHEMA PATHS ANIMÉ --- */
+        .schema-wrapper { position: relative; max-width: 900px; margin: 20px auto; padding: 40px 0; }
+        .schema-line {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+            background: #E5E7EB; /* Couleur de base grise */
+            transform: translateX(-50%);
+        }
+        .schema-line-progress {
+            position: absolute; left: 50%; top: 0; width: 2px; height: 0%;
+            background: var(--primary); /* Ligne bleue qui descend au scroll */
+            transform: translateX(-50%);
+            transition: height 0.1s linear;
+        }
+        .schema-step {
+            position: relative; width: 50%; margin-bottom: 30px; padding: 0 40px;
+            opacity: 0; transform: translateY(30px); transition: 0.8s ease-out;
+        }
+        .schema-step.is-visible { opacity: 1; transform: translateY(0); }
+        .schema-step.right { margin-left: 50%; }
+        
+        .path-card {
+            background: white; border-radius: 10px; padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.04);
+            position: relative; transition: 0.3s;
+        }
+        .path-card:hover { border-color: var(--primary); transform: scale(1.02); }
+
+        .connector-dot {
+            position: absolute; top: 50%; width: 16px; height: 16px;
+            background: #E5E7EB; border: 4px solid white; border-radius: 50%;
+            z-index: 2; transition: background 0.5s;
+        }
+        .is-visible .connector-dot { background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+        .left .connector-dot { right: -48px; transform: translateY(-50%); }
+        .right .connector-dot { left: -48px; transform: translateY(-50%); }
+
+        .path-progress-bg { height: 6px; background: #eee; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .path-progress-fill { height: 100%; background: var(--primary); width: 0; transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* --- BENTO & FOOTER --- */
+        .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .bento-item { background: white; border-radius: 10px; padding: 40px; border: 1px solid rgba(0,0,0,0.03); transition: 0.3s; }
+        .bento-item:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+        .large { grid-column: span 2; }
+        .manifesto-box { background: var(--primary); color: white; border-radius: 60px; padding: 80px; }
+        footer { background: var(--primary); backdrop-filter: blur(20px); border-radius: 10px; padding: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; width: 100%; margin: 40px auto; border: 1px solid rgba(255,255,255,0.4); color: var(--white-trans); }
+
+        @media (max-width: 768px) {
+            .schema-line, .schema-line-progress { left: 20px; }
+            .schema-step { width: 100%; margin-left: 40px !important; padding-left: 20px; }
+            .connector-dot { left: -30px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mesh-bg"><div class="mesh-ball ball-1"></div><div class="mesh-ball ball-2"></div></div>
+
+    <div id="loader-screen">
+        <div class="peace-logo-square"><span class="peace-text">Peace</span><span class="crvs-slogan">CRVSLEARNING</span></div>
+        <div class="progress-bar"></div>
+    </div>
+
+    <nav>
+        <div class="brand-section">
+            <div style="font-weight:900;">CrvsLearning</div>
+            <div style="font-size:0.7rem; opacity:0.5; letter-spacing:2px;">P E A C E  2026</div>
+        </div>
+      <a class="dropdown-item text-white" href="{% url 'courses:learning_path_dashboard' %}" style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 6px; transition: all 0.2s ease;">
+          <i class="bi bi-mortarboard-fill" style="color: #ffc107;"></i>
+          <div>
+            <div style="font-weight: 600;" class="login-btn">Mon Parcours</div>
+          </div>
+        </a>
+        {% if user.is_authenticated %}
+            <div class="user-profile-section">
+                <div class="user-info">
+                    <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="user-role">
+                        {% if user.is_staff %}se
+                            Administrateur
+                        {% elif user.is_superuser %}
+                            Super Admin
+                        {% else %}
+                            Étudiant
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="user-actions">
+                    {% if user.profile.avatar %}
+                     <img src="{% if user.avatar %}{{ user.avatar.url }}{% else %}{% static 'img/ninja-avatar.png' %}{% endif %}" class="user-avatar" onclick="window.location.href='{% url 'users:dashboard' %}'">
+                    {% else %}
+                        <a href="{% url 'users:profile' %}"><div class="user-avatar" style="background: linear-gradient(135deg, #0077B5, #005a8b); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem;" onclick="window.location.href='{% url 'users:dashboard' %}'">
+                            {{ user.username|slice:':1'|upper }}
+                        </div></a>
+                    {% endif %}
+                    <form action="{% url 'users:logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn" title="Se déconnecter">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <a href="{% url 'users:login' %}" class="login-btn">
+                <i class="bi bi-box-arrow-in-right" style="margin-right: 5px;"></i>
+                Se connecter
+            </a>
+        {% endif %}
+        
+    </nav>
+
+    <a href="{% url 'courses:category_list' %}" class="floating-cta" id="mainCta">Commencer maintenant <span class="cta-icon">→</span></a>
+
+    <section class="reveal-section hero" style="display:flex; align-items:center;">
+        <div class="hero-split-container">
+            <div class="carousel-shadow-wrapper">
+                <div class="hero-image-carousel">
+                    <div class="image-track" id="imageTrack">
+                        <div class="image-slide"><img src="{% static 'img/graduation.png' %}"></div>
+                        <div class="image-slide"><img src="{% static 'img/salle.jpg' %}"></div>
+                        <div class="image-slide"><img src="{% static 'img/professeur.jpg' %}"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-text-content">
+                <div class="hero-carousel" style="overflow:hidden; height:260px;">
+                    <div class="carousel-track" id="heroTrack">
+                        <h1 class="hero-slide active">CRVS<br>Academy.</h1>
+                        <h1 class="hero-slide">Formations<br>Pratiques.</h1>
+                        <h1 class="hero-slide">Contenus<br>Pédagogiques.</h1>
+                    </div>
+                </div>
+                <p style="opacity:0.5; margin-top:20px; max-width:400px;">L'excellence technologique au service de la nation. Une plateforme de formation stratégique.</p>
+                <div class="hero-stats">
+                    <div><span class="stat-value">+2.4k</span><br><small style="opacity:0.5">de formateurs Experts</small></div>
+                    <div><span class="stat-value">98%</span><br><small style="opacity:0.5">Succès aux évaluations</small></div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator"><div class="mouse"><div class="wheel"></div></div><span>Scroll pour explorer</span></div>
+    </section>
+
+    <section class="reveal-section paths" id="pathSection">
+        <div style="text-align:center; margin-bottom:60px;">
+            <span style="color:var(--primary); font-weight:800; letter-spacing:3px;">01.5 ROADMAP</span>
+            <h2 style="font-size:3.5rem; letter-spacing:-2px;">Parcours d'Apprentissage</h2>
+        </div>
+
+        <div class="schema-wrapper" id="schemaWrapper">
+            <div class="schema-line"></div>
+            <div class="schema-line-progress" id="scrollLine"></div>
+
+            <div class="schema-step left" data-percent="75">
+                <div class="connector-dot"></div>
+                <div class="path-card">
+                    <div class="path-icon">🛡️</div>
+                    <h3>Introduction à l'Etat Civil</h3>
+                    <p style="font-size:0.9rem; opacity:0.6; margin-top:10px;">Maîtrisez les bases et les concepts fondamentaux de l'etat civil.</p>
+                    <div class="path-progress-bg"><div class="path-progress-fill"></div></div>
+                </div>
+            </div>
+
+            <div class="schema-step right" data-percent="30">
+                <div class="connector-dot"></div>
+                <div class="path-card">
+                    <div class="path-icon">🌐</div>
+                    <h3>Fondamentaux à l'archivage des registres d'Etat civil</h3>
+                    <p style="font-size:0.9rem; opacity:0.6; margin-top:10px;">Devenez Expert dans les domaines CRVS.</p>
+                    <div class="path-progress-bg"><div class="path-progress-fill"></div></div>
+                </div>
+            </div>
+
+            <div class="schema-step left" data-percent="12">
+                <div class="connector-dot"></div>
+                <div class="path-card">
+                    <div class="path-icon">⚡</div>
+                    <h3>Production et diffusion des données statistiques</h3>
+                    <p style="font-size:0.9rem; opacity:0.6; margin-top:10px;">Maitrisez les concepts d'archivages et tenu des registres d'état civil.</p>
+                    <div class="path-progress-bg"><div class="path-progress-fill"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="reveal-section">
+        <h2 style="font-size:3.5rem; margin-bottom:40px;">Apprentissage à la Carte</h2>
+        <div class="bento-grid">
+            <div class="bento-item large"><h4>Syllabus IA</h4><p style="opacity:0.5">Adaptation en temps réel.</p></div>
+            <div class="bento-item"><h4>Labs</h4><p style="opacity:0.5">Pratique Cloud.</p></div>
+            <div class="bento-item"><h4>Certifs</h4><p style="opacity:0.5">Crvs Academy.</p></div>
+            <div class="bento-item large"><h4>Analytics</h4><p style="opacity:0.5">Tracking complet.</p></div>
+        </div>
+        
+    <footer>
+        <div><div style="font-weight:900; color:var(--white-trans);">PEACE</div><p style="opacity:0.5; font-size:0.8rem; margin-top:10px;">Yaoundé, Cameroun</p></div>
+        <div><h5>Ressources</h5><p style="opacity:0.5; font-size:0.8rem;">Syllabus<br>Documentation</p></div>
+        <div><h5>Contact</h5><p style="opacity:0.5; font-size:0.8rem;">Support Technique<br>BUNEC Portal</p></div>
+    </footer>
+    </section>
+
+    <!-- <section class="reveal-section">
+        <div class="manifesto-box">
+            <h2>Forgeons l'excellence nationale.</h2>
+            <p style="margin-top:20px; font-size:1.2rem; opacity:0.8;">Un déploiement stratégique de compétences.</p>
+        </div>
+    </section> -->
+
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader-screen').classList.add('fade-out');
+                document.querySelectorAll('.reveal-section').forEach(s => s.classList.add('is-visible'));
+                document.getElementById('mainCta').classList.add('show');
+                startHero();
+                initPathObserver();
+            }, 2300);
+        });
+
+        function startHero() {
+            const tTrack = document.getElementById('heroTrack');
+            const iTrack = document.getElementById('imageTrack');
+            const slides = document.querySelectorAll('.hero-slide');
+            let idx = 0;
+            setInterval(() => {
+                slides[idx].classList.remove('active');
+                idx = (idx + 1) % slides.length;
+                tTrack.style.transform = `translateY(-${idx * 260}px)`;
+                iTrack.style.transform = `translateY(-${idx * 500}px)`;
+                slides[idx].classList.add('active');
+            }, 3500);
+        }
+
+        function initPathObserver() {
+            const steps = document.querySelectorAll('.schema-step');
+            const scrollLine = document.getElementById('scrollLine');
+            const wrapper = document.getElementById('schemaWrapper');
+
+            // Observer pour les cartes et les jauges
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        const fill = entry.target.querySelector('.path-progress-fill');
+                        const percent = entry.target.getAttribute('data-percent');
+                        fill.style.width = percent + '%';
+                    }
+                });
+            }, {threshold: 0.6});
+            steps.forEach(s => observer.observe(s));
+
+            // Animation de la ligne au scroll
+            window.addEventListener('scroll', () => {
+                const rect = wrapper.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                
+                // On calcule le pourcentage de progression dans la section Roadmap
+                let progress = (windowHeight / 2 - rect.top) / rect.height * 100;
+                progress = Math.max(0, Math.min(100, progress));
+                scrollLine.style.height = progress + '%';
+            });
+        }
+    </script>
+</body>
+</html>

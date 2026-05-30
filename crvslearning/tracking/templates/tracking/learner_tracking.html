@@ -1,0 +1,1044 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load tracking_filters %}
+
+{% block extra_css %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+    .app{
+  zoom: 0.8 !important;
+}
+
+    /* Interface compacte */
+    .container {
+        padding: 10px !important;
+    }
+    .card {
+        font-size: 0.75rem;
+        margin-bottom: 0.3rem !important;
+    }
+    .card-body {
+        padding: 0.5rem !important;
+    }
+    .card h1, .card h2, .card h3, .card h4, .card h5, .card h6 {
+        font-size: 0.8rem;
+        margin-bottom: 0.3rem !important;
+    }
+    /* Réduction du texte dans la première row */
+    .container > .row:first-child .card {
+        font-size: 0.65rem !important;
+    }
+    .container > .row:first-child .card h5,
+    .container > .row:first-child .card h6 {
+        font-size: 0.7rem !important;
+    }
+    .container > .row:first-child .badge {
+        font-size: 0.6rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+    .container > .row:first-child .small {
+        font-size: 0.55rem !important;
+    }
+    .row {
+        margin-bottom: 0.5rem !important;
+    }
+    .mt-2 {
+        margin-top: 0.5rem !important;
+    }
+    .mt-4 {
+        margin-top: 0.75rem !important;
+    }
+    .mb-2 {
+        margin-bottom: 0.25rem !important;
+    }
+    .mb-4 {
+        margin-bottom: 0.5rem !important;
+    }
+    /* Style pour les onglets de navigation - Style chan-tabs de instructor_public */
+    .nav.nav-pills {
+        display: flex !important;
+        gap: 8px !important;
+        border: none !important;
+        margin: 6px 0 14px 0 !important;
+        padding: 0 !important;
+        background: rgba(26, 26, 26, 0.1) !important;
+        border-radius: 10px !important;
+        padding: 6px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .nav.nav-pills .nav-link {
+        display: inline-block !important;
+        padding: 10px 20px !important;
+        color: #e0e0e0 !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        overflow: hidden !important;
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+        border: 1px solid #3a3a3a !important;
+    }
+
+    .nav.nav-pills .nav-link::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent) !important;
+        transition: 0.5s !important;
+    }
+
+    .nav.nav-pills .nav-link:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        color: #fff !important;
+    }
+
+    .nav.nav-pills .nav-link:hover::before {
+        left: 100% !important;
+    }
+
+    .nav.nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #0072ce, #00439c) !important;
+        color: #fff !important;
+        border-color: #00a4ff !important;
+        box-shadow: 0 4px 16px rgba(0, 114, 206, 0.4) !important;
+    }
+
+    .nav.nav-pills .nav-link.active:hover {
+        background: linear-gradient(135deg, #0088ff, #0055cc) !important;
+        box-shadow: 0 6px 20px rgba(0, 136, 255, 0.5) !important;
+    }
+
+    .nav.nav-pills .nav-link i {
+        margin-right: 8px !important;
+        font-size: 0.9rem !important;
+    }
+    /* Ajout d'un léger délai entre les animations */
+    [data-aos] {
+        transition-delay: 0.1s;
+    }
+    
+    /* Style pour les cartes avec effet de survol */
+    .card-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    /* Styles des barres de progression */
+    .progress {
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .progress-bar {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        transition: width 0.6s ease;
+    }
+    .progress-bar.bg-success {
+        background-color: #198754 !important;
+    }
+    .progress-bar.bg-primary {
+        background-color: #0d6efd !important;
+    }
+    .progress-bar.bg-danger {
+        background-color: #dc3545 !important;
+    }
+    .progress-bar.bg-warning {
+        background-color: #ffc107 !important;
+    }
+    .structure-stats {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+   /* ==================================================
+   TABLE – STYLE AVANCÉ (ESPACES + CARTES)
+================================================== */
+.table-wrapper {
+  background: transparent;
+  box-shadow: none;
+}
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0 4px;  /* Espace entre les lignes */
+  width: 100%;
+}
+
+.table thead th {
+  background: #111827;
+  color: #ffffff;
+  font-weight: 800;
+  border: 0;
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.table td {
+  border: 0;
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.1);
+}
+
+/* Coins arrondis visibles */
+.table tbody tr td:first-child {
+  border-radius: 5px 0 0 5px;
+}
+
+.table tbody tr td:last-child {
+  border-radius: 0 5px 5px 0;
+}
+
+/* Style pour les lignes de détails */
+.table tbody tr.detail-row {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.table tbody tr.detail-row td {
+  padding: 0 !important;
+}
+
+.detail-content {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+
+
+    
+    .toggle-details {
+        cursor: pointer;
+        color: #0d6efd;
+        transition: all 0.2s;
+    }
+    
+    .toggle-details:hover {
+        color: #0a58ca;
+    }
+    
+    /* Style FORCÉ pour les onglets de navigation - Style chan-tabs de instructor_public */
+    #viewTabs.nav.nav-pills {
+        display: flex !important;
+        gap: 8px !important;
+        border: none !important;
+        margin: 6px 0 14px 0 !important;
+        padding: 6px !important;
+        background: rgba(26, 26, 26, 0.1) !important;
+        border-radius: 10px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #viewTabs.nav.nav-pills .nav-link {
+        display: inline-block !important;
+        padding: 10px 20px !important;
+        color: #e0e0e0 !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        overflow: hidden !important;
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+        border: 1px solid #3a3a3a !important;
+    }
+
+    #viewTabs.nav.nav-pills .nav-link::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: -100% !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent) !important;
+        transition: 0.5s !important;
+    }
+
+    #viewTabs.nav.nav-pills .nav-link:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        color: #fff !important;
+    }
+
+    #viewTabs.nav.nav-pills .nav-link:hover::before {
+        left: 100% !important;
+    }
+
+    #viewTabs.nav.nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #0072ce, #00439c) !important;
+        color: #fff !important;
+        border-color: #00a4ff !important;
+        box-shadow: 0 4px 16px rgba(0, 114, 206, 0.4) !important;
+    }
+
+    #viewTabs.nav.nav-pills .nav-link.active:hover {
+        background: linear-gradient(135deg, #0088ff, #0055cc) !important;
+        box-shadow: 0 6px 20px rgba(0, 136, 255, 0.5) !important;
+    }
+
+    #viewTabs.nav.nav-pills .nav-link i {
+        margin-right: 8px !important;
+        font-size: 0.9rem !important;
+    }
+</style>
+{% endblock %}
+
+{% block title %}Suivi des Apprenants{% endblock %}
+
+{% block content %}
+<!-- Loader circulaire fluide -->
+{% include 'courses/partials/course_loader.html' %}
+
+<div class="container mt-2 app" data-aos="fade-up">
+    
+    <div class="row">
+        <div class="col-md-6 d-flex justify-content-center">
+        <div class="col-md-6">
+            <img src="{% static 'img/stats.jpg' %}" alt="Crayons" class="img-fluid mt-4" style="max-height: 400px; width: auto; object-fit: contain; border-radius: 6px;">
+        </div>
+        <div class="col-md-6 mx-3 d-flex flex-column align-items-center justify-content-center text-center">
+            <h5 class="mt-2">Suivi des Apprenants</h5>
+            <div class="d-flex gap-3">
+                <button class="btn btn-primary" onclick="showFlowView()">
+                    <i class="fas fa-chart-line me-2"></i>Flow
+                </button>
+                <button class="btn btn-dark" onclick="showInfoView()">
+                    <i class="fas fa-info-circle me-2"></i>Info
+                </button>
+            </div>
+        </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <!-- <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Statistiques</h5>
+                                <span class="badge bg-primary">
+                                    {% if structure_filter %}
+                                        {{ structure_choices|get_item:structure_filter }}
+                                    {% else %}
+                                        Toutes structures
+                                    {% endif %}
+                                </span>
+                            </div> -->
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Apprenants actifs :</span>
+                        <span class="badge bg-primary">{{ active_learners }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total apprenants :</span>
+                        <span class="badge bg-secondary">{{ total_learners }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total cours :</span>
+                        <span class="badge bg-info">{{ total_courses }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total leçons :</span>
+                        <span class="badge bg-info">{{ total_lessons }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Inscriptions :</span>
+                        <span class="badge bg-warning">{{ total_enrollments }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Cours terminés :</span>
+                        <span class="badge bg-success">{{ total_completed_courses }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Leçons terminées :</span>
+                        <span class="badge bg-success">{{ total_completed_lessons }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="col-md-3">
+            <div class="card bg-light border-0 shadow-sm">
+                <div class="card-body p-1">
+                    <h6 class="card-title text-muted text-uppercase fw-bold mb-4">Progression Globale</h6>
+                    
+                    <!-- Cours terminés -->
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-graduation-cap text-success me-2"></i>
+                                <span class="fw-medium">Cours terminés</span>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success">
+                                {{ course_completion_rate|floatformat:1 }}%
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" 
+                                role="progressbar" 
+                                style="width: {{ course_completion_rate|floatformat:0 }}%"
+                                aria-valuenow="{{ course_completion_rate|floatformat:0 }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">{{ total_completed_courses }} / {{ total_enrollments }} cours</small>
+                            <small class="text-muted">{{ course_completion_rate|floatformat:1 }}%</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Leçons terminées -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-book text-primary me-2"></i>
+                                <span class="fw-medium">Leçons terminées</span>
+                            </div>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">
+                                {{ lesson_completion_rate|floatformat:1 }}%
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" 
+                                role="progressbar" 
+                                style="width: {{ lesson_completion_rate|floatformat:0 }}%"
+                                aria-valuenow="{{ lesson_completion_rate|floatformat:0 }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">{{ total_completed_lessons }} / {{ total_lessons_completable }} leçons</small>
+                            <small class="text-muted">{{ lesson_completion_rate|floatformat:1 }}%</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Cours manqués -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                <span class="fw-medium">Cours manqués</span>
+                            </div>
+                            <span class="badge bg-danger bg-opacity-10 text-danger">
+                                {{ missed_courses_rate|floatformat:1 }}%
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" 
+                                role="progressbar" 
+                                style="width: {{ missed_courses_rate|floatformat:0 }}%"
+                                aria-valuenow="{{ missed_courses_rate|floatformat:0 }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">{{ total_missed_courses }} / {{ total_enrollments }} cours manqués</small>
+                            <small class="text-muted">{{ missed_courses_rate|floatformat:1 }}%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-1">
+        <!-- Nav Pills -->
+        <div class="col-12 mb-3">
+            <ul class="nav nav-pills" id="viewTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="main-tab" data-bs-toggle="pill" data-bs-target="#main" type="button" role="tab" aria-controls="main" aria-selected="true">
+                        <i class="fas fa-table me-2"></i>Suivi des Apprenants
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="stats-tab" data-bs-toggle="pill" data-bs-target="#stats" type="button" role="tab" aria-controls="stats" aria-selected="false">
+                        <i class="fas fa-chart-pie me-2"></i>Répartition par Structure
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="col-12">
+            <div class="tab-content" id="viewTabsContent">
+                <!-- Main Tab -->
+                <div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <!-- Filtres -->
+                            <div class="card mb-4 card-hover" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|multiply:50 }}">
+                                <div class="card-body">
+                                    <form method="get" id="searchForm" class="mb-0">
+                                        <div class="mb-3">
+                                            <label for="structureFilter" class="form-label">Structure</label>
+                                            <select name="structure" id="structureFilter" class="form-select">
+                                                <option value="">Toutes les structures</option>
+                                                {% for value, label in structure_choices.items %}
+                                                    <option value="{{ value }}" {% if structure_filter == value %}selected{% endif %}>
+                                                        {{ label }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="certificationFilter" class="form-label">Certification</label>
+                                            <select name="certification" id="certificationFilter" class="form-select">
+                                                <option value="">Tous les apprenants</option>
+                                                <option value="with_certification" {% if certification_filter == 'with_certification' %}selected{% endif %}>
+                                                    Avec certification
+                                                </option>
+                                                <option value="without_certification" {% if certification_filter == 'without_certification' %}selected{% endif %}>
+                                                    Sans certification
+                                                </option>
+                                            </select>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                                        <a href="?" class="btn btn-outline-secondary w-100 mt-2">Réinitialiser</a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center" style="background: transparent !important;">
+                                    <h5 class="mb-0"></h5>
+                                    <div>
+                                        <a href="?export=csv" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-download me-1"></i> Exporter
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Apprenant</th>
+                                                    <th>Structure</th>
+                                                    <th>Service/Commune</th>
+                                                    <th>Profession</th>
+                                                    <th>Date de naissance</th>
+                                                    <th class="text-center">Cours</th>
+                                                    <th class="text-center">Leçons</th>
+                                                    <th class="text-center">Dernière activité</th>
+                                                    <th class="text-center">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for learner in learners %}
+                                                <tr class="collapse-row" onclick="toggleDetails({{ forloop.counter }})">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            {% with avatar=learner.user.get_avatar_display %}
+                                                                {% if avatar.type == 'image' %}
+                                                                    <img src="{{ avatar.url }}" 
+                                                                         class="rounded-circle me-2" width="32" height="32" 
+                                                                         alt="{{ avatar.alt }}">
+                                                                {% else %}
+                                                                    <div class="rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                                         style="width: 32px; height: 32px; background-color: {{ avatar.bg_color }}; color: {{ avatar.color }};">
+                                                                        {{ avatar.text }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                            <div>
+                                                                <div class="fw-bold">{{ learner.user.get_full_name|default:learner.user.username }}</div>
+                                                                <small class="text-muted">{{ learner.user.email }}</small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-{{ learner.user.structure|default:'secondary'|lower }} text-dark" title="Valeur brute: {{ learner.user.structure|default:'Non défini' }}">
+                                                            {{ learner.user.get_structure_display|default:"-" }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        {% if learner.user.structure == 'bunec' %}
+                                                            {{ learner.user.service|default:"Aucun service défini" }}
+                                                        {% elif learner.user.structure == 'commune' %}
+                                                            {{ learner.user.commune|default:"Aucune commune définie" }}
+                                                        {% elif learner.user.structure == 'minsante' %}
+                                                            {% if learner.user.sante_type == 'admin_centrale' %}
+                                                                {{ learner.user.sante_service|default:"Aucun service défini" }}
+                                                            {% elif learner.user.sante_type == 'fosa' %}
+                                                                {{ learner.user.get_fosa_profession_display|default:"Aucune profession définie" }}
+                                                            {% else %}
+                                                                Non applicable
+                                                            {% endif %}
+                                                        {% else %}
+                                                            Non applicable ({{ learner.user.get_structure_display|default:"Structure non définie" }})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if learner.user.structure == 'minsante' and learner.user.sante_type == 'fosa' %}
+                                                            <span class="badge bg-info text-dark">
+                                                                {{ learner.user.get_fosa_profession_display|default:"-" }}
+                                                            </span>
+                                                        {% elif learner.user.structure == 'commune' %}
+                                                            <span class="badge bg-secondary text-dark">
+                                                                {{ learner.user.get_fonction_display|default:"-" }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        {% if learner.user.date_of_birth %}
+                                                            <span class="text-muted">
+                                                                {{ learner.user.date_of_birth|date:"d/m/Y" }}
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="text-muted">Non spécifiée</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-light text-dark">
+                                                            {{ learner.courses_completed }}/{{ learner.courses_enrolled }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="badge bg-light text-dark">
+                                                            <div class="progress" style="height: 4px;">
+                                                                <div class="progress-bar bg-success" 
+                                                                     style="width: {{ learner.lesson_completion_rate|default:0 }}%;">
+                                                                </div>
+                                                            </div>
+                                                            <small class="text-muted">{{ learner.lesson_completion_rate|default:0|floatformat:0 }}%</small>
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="text-muted" title="{{ learner.last_activity|date:'d/m/Y H:i' }}">
+                                                            {{ learner.last_activity|naturaltime|default:'Jamais' }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a href="{% url 'tracking:learner_detail' learner.user.id %}" 
+                                                           class="btn btn-sm btn-outline-primary d-flex align-items-center"
+                                                           title="Voir le détail">
+                                                            <i class="fas fa-eye me-1"></i>
+                                                            <span>Voir</span>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                <!-- Ligne de détails -->
+                                                <tr id="detail-{{ forloop.counter }}" class="detail-row" style="display: none;">
+                                                    <td colspan="9" class="p-0">
+                                                        <div class="detail-content">
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <h6>Détails de l'apprenant</h6>
+                                                                    <p class="mb-1"><strong>Email :</strong> {{ learner.email }}</p>
+                                                                    <p class="mb-1"><strong>Date de naissance :</strong> 
+                                                                        {% if learner.user.date_of_birth %}
+                                                                            {{ learner.user.date_of_birth|date:"d/m/Y" }}
+                                                                        {% else %}
+                                                                            Non spécifiée
+                                                                        {% endif %}
+                                                                    </p>
+                                                                    <p class="mb-1"><strong>Dernière connexion :</strong> {{ learner.last_login|naturaltime|default:'Jamais' }}</p>
+                                                                    <p class="mb-0"><strong>Date d'inscription :</strong> {{ learner.date_joined|date:"d/m/Y" }}</p>
+                                                                    
+                                                                    {% if learner.user.structure == 'minsante' or learner.user.structure == 'commune' %}
+                                                                    <h6 class="mt-3">Informations professionnelles</h6>
+                                                                        {% if learner.user.structure == 'minsante' and learner.user.sante_type == 'fosa' %}
+                                                                            <p class="mb-1"><strong>Profession :</strong> {{ learner.user.get_fosa_profession_display|default:"Non spécifiée" }}</p>
+                                                                        {% elif learner.user.structure == 'commune' %}
+                                                                            <p class="mb-1"><strong>Fonction :</strong> {{ learner.user.get_fonction_display|default:"Non spécifiée" }}</p>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <h6>Progression</h6>
+                                                                    <div class="progress mb-2" style="height: 8px;">
+                                                                        <div class="progress-bar bg-success" role="progressbar" 
+                                                                             style="width: {{ learner.completion_rate|default:0 }}%" 
+                                                                             aria-valuenow="{{ learner.completion_rate|default:0 }}" 
+                                                                             aria-valuemin="0" 
+                                                                             aria-valuemax="100">
+                                                                        </div>
+                                                                    </div>
+                                                                    <p class="mb-1"><strong>Progression :</strong> {{ learner.completion_rate|default:0|floatformat:0 }}%</p>
+                                                                    <p class="mb-0"><strong>Cours terminés :</strong> {{ learner.completed_courses_count|default:0 }} / {{ learner.enrolled_courses_count|default:0 }}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr class="collapse-row">
+                                                    <td colspan="5" class="text-center py-4">
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-users-slash fa-2x mb-2"></i>
+                                                            <p class="mb-0">Aucun apprenant trouvé</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Pagination -->
+                            {% if learners.has_other_pages %}
+                            <div class="card-footer">
+                                <nav aria-label="Pagination">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        {% if learners.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                                                   aria-label="Première">
+                                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ learners.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                                                   aria-label="Précédent">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                        
+                                        {% for num in learners.paginator.page_range %}
+                                            {% if learners.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                                        {{ num }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        {% if learners.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ learners.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                                                   aria-label="Suivant">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ learners.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+                                                   aria-label="Dernière">
+                                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                                <div class="text-center text-muted mt-2">
+                                    Page {{ learners.number }} sur {{ learners.paginator.num_pages }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Tab -->
+                <div class="tab-pane fade" id="stats" role="tabpanel" aria-labelledby="stats-tab">
+                    <div class="card mt-3 card-hover" data-aos="fade-up" data-aos-delay="150">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Répartition par structure</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush structure-stats">
+                                {% for stat in structure_stats %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ stat.structure|default:"Non spécifié" }}</h6>
+                                        <span class="badge bg-primary rounded-pill">{{ stat.total }}</span>
+                                    </div>
+                                    <div class="small text-muted">
+                                        <span class="text-success">{{ stat.active }} actifs</span> • 
+                                        <span>{{ stat.enrolled }} inscriptions</span>
+                                    </div>
+                                    <div class="progress progress-thin mt-1">
+                                        <div class="progress-bar bg-success" 
+                                             style="width: {{ stat.completed|default:0 }}%">
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted text-end">
+                                        {{ stat.completed|default:0 }}% de complétion
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fonction pour gérer l'affichage des détails
+    function toggleDetails(rowId) {
+        const detailRow = document.getElementById(`detail-${rowId}`);
+        const row = document.querySelector(`tr[onclick="toggleDetails(${rowId})"]`);
+        
+        if (detailRow.style.display === 'none' || !detailRow.style.display) {
+            detailRow.style.display = 'table-row';
+            row.classList.add('active');
+        } else {
+            detailRow.style.display = 'none';
+            row.classList.remove('active');
+        }
+        
+        // Fermer les autres lignes détaillées
+        document.querySelectorAll('.detail-row').forEach((el) => {
+            if (el.id !== `detail-${rowId}`) {
+                el.style.display = 'none';
+            }
+        });
+    }
+    
+    // Fonctions pour les boutons Flow et Info
+    function showFlowView() {
+        // Activer l'onglet principal (suivi des apprenants)
+        const mainTab = document.getElementById('main-tab');
+        const statsTab = document.getElementById('stats-tab');
+        const mainPane = document.getElementById('main');
+        const statsPane = document.getElementById('stats');
+        
+        mainTab.classList.add('active');
+        mainTab.setAttribute('aria-selected', 'true');
+        statsTab.classList.remove('active');
+        statsTab.setAttribute('aria-selected', 'false');
+        
+        mainPane.classList.add('show', 'active');
+        statsPane.classList.remove('show', 'active');
+        
+        // Afficher une notification
+        Swal.fire({
+            icon: 'info',
+            title: 'Vue Flow',
+            text: 'Affichage du suivi des apprenants en mode flux',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+    
+    function showInfoView() {
+        // Activer l'onglet des statistiques
+        const mainTab = document.getElementById('main-tab');
+        const statsTab = document.getElementById('stats-tab');
+        const mainPane = document.getElementById('main');
+        const statsPane = document.getElementById('stats');
+        
+        statsTab.classList.add('active');
+        statsTab.setAttribute('aria-selected', 'true');
+        mainTab.classList.remove('active');
+        mainTab.setAttribute('aria-selected', 'false');
+        
+        statsPane.classList.add('show', 'active');
+        mainPane.classList.remove('show', 'active');
+        
+        // Afficher une notification
+        Swal.fire({
+            icon: 'info',
+            title: 'Vue Info',
+            text: 'Affichage des statistiques par structure',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+    
+    // Fermer les détails lors du clic en dehors
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('tr.collapse-row') && !event.target.closest('.detail-content')) {
+            document.querySelectorAll('.detail-row').forEach((el) => {
+                el.style.display = 'none';
+            });
+            document.querySelectorAll('tr.collapse-row').forEach((el) => {
+                el.classList.remove('active');
+            });
+        }
+    });
+</script>
+
+<!-- AOS Animation Library -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    // Initialiser AOS
+    document.addEventListener('DOMContentLoaded', function() {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false
+        });
+    });
+    
+    // Réinitialiser AOS après un filtrage
+    document.getElementById('searchForm').addEventListener('submit', function() {
+        setTimeout(function() {
+            AOS.refresh();
+        }, 500);
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Fonction de recherche en temps réel
+    function filterLearners() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        
+        // Récupérer la structure sélectionnée
+        var structureFilter = document.getElementById("structureFilter").value.toUpperCase();
+
+        table = document.querySelector("table");
+        tr = table.getElementsByTagName("tr");
+        
+        // Parcourir toutes les lignes du tableau et masquer celles qui ne correspondent pas aux critères
+        for (i = 1; i < tr.length; i++) {
+            var row = tr[i];
+            var showRow = true;
+            
+            // Filtrer par recherche texte
+            if (filter) {
+                showRow = false;
+                var cells = row.getElementsByTagName("td");
+                for (var j = 0; j < cells.length; j++) {
+                    if (cells[j]) {
+                        txtValue = cells[j].textContent || cells[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            showRow = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Filtrer par structure
+            if (showRow && structureFilter) {
+                var structureCell = row.querySelector(".structure-badge");
+                if (structureCell) {
+                    var structureValue = structureCell.getAttribute("data-structure") || "";
+                    if (structureValue.toUpperCase() !== structureFilter) {
+                        showRow = false;
+                    }
+                }
+            }
+            
+            row.style.display = showRow ? "" : "none";
+        }
+    }
+
+    // Initialisation du graphique des structures
+    var ctx = document.getElementById('structureChart').getContext('2d');
+    var structureChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ structure_chart_data.labels|safe }},
+            datasets: [{
+                data: {{ structure_chart_data.data|safe }},
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                    '#5a5c69', '#858796', '#5a5c69', '#36b9cc', '#1cc88a'
+                ],
+                hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617'],
+                hoverBorderColor: 'rgba(234, 236, 244, 1)',
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                title: {
+                    display: true,
+                    text: 'Répartition par structure',
+                    font: { size: 14 }
+                },
+                tooltip: {
+                    backgroundColor: 'rgb(255,255,255)',
+                    bodyColor: '#858796',
+                    titleMarginBottom: 10,
+                    titleColor: '#6e707e',
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(context) {
+                            var label = context.label || '';
+                            var value = context.raw || 0;
+                            var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            var percentage = Math.round((value / total) * 100);
+                            return label + ': ' + value + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            },
+            cutout: '70%',
+        },
+    });
+
+    // Recherche à la frappe
+    $('#searchInput, #structureFilter').on('input change', function() {
+        filterLearners();
+    });
+
+    // Soumission du formulaire (rechargement de la page avec les paramètres de recherche)
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        const query = $('#searchInput').val();
+        window.location.href = '?q=' + encodeURIComponent(query);
+    });
+
+    // Gestion du bouton de r�initialisation
+    $('a[href="?"].btn').on('click', function(e) {
+        e.preventDefault();
+        window.location.href = '?';
+    });
+});
+</script>
+{% endblock %}

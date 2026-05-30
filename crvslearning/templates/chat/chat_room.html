@@ -1,0 +1,519 @@
+{% extends "chat/base.html" %}
+{% load static %}
+
+{% block title %}{{ room.name }} - Chat{% endblock %}
+
+{% block content %}
+<!-- Loader circulaire fluide -->
+{% include 'courses/partials/course_loader.html' %}
+
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 border-end bg-light p-0">
+            <div class="p-3 border-bottom">
+                <h6 class="mb-0">
+                    <i class="fas fa-users"></i> Participants
+                    <span class="badge bg-primary ms-2">{{ room.participants.count }}</span>
+                </h6>
+            </div>
+            <div class="participants-list">
+                {% for participant in room.participants.all %}
+                    <div class="participant-item d-flex align-items-center p-2 border-bottom">
+                        <div class="me-2">
+                            {% if participant.chat_status.is_online %}
+                                <span class="online-indicator"></span>
+                            {% else %}
+                                <span class="offline-indicator" style="width: 10px; height: 10px; background: #6c757d; border-radius: 50%; display: inline-block;"></span>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <strong>{{ participant.get_full_name|default:participant.username }}</strong>
+                            <small class="d-block text-muted">@{{ participant.username }}</small>
+                        </div>
+                        {% if participant.chat_status.is_online %}
+                            <small class="text-success">En ligne</small>
+                        {% else %}
+                            <small class="text-muted">{{ participant.chat_status.last_seen|date:"H:i" }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Chat principal -->
+        <div class="col-md-9 col-lg-10 d-flex flex-column">
+            <!-- En-tête du salon -->
+            <div class="p-3 border-bottom bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">
+                            {% if room.is_private %}
+                                <i class="fas fa-lock text-muted"></i>
+                            {% else %}
+                                <i class="fas fa-users text-muted"></i>
+                            {% endif %}
+                            {{ room.name }}
+                        </h4>
+                        {% if room.description %}
+                            <p class="text-muted mb-0 small">{{ room.description }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleSearch()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleParticipants()">
+                            <i class="fas fa-users"></i>
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                {% if room.created_by == request.user %}
+                                    <li><a class="dropdown-item" href="{% url 'chat:edit' room.id %}">
+                                        <i class="fas fa-edit"></i> Modifier le salon
+                                    </a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="#" onclick="clearChat()">
+                                    <i class="fas fa-trash"></i> Vider le chat
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'chat:list' %}">
+                                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                                </a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Barre de recherche -->
+                <div id="searchBar" class="mt-2" style="display: none;">
+                    <input type="text" class="form-control form-control-sm" id="messageSearch" placeholder="Rechercher dans les messages...">
+                </div>
+            </div>
+            
+            <!-- Zone des messages -->
+            <div class="chat-messages flex-grow-1" id="messagesContainer">
+                <div class="text-center py-3">
+                    <small class="text-muted">Chargement des messages...</small>
+                </div>
+            </div>
+            
+            <!-- Zone de saisie -->
+            <div class="chat-input border-top bg-light">
+                <!-- Zone de réponse -->
+                <div id="replyPreview" class="reply-preview" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small>
+                            <strong>Réponse à:</strong> <span id="replyContent"></span>
+                        </small>
+                        <button type="button" class="btn-close btn-close-sm" onclick="cancelReply()"></button>
+                    </div>
+                </div>
+                
+                <!-- Indicateur de frappe -->
+                <div id="typingIndicator" class="typing-indicator" style="display: none;">
+                    <em><span id="typingUsers"></span> est en train d'écrire...</em>
+                </div>
+                
+                <!-- Formulaire d'envoi -->
+                <form id="messageForm" class="d-flex gap-2">
+                    <div class="flex-grow-1">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="messageInput" placeholder="Tapez votre message..." autocomplete="off">
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleEmojiPicker()">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <input type="file" id="fileInput" class="file-upload" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" multiple>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Envoyer
+                    </button>
+                </form>
+                
+                <!-- Sélecteur d'émojis -->
+                <div id="emojiPicker" class="emoji-picker">
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('😀')">😀</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('😂')">😂</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('😍')">😍</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('🤔')">🤔</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('👍')">👍</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('👎')">👎</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('❤️')">❤️</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('🎉')">🎉</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('🔥')">🔥</button>
+                        <button type="button" class="emoji-btn" onclick="insertEmoji('💯')">💯</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour visualiser les images -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"></button>
+                <img id="modalImage" src="" class="img-fluid rounded" alt="Image">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const roomId = {{ room.id }};
+const currentUserId = {{ request.user.id }};
+let chatSocket;
+let messageReplyTo = null;
+let typingTimeout;
+let isTyping = false;
+
+// Connexion WebSocket
+function connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    chatSocket = new ReconnectingWebSocket(
+        protocol + '//' + window.location.host + '/ws/chat/' + roomId + '/'
+    );
+    
+    chatSocket.onopen = function(e) {
+        console.log('WebSocket connection established.');
+        loadMessages();
+    };
+    
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        handleMessage(data);
+    };
+    
+    chatSocket.onclose = function(e) {
+        console.error('WebSocket connection closed unexpectedly.');
+    };
+    
+    chatSocket.onerror = function(e) {
+        console.error('WebSocket error:', e);
+    };
+}
+
+// Gestion des messages reçus
+function handleMessage(data) {
+    switch(data.type) {
+        case 'message':
+            addMessage(data.message);
+            updateScroll();
+            break;
+        case 'user_joined':
+            showNotification(data.user.username + ' a rejoint le salon');
+            break;
+        case 'user_left':
+            showNotification(data.user.username + ' a quitté le salon');
+            break;
+        case 'user_typing':
+            handleTypingIndicator(data.user, data.is_typing);
+            break;
+    }
+}
+
+// Charger les messages existants
+function loadMessages() {
+    fetch(`/chat/room/${roomId}/?page=1`)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const messagesContainer = doc.querySelector('#messagesContainer');
+            if (messagesContainer) {
+                document.getElementById('messagesContainer').innerHTML = messagesContainer.innerHTML;
+            }
+        })
+        .catch(error => console.error('Error loading messages:', error));
+}
+
+// Ajouter un message à la conversation
+function addMessage(message) {
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageElement = createMessageElement(message);
+    messagesContainer.appendChild(messageElement);
+}
+
+// Créer l'élément HTML pour un message
+function createMessageElement(message) {
+    const div = document.createElement('div');
+    const isOwn = message.sender.id === currentUserId;
+    div.className = `message ${isOwn ? 'own' : ''}`;
+    
+    let attachmentsHtml = '';
+    if (message.attachments && message.attachments.length > 0) {
+        attachmentsHtml = '<div class="attachments">';
+        message.attachments.forEach(attachment => {
+            if (attachment.is_image) {
+                attachmentsHtml += `
+                    <div class="attachment">
+                        <img src="${attachment.url}" alt="${attachment.filename}" onclick="showImageModal('${attachment.url}')">
+                        <div class="mt-1">
+                            <small>${attachment.filename} (${attachment.file_size})</small>
+                        </div>
+                    </div>
+                `;
+            } else {
+                attachmentsHtml += `
+                    <div class="attachment">
+                        <a href="${attachment.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-download"></i> ${attachment.filename}
+                        </a>
+                        <small class="d-block text-muted">${attachment.file_size}</small>
+                    </div>
+                `;
+            }
+        });
+        attachmentsHtml += '</div>';
+    }
+    
+    let replyHtml = '';
+    if (message.reply_to) {
+        replyHtml = `
+            <div class="reply-preview">
+                <small>
+                    <strong>Réponse à ${message.reply_to.sender}:</strong> ${message.reply_to.content}
+                </small>
+            </div>
+        `;
+    }
+    
+    div.innerHTML = `
+        <div class="message-avatar">
+            <img src="/static/images/default-avatar.png" alt="${message.sender.username}" class="rounded-circle">
+        </div>
+        <div class="message-content">
+            <div class="message-bubble">
+                ${replyHtml}
+                <div class="message-text">${message.content}</div>
+                ${attachmentsHtml}
+            </div>
+            <div class="message-info">
+                <strong>${message.sender.first_name || message.sender.username}</strong>
+                <span class="ms-2">${message.time_display}</span>
+                ${message.is_edited ? '<span class="ms-1 text-muted">(modifié)</span>' : ''}
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+// Envoyer un message
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('messageInput');
+    const content = input.value.trim();
+    
+    if (!content && !messageReplyTo) return;
+    
+    const messageData = {
+        type: 'message',
+        content: content,
+        reply_to: messageReplyTo
+    };
+    
+    chatSocket.send(JSON.stringify(messageData));
+    input.value = '';
+    cancelReply();
+    stopTyping();
+});
+
+// Gestion des fichiers
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const files = e.target.files;
+    for (let file of files) {
+        uploadFile(file);
+    }
+    e.target.value = '';
+});
+
+function uploadFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    fetch(`/chat/room/${roomId}/upload/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Fichier uploadé avec succès');
+        } else {
+            showNotification('Erreur: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error uploading file:', error);
+        showNotification('Erreur lors de l\'upload', 'error');
+    });
+}
+
+// Gestion de la frappe
+document.getElementById('messageInput').addEventListener('input', function() {
+    if (!isTyping) {
+        isTyping = true;
+        chatSocket.send(JSON.stringify({
+            type: 'typing',
+            is_typing: true
+        }));
+    }
+    
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(stopTyping, 1000);
+});
+
+function stopTyping() {
+    if (isTyping) {
+        isTyping = false;
+        chatSocket.send(JSON.stringify({
+            type: 'typing',
+            is_typing: false
+        }));
+    }
+}
+
+// Indicateur de frappe
+function handleTypingIndicator(user, isTyping) {
+    const indicator = document.getElementById('typingIndicator');
+    const typingUsers = document.getElementById('typingUsers');
+    
+    if (isTyping && user.id !== currentUserId) {
+        typingUsers.textContent = user.username;
+        indicator.style.display = 'block';
+    } else {
+        indicator.style.display = 'none';
+    }
+}
+
+// Fonctions utilitaires
+function toggleEmojiPicker() {
+    document.getElementById('emojiPicker').classList.toggle('show');
+}
+
+function insertEmoji(emoji) {
+    const input = document.getElementById('messageInput');
+    input.value += emoji;
+    input.focus();
+    toggleEmojiPicker();
+}
+
+function showImageModal(imageUrl) {
+    document.getElementById('modalImage').src = imageUrl;
+    new bootstrap.Modal(document.getElementById('imageModal')).show();
+}
+
+function toggleSearch() {
+    document.getElementById('searchBar').style.display = 
+        document.getElementById('searchBar').style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleParticipants() {
+    // Toggle participants sidebar on mobile
+    const sidebar = document.querySelector('.col-md-3');
+    if (window.innerWidth < 768) {
+        sidebar.classList.toggle('d-none');
+    }
+}
+
+function clearChat() {
+    if (confirm('Êtes-vous sûr de vouloir vider cette conversation?')) {
+        document.getElementById('messagesContainer').innerHTML = '';
+        showNotification('Conversation vidée');
+    }
+}
+
+function cancelReply() {
+    messageReplyTo = null;
+    document.getElementById('replyPreview').style.display = 'none';
+}
+
+function updateScroll() {
+    const container = document.getElementById('messagesContainer');
+    container.scrollTop = container.scrollHeight;
+}
+
+function showNotification(message, type = 'info') {
+    // Créer une notification toast
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'primary'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    toast.addEventListener('hidden.bs.toast', () => {
+        document.body.removeChild(toast);
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    connectWebSocket();
+    
+    // Marquer les messages comme lus
+    fetch(`/chat/room/${roomId}/mark-read/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    });
+    
+    // Recherche de messages
+    document.getElementById('messageSearch').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        const messages = document.querySelectorAll('.message');
+        
+        messages.forEach(message => {
+            const text = message.textContent.toLowerCase();
+            message.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+    });
+});
+
+// Nettoyage à la fermeture
+window.addEventListener('beforeunload', function() {
+    if (chatSocket) {
+        chatSocket.close();
+    }
+});
+</script>
+{% endblock %}

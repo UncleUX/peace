@@ -1,0 +1,842 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Créer votre compte - CRVS Training</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- CSS local -->
+  <link href="{% static 'vendor/css/sweetalert2.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/css/v1/all.min.css' %}" rel="stylesheet">
+
+</head>
+
+<body>
+
+
+  <div class="register-container">
+    <!-- Header -->
+    <div class="register-header">
+      <h1><i class="fas fa-rocket"></i> Créer votre compte</h1>
+      <p>Rejoignez CRVS Training et accédez à plus de 100 cours gratuits</p>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress-bar">
+      <div class="progress-step active" id="step1">
+        <div class="progress-number">1</div>
+        <span>Informations</span>
+      </div>
+      <div class="progress-step" id="step2">
+        <div class="progress-number">2</div>
+        <span>Structure</span>
+      </div>
+      <div class="progress-step" id="step3">
+        <div class="progress-number">3</div>
+        <span>Sécurité</span>
+      </div>
+    </div>
+
+    <!-- Messages container -->
+    <div id="messages" style="display: none;">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="message" data-type="{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- Form -->
+    <form method="post" action="{% url 'users:register' %}" id="registerForm" novalidate>
+      {% csrf_token %}
+
+      <div class="register-content">
+        <div class="form-sections">
+          <!-- SECTION 1: Informations personnelles -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="section-title">
+                <h3>Informations personnelles</h3>
+                <p>Remplissez vos informations de base</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_first_name">
+                <i class="fas fa-user-circle"></i>
+                Prénom <span class="required-star">*</span>
+              </label>
+              <input type="text" name="first_name" id="id_first_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="id_last_name">
+                <i class="fas fa-user-tag"></i>
+                Nom <span class="required-star">*</span>
+              </label>
+              <input type="text" name="last_name" id="id_last_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="id_date_of_birth">
+                <i class="fas fa-calendar-alt"></i>
+                Date de naissance <span class="required-star">*</span>
+              </label>
+              <div class="date-input-wrapper">
+                <input type="date" name="date_of_birth" id="id_date_of_birth" class="form-control" required>
+                <button type="button" class="date-toggle" onclick="toggleDatePicker()">
+                  <i class="fas fa-calendar"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_email">
+                <i class="fas fa-envelope"></i>
+                Adresse email <span class="required-star">*</span>
+              </label>
+              <input type="email" name="email" id="id_email" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Structure professionnelle -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="section-title">
+                <h3>Structure professionnelle</h3>
+                <p>Votre affiliation professionnelle</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_username">
+                <i class="fas fa-id-badge"></i>
+                Nom d'utilisateur
+              </label>
+              <input type="text" name="username" id="id_username" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="id_structure">
+                <i class="fas fa-sitemap"></i>
+                Votre structure <span class="required-star">*</span>
+              </label>
+              <select name="structure" id="id_structure" class="form-control form-select" required>
+                <option value="" disabled selected>Sélectionnez votre structure</option>
+                <option value="bunec">BUNEC</option>
+                <option value="commune">Commune</option>
+                <option value="minsante">Ministère de la Santé</option>
+                <option value="minddevel">Ministère du Développement</option>
+                <option value="ong">ONG</option>
+                <option value="universite">Université</option>
+                <option value="consultant">Consultant</option>
+                <option value="partenaire">Partenaire</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+
+            <!-- Champs conditionnels BUNEC -->
+            <div id="bunec-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="bunec_structure_select">
+                  <i class="fas fa-building"></i>
+                  Structure BUNEC <span class="required-star">*</span>
+                </label>
+                <select name="bunec_structure" id="bunec_structure_select" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre structure BUNEC</option>
+                  <option value="direction_generale">Direction Générale</option>
+                  <option value="agence_regionale">Agence Régionale</option>
+                </select>
+                {% if form.bunec_structure.errors %}
+                  <div class="error-message">{{ form.bunec_structure.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+              
+              <div id="bunec_service_container" style="display: none;" class="conditional-fields">
+                <div class="form-group">
+                  <label for="bunec_service_select">
+                    <i class="fas fa-briefcase"></i>
+                    Service BUNEC <span class="required-star">*</span>
+                  </label>
+                  <select name="bunec_service" id="bunec_service_select" class="form-control form-select">
+                    <option value="" disabled selected>Sélectionnez d'abord votre structure</option>
+                  </select>
+                  {% if form.bunec_service.errors %}
+                    <div class="error-message">{{ form.bunec_service.errors|join:", " }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Ancien champ service (conservé pour compatibilité) -->
+            <div id="service-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_service">
+                  <i class="fas fa-briefcase"></i>
+                  Service à la BUNEC <span class="required-star">*</span>
+                </label>
+                <input type="text" name="service" id="id_service" class="form-control" placeholder="Entrez votre service à la BUNEC">
+                {% if form.service.errors %}
+                  <div class="error-message">{{ form.service.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="commune-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_commune">
+                  <i class="fas fa-city"></i>
+                  Nom de votre commune <span class="required-star">*</span>
+                </label>
+                <input type="text" name="commune" id="id_commune" class="form-control" placeholder="Entrez le nom de votre commune">
+                {% if form.commune.errors %}
+                  <div class="error-message">{{ form.commune.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label for="id_fonction">
+                  <i class="fas fa-user-tie"></i>
+                  Votre fonction <span class="required-star">*</span>
+                </label>
+                <select name="fonction" id="id_fonction" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre fonction</option>
+                  <option value="secretaire">Secrétaire d'état civil</option>
+                  <option value="officier">Officier d'état civil</option>
+                </select>
+                {% if form.fonction.errors %}
+                  <div class="error-message">{{ form.fonction.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="universite-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_universite">
+                  <i class="fas fa-graduation-cap"></i>
+                  Votre établissement <span class="required-star">*</span>
+                </label>
+                <select name="universite" id="id_universite" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre établissement</option>
+                  {% for value, label in form.fields.universite.choices %}
+                    {% if value %}
+                      <option value="{{ value }}">{{ label }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                {% if form.universite.errors %}
+                  <div class="error-message">{{ form.universite.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="sante-type-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_sante_type">
+                  <i class="fas fa-hospital"></i>
+                  Type de structure <span class="required-star">*</span>
+                </label>
+                <select name="sante_type" id="id_sante_type" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez le type de structure</option>
+                  <option value="admin_centrale">Administration centrale</option>
+                  <option value="fosa">FOSA (Formation Sanitaire)</option>
+                </select>
+                {% if form.sante_type.errors %}
+                  <div class="error-message">{{ form.sante_type.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="sante-service-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_sante_service">
+                  <i class="fas fa-clinic-medical"></i>
+                  Service <span class="required-star">*</span>
+                </label>
+                <input type="text" name="sante_service" id="id_sante_service" class="form-control" placeholder="Entrez votre service">
+                {% if form.sante_service.errors %}
+                  <div class="error-message">{{ form.sante_service.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="fosa-profession-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_fosa_profession">
+                  <i class="fas fa-user-md"></i>
+                  Profession <span class="required-star">*</span>
+                </label>
+                <select name="fosa_profession" id="id_fosa_profession" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre profession</option>
+                  <option value="medecin">Médecin</option>
+                  <option value="sage_femme">Sage femme</option>
+                  <option value="infirmiere">Infirmière</option>
+                  <option value="aide_soignant">Aide soignant</option>
+                </select>
+                {% if form.fosa_profession.errors %}
+                  <div class="error-message">{{ form.fosa_profession.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Sécurité -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="section-title">
+              <h3>Sécurité du compte</h3>
+              <p>Créez votre mot de passe</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_password1">
+              <i class="fas fa-key"></i>
+              Mot de passe <span class="required-star">*</span>
+            </label>
+            <div class="password-input-wrapper">
+              <input type="password" name="password1" id="id_password1" class="form-control" required>
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('id_password1')" title="Afficher le mot de passe">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="password-strength">
+              <div class="password-strength-bar" id="passwordStrength"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_password2">
+              <i class="fas fa-lock"></i>
+              Confirmer le mot de passe <span class="required-star">*</span>
+            </label>
+            <div class="password-input-wrapper">
+              <input type="password" name="password2" id="id_password2" class="form-control" required>
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('id_password2')" title="Afficher le mot de passe">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Champ caché pour le rôle -->
+          <input type="hidden" name="role" value="learner" checked>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a href="{% url 'users:login' %}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i>
+          Retour à la connexion
+        </a>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fas fa-user-plus"></i>
+          Créer mon compte
+        </button>
+      </div>
+    </form>
+
+    <div class="login-link">
+      Vous avez déjà un compte ? <a href="{% url 'users:login' %}">Connectez-vous ici</a>
+    </div>
+  </div>
+
+  <!-- SweetAlert2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Progress bar update
+      function updateProgress() {
+        const firstName = document.getElementById('id_first_name').value;
+        const lastName = document.getElementById('id_last_name').value;
+        const email = document.getElementById('id_email').value;
+        const structure = document.getElementById('id_structure').value;
+        const password1 = document.getElementById('id_password1').value;
+        const password2 = document.getElementById('id_password2').value;
+        
+        const steps = document.querySelectorAll('.progress-step');
+        
+        // Step 1: Personal info
+        if (firstName && lastName && email) {
+          steps[0].classList.add('completed');
+          steps[0].classList.remove('active');
+        } else {
+          steps[0].classList.add('active');
+          steps[0].classList.remove('completed');
+        }
+        
+        // Step 2: Structure
+        if (structure) {
+          steps[1].classList.add('completed');
+          steps[1].classList.remove('active');
+        } else {
+          steps[1].classList.add('active');
+          steps[1].classList.remove('completed');
+        }
+        
+        // Step 3: Security
+        if (password1 && password2) {
+          steps[2].classList.add('completed');
+          steps[2].classList.remove('active');
+        } else {
+          steps[2].classList.add('active');
+          steps[2].classList.remove('completed');
+        }
+      }
+      
+      // Password strength indicator
+      function checkPasswordStrength(password) {
+        const strengthBar = document.getElementById('passwordStrength');
+        let strength = 0;
+        
+        if (password.length >= 8) strength++;
+        if (password.match(/[a-z]+/)) strength++;
+        if (password.match(/[A-Z]+/)) strength++;
+        if (password.match(/[0-9]+/)) strength++;
+        if (password.match(/[$@#&!]+/)) strength++;
+        
+        strengthBar.className = 'password-strength-bar';
+        
+        if (strength <= 2) {
+          strengthBar.classList.add('weak');
+        } else if (strength <= 3) {
+          strengthBar.classList.add('medium');
+        } else {
+          strengthBar.classList.add('strong');
+        }
+      }
+      
+      // Toggle conditional fields
+      function toggleFields() {
+        const structure = document.getElementById('id_structure');
+        const containers = {
+          bunec: document.getElementById('bunec-container'),
+          service: document.getElementById('service-container'),
+          commune: document.getElementById('commune-container'),
+          universite: document.getElementById('universite-container'),
+          santeType: document.getElementById('sante-type-container'),
+          santeService: document.getElementById('sante-service-container'),
+          fosaProfession: document.getElementById('fosa-profession-container')
+        };
+        
+        // Hide all containers
+        Object.values(containers).forEach(container => {
+          if (container) container.style.display = 'none';
+        });
+        
+        // Reset required fields
+        const inputs = document.querySelectorAll('.conditional-fields input, .conditional-fields select');
+        inputs.forEach(input => input.required = false);
+        
+        // Show relevant container
+        if (structure) {
+          const selectedStructure = structure.value;
+          
+          switch(selectedStructure) {
+            case 'bunec':
+              if (containers.bunec) {
+                containers.bunec.style.display = 'block';
+                containers.bunec.querySelectorAll('select').forEach(input => input.required = true);
+              }
+              // Masquer l'ancien champ service
+              if (containers.service) {
+                containers.service.style.display = 'none';
+                containers.service.querySelector('input').required = false;
+              }
+              break;
+            case 'commune':
+              if (containers.commune) {
+                containers.commune.style.display = 'block';
+                containers.commune.querySelectorAll('input, select').forEach(input => input.required = true);
+              }
+              break;
+            case 'universite':
+              if (containers.universite) {
+                containers.universite.style.display = 'block';
+                containers.universite.querySelector('select').required = true;
+              }
+              break;
+            case 'minsante':
+              if (containers.santeType) {
+                containers.santeType.style.display = 'block';
+                containers.santeType.querySelector('select').required = true;
+                toggleSanteFields();
+              }
+              break;
+          }
+        }
+        
+        updateProgress();
+      }
+      
+      // Toggle health ministry fields
+      function toggleSanteFields() {
+        const santeType = document.getElementById('id_sante_type');
+        const santeService = document.getElementById('sante-service-container');
+        const fosaProfession = document.getElementById('fosa-profession-container');
+        
+        // Hide both containers
+        if (santeService) santeService.style.display = 'none';
+        if (fosaProfession) fosaProfession.style.display = 'none';
+        
+        // Reset required fields
+        if (santeService) santeService.querySelector('input').required = false;
+        if (fosaProfession) fosaProfession.querySelector('select').required = false;
+        
+        // Show relevant container
+        if (santeType) {
+          const selectedType = santeType.value;
+          
+          if (selectedType === 'admin_centrale' && santeService) {
+            santeService.style.display = 'block';
+            santeService.querySelector('input').required = true;
+          } else if (selectedType === 'fosa' && fosaProfession) {
+            fosaProfession.style.display = 'block';
+            fosaProfession.querySelector('select').required = true;
+          }
+        }
+      }
+      
+      // Toggle BUNEC service fields based on structure selection
+      function toggleBunecServiceFields() {
+        const bunecStructure = document.getElementById('bunec_structure_select');
+        const bunecServiceContainer = document.getElementById('bunec_service_container');
+        const bunecServiceSelect = document.getElementById('bunec_service_select');
+        
+        if (!bunecStructure || !bunecServiceContainer || !bunecServiceSelect) return;
+        
+        // Hide service container initially
+        bunecServiceContainer.style.display = 'none';
+        bunecServiceSelect.required = false;
+        
+        // Clear existing options
+        bunecServiceSelect.innerHTML = '<option value="" disabled selected>Sélectionnez votre service</option>';
+        
+        const selectedStructure = bunecStructure.value;
+        
+        if (selectedStructure === 'direction_generale') {
+          // Services pour Direction Générale
+          const services = [
+            { value: 'cabinet_dg', text: 'Cabinet DG' },
+            { value: 'das', text: 'DAS' },
+            { value: 'daf', text: 'DAF' },
+            { value: 'dsi', text: 'DSI' },
+            { value: 'dncc', text: 'DNCC' },
+            { value: 'cfs', text: 'CFS' },
+            { value: 'cajc', text: 'CAJC' },
+            { value: 'dac', text: 'DAC' },
+            { value: 'courrier', text: 'COURRIER' },
+            { value: 'cppc', text: 'CPPC' },
+            { value: 'autres', text: 'AUTRES' }
+          ];
+          
+          services.forEach(service => {
+            const option = document.createElement('option');
+            option.value = service.value;
+            option.textContent = service.text;
+            bunecServiceSelect.appendChild(option);
+          });
+          
+          // Show service container
+          bunecServiceContainer.style.display = 'block';
+          bunecServiceSelect.required = true;
+          
+        } else if (selectedStructure === 'agence_regionale') {
+          // Services pour Agence Régionale
+          const services = [
+            { value: 'service_suivi_cec', text: 'Service du suivi et des CEC' },
+            { value: 'service_formation_sensibilisation', text: 'Service de la formation et de la sensibilisation' },
+            { value: 'service_informatique_fichier_statistiques', text: 'Service informatique du fichier et des statistiques' },
+            { value: 'autres', text: 'Autres' }
+          ];
+          
+          services.forEach(service => {
+            const option = document.createElement('option');
+            option.value = service.value;
+            option.textContent = service.text;
+            bunecServiceSelect.appendChild(option);
+          });
+          
+          // Show service container
+          bunecServiceContainer.style.display = 'block';
+          bunecServiceSelect.required = true;
+        }
+      }
+      
+      // Auto-generate username
+      function updateUsername() {
+        const firstName = document.getElementById('id_first_name').value.trim().toLowerCase();
+        const lastName = document.getElementById('id_last_name').value.trim().toLowerCase();
+        const username = document.getElementById('id_username');
+        
+        if (firstName && lastName && username) {
+          const generatedUsername = firstName + '.' + lastName;
+          if (!username.value || username.value === generatedUsername) {
+            username.value = generatedUsername;
+          }
+        }
+      }
+      
+      // Enable manual username edit
+      function enableManualUsernameEdit() {
+        const username = document.getElementById('id_username');
+        if (username) {
+          username.readOnly = false;
+          username.placeholder = "Modifiable manuellement ou généré automatiquement";
+        }
+      }
+      
+      // Form validation
+      function validateForm() {
+        const password1 = document.getElementById('id_password1').value;
+        const password2 = document.getElementById('id_password2').value;
+        const structure = document.getElementById('id_structure').value;
+        const service = document.getElementById('id_service').value;
+        const commune = document.getElementById('id_commune').value;
+        
+        // Check password match
+        if (password1 && password2 && password1 !== password2) {
+          Swal.fire({
+            title: 'Erreur',
+            text: 'Les mots de passe ne correspondent pas',
+            icon: 'error',
+            confirmButtonColor: '#d13438',
+            confirmButtonText: 'OK'
+          });
+          return false;
+        }
+        
+        // Check required conditional fields
+        if (structure === 'bunec') {
+          const bunecStructure = document.getElementById('bunec_structure_select').value;
+          const bunecService = document.getElementById('bunec_service_select').value;
+          
+          if (!bunecStructure) {
+            Swal.fire({
+              title: 'Champ requis',
+              text: 'Veuillez sélectionner votre structure BUNEC',
+              icon: 'error',
+              confirmButtonColor: '#d13438',
+              confirmButtonText: 'OK'
+            });
+            return false;
+          }
+          
+          if (!bunecService) {
+            Swal.fire({
+              title: 'Champ requis',
+              text: 'Veuillez sélectionner votre service BUNEC',
+              icon: 'error',
+              confirmButtonColor: '#d13438',
+              confirmButtonText: 'OK'
+            });
+            return false;
+          }
+        }
+        
+        if (structure === 'commune' && !commune) {
+          Swal.fire({
+            title: 'Champ requis',
+            text: 'Veuillez entrer le nom de votre commune',
+            icon: 'error',
+            confirmButtonColor: '#d13438',
+            confirmButtonText: 'OK'
+          });
+          return false;
+        }
+        
+        return true;
+      }
+      
+      // Event listeners
+      const structureSelect = document.getElementById('id_structure');
+      if (structureSelect) {
+        structureSelect.addEventListener('change', toggleFields);
+      }
+      
+      const santeTypeSelect = document.getElementById('id_sante_type');
+      if (santeTypeSelect) {
+        santeTypeSelect.addEventListener('change', toggleSanteFields);
+      }
+      
+      // Event listener pour BUNEC structure
+      const bunecStructureSelect = document.getElementById('bunec_structure_select');
+      if (bunecStructureSelect) {
+        bunecStructureSelect.addEventListener('change', toggleBunecServiceFields);
+      }
+      
+      // Username generation
+      ['input', 'blur'].forEach(event => {
+        document.getElementById('id_first_name')?.addEventListener(event, updateUsername);
+        document.getElementById('id_last_name')?.addEventListener(event, updateUsername);
+      });
+      
+      document.getElementById('id_username')?.addEventListener('focus', enableManualUsernameEdit);
+      
+      // Password strength
+      document.getElementById('id_password1')?.addEventListener('input', (e) => {
+        checkPasswordStrength(e.target.value);
+        updateProgress();
+      });
+      
+      document.getElementById('id_password2')?.addEventListener('input', updateProgress);
+      
+      // Progress update on all inputs
+      document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('input', updateProgress);
+        input.addEventListener('blur', updateProgress);
+      });
+      
+      // Form submission
+      const registerForm = document.getElementById('registerForm');
+      if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+          if (!validateForm()) {
+            e.preventDefault();
+            return;
+          }
+          
+          const submitBtn = document.getElementById('submitBtn');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du compte...';
+          }
+        });
+      }
+      
+      // Display messages
+      const messages = document.querySelectorAll('.message');
+      messages.forEach(message => {
+        const type = message.getAttribute('data-type') || 'info';
+        const icon = type === 'error' ? 'error' : 'success';
+        
+        Swal.fire({
+          title: type === 'error' ? 'Erreur' : 'Information',
+          html: message.textContent,
+          icon: icon,
+          confirmButtonColor: type === 'error' ? '#d13438' : '#107c10',
+          confirmButtonText: 'OK',
+          allowOutsideClick: false
+        });
+      });
+      
+      // Initialize
+      toggleFields();
+      updateProgress();
+      
+      // Password validation
+      const password1 = document.getElementById('id_password1');
+      const password2 = document.getElementById('id_password2');
+      
+      function validatePassword() {
+        if (password1 && password2 && password1.value !== password2.value) {
+          password2.setCustomValidity("Les mots de passe ne correspondent pas");
+        } else if (password2) {
+          password2.setCustomValidity('');
+        }
+      }
+      
+      // Password validation listeners
+      if (password1) {
+        password1.addEventListener('input', validatePassword);
+      }
+      if (password2) {
+        password2.addEventListener('input', validatePassword);
+      }
+    });
+
+    // Toggle password visibility
+    function togglePasswordVisibility(fieldId) {
+      const passwordField = document.getElementById(fieldId);
+      const toggleButton = passwordField.nextElementSibling;
+      const icon = toggleButton.querySelector('i');
+      
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        toggleButton.title = 'Masquer le mot de passe';
+      } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        toggleButton.title = 'Afficher le mot de passe';
+      }
+    }
+
+    // Date picker toggle (simple year input for older dates)
+    function toggleDatePicker() {
+      const dateInput = document.getElementById('id_date_of_birth');
+      
+      // If input is already focused, show year picker
+      if (document.activeElement === dateInput) {
+        // Create simple year picker
+        showYearPicker(dateInput);
+      } else {
+        // Focus the date input
+        dateInput.focus();
+      }
+    }
+
+    function showYearPicker(dateInput) {
+      // Create a simple year selector for easier navigation
+      const currentYear = new Date().getFullYear();
+      const minYear = 1900;
+      const maxYear = currentYear - 16; // Minimum age 16
+      
+      // Create year dropdown
+      const yearSelect = document.createElement('select');
+      yearSelect.style.position = 'absolute';
+      yearSelect.style.top = '100%';
+      yearSelect.style.left = '0';
+      yearSelect.style.zIndex = '1000';
+      yearSelect.style.background = 'white';
+      yearSelect.style.border = '2px solid #0078d4';
+      yearSelect.style.borderRadius = '8px';
+      yearSelect.style.padding = '8px';
+      yearSelect.style.marginTop = '4px';
+      yearSelect.style.fontSize = '16px';
+      
+      // Add years in reverse order (newest first)
+      for (let year = maxYear; year >= minYear; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      }
+      
+      // Add close handler
+      yearSelect.addEventListener('change', function() {
+        const selectedYear = this.value;
+        const currentDate = dateInput.value || '2000-01-01';
+        const [year, month, day] = currentDate.split('-');
+        dateInput.value = `${selectedYear}-${month || '01'}-${day || '01'}`;
+        document.body.removeChild(yearSelect);
+      });
+      
+      yearSelect.addEventListener('blur', function() {
+        setTimeout(() => {
+          if (document.body.contains(yearSelect)) {
+            document.body.removeChild(yearSelect);
+          }
+        }, 200);
+      });
+      
+      // Add to DOM and focus
+      document.body.appendChild(yearSelect);
+      yearSelect.focus();
+    }
+  </script>
+</body>
+</html>

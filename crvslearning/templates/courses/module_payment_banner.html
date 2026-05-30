@@ -1,0 +1,22 @@
+{% load payment_tags %}
+
+{% if module.is_paid %}
+    {% if request.user|has_paid_access:module %}
+        <!-- Accès accordé -->
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Accès premium</strong> - Vous avez accès à ce module payant.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% else %}
+        <!-- Module payant - accès requis -->
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-lock me-2"></i>
+            <strong>Module premium</strong> - Ce module nécessite un paiement de {{ module.price|format_price }}.
+            <a href="{% url 'payments:module_payment' module.id %}" class="btn btn-sm btn-primary ms-2">
+                <i class="fas fa-shopping-cart me-1"></i>Acheter l'accès
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+{% endif %}

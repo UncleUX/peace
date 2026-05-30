@@ -1,0 +1,1035 @@
+{% extends "base.html" %}
+{% load static %}
+{% load course_extras %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/cookie-consent.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  /* ── Variables couleurs thème CRVS ── */
+  :root {
+    --google-blue:   #4285F4;
+    --google-red:    #EA4335;
+    --google-yellow: #FBBC05;
+    --google-green:  #34A853;
+    --dark:          #1a1a1a;
+    --text-muted:    #5f6368;
+
+    /* Fonds alternés */
+    --bg-hero:       #eaf1fb;   /* bleu très clair — hero */
+    --bg-coursera:   #ffffff;   /* blanc pur — section Coursera */
+    --bg-pitch:      #e8f5e9;   /* vert très clair — section pitch */
+    --bg-categories: #fff8e1;   /* jaune très clair — catégories */
+    --bg-courses:    #fce8e6;   /* rouge très clair — cours */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-hero);
+    color: var(--dark);
+    overflow-x: hidden;
+  }
+
+  /* ── Overlay loading ── */
+  .overlay {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255,255,255,0.98);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 9999;
+    animation: fadeOut 0.5s ease-out 1.5s forwards;
+  }
+  @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+  .overlay h1 {
+    font-size: clamp(40px,10vw,150px);
+    letter-spacing: 5px; font-weight: 800;
+    margin: 0; color: #333; text-align: center;
+  }
+  .overlay span {
+    letter-spacing: 3px; font-size: clamp(20px,4vw,50px);
+    font-weight: 600; color: var(--google-blue); margin-top: 1rem;
+  }
+
+  /* ══════════════════════════════════════
+     SECTION 1 — HERO
+  ══════════════════════════════════════ */
+  .section-hero {
+    background: var(--bg-hero);
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Tes styles hero existants (canvas, shapes, etc.) restent intacts */
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotateX(45deg) rotateZ(45deg); }
+    50%       { transform: translateY(-20px) rotateX(45deg) rotateZ(45deg); }
+  }
+  .canvas {
+    position: relative;
+    margin-top: -4%;
+    width: 100vw; height: 100vh;
+    display: flex;
+    align-items: center; justify-content: center;
+  }
+  .shape { position: absolute; }
+  .red-block {
+    top: 0; left: 3%;
+    width: 80px; height: 60px;
+    background: var(--google-red);
+    box-shadow: 0 0 15px var(--google-red), 0 0 30px rgba(234,67,53,0.5);
+    border-radius: 8px;
+    transform-style: preserve-3d;
+    transform: rotateX(45deg) rotateZ(45deg);
+    animation: float 6s ease-in-out infinite;
+  }
+  .green-ring {
+    top: 20%; left: -60px;
+    width: 150px; height: 150px;
+    border: 15px solid var(--google-green); border-radius: 50%;
+  }
+  .yellow-ring {
+    bottom: -50px; right: 10%;
+    width: 300px; height: 300px;
+    border: 30px solid var(--google-blue); border-radius: 50%;
+  }
+  .blue-ring {
+    bottom: -100px; right: -5%;
+    width: 400px; height: 400px;
+    border: 35px solid var(--google-blue); border-radius: 50%;
+  }
+  .blue-rect {
+    bottom: 45%; right: 22%;
+    width: 80px; height: 50px;
+    background: #000; border-radius: 5px;
+  }
+  .green-rect {
+    bottom: 0; left: 35%;
+    width: 120px; height: 40px;
+    background: var(--google-green);
+  }
+  .google-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 100px; font-weight: 700;
+    display: flex; align-items: flex-start;
+  }
+  .g1 { color: var(--google-green); }
+  .o1 { color: var(--google-red); }
+  .o2 { color: var(--google-yellow); }
+  .g2 { color: var(--google-blue); }
+  .l  { color: var(--google-green); }
+  .e  { color: var(--google-red); }
+  .humanz {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 140px; font-weight: 900;
+    color: #1a1a1a; margin-top: -60px;
+    letter-spacing: -5px; position: relative;
+  }
+  .humanz span { text-decoration: underline; text-decoration-thickness: 10px; }
+  .in-text {
+    position: absolute; right: 120%; top: 50%;
+    font-size: 80px; font-weight: 900; color: #1a1a1a;
+    transform: rotate(-30deg);
+  }
+  .come-back-box {
+    position: absolute; top: 18%; left: 230px;
+    background: white; border: 3px solid #000;
+    border-radius: 20px; padding: 15px 30px;
+    display: flex; align-items: center; gap: 15px;
+  }
+  .phone-mockup {
+    position: absolute; left: -120px; top: 10%;
+    width: 130px; transform: rotate(-15deg); z-index: 5;
+  }
+  .megaphone {
+    position: absolute; left: 30px; top: -50px;
+    width: 80px; transform: rotate(-10deg);
+  }
+
+  /* Scroll button */
+  @keyframes outerPulse {
+    0%   { transform: translateX(-50%) scale(1);    opacity: 0.8; }
+    50%  { transform: translateX(-50%) scale(1.05); opacity: 1;   }
+    100% { transform: translateX(-50%) scale(1);    opacity: 0.8; }
+  }
+  @keyframes innerPulse {
+    0%   { transform: scale(1);   opacity: 0.9; }
+    50%  { transform: scale(1.1); opacity: 1;   }
+    100% { transform: scale(1);   opacity: 0.9; }
+  }
+
+  /* ══════════════════════════════════════
+     SECTION 2 — COURSERA-STYLE
+     Fond : blanc pur avec légère ombre haut/bas
+  ══════════════════════════════════════ */
+  .section-coursera {
+    background: var(--bg-coursera);
+    border-top: 4px solid var(--google-blue);
+    border-bottom: 4px solid var(--google-blue);
+    padding: 60px 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .section-coursera .inner {
+    max-width: 1200px; margin: 0 auto;
+  }
+
+  /* Cards CTA salles/forum */
+  .cta-grid {
+    display: flex; gap: 20px;
+    margin-bottom: 40px; flex-wrap: wrap;
+  }
+  .cta-card {
+    flex: 1; min-width: 300px;
+    border-radius: 20px; padding: 40px;
+    display: flex; align-items: center; gap: 24px;
+    position: relative; overflow: hidden;
+  }
+  .cta-card-blue {
+    background: linear-gradient(135deg, #1a56db 0%, #1e3a8a 100%);
+    color: white;
+  }
+  .cta-card-white {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    color: var(--dark);
+  }
+  .cta-card h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+  .cta-card p  { font-size: 0.88rem; margin-bottom: 24px; line-height: 1.6; opacity: 0.85; }
+  .cta-card-emoji { font-size: 3.5rem; flex-shrink: 0; }
+  .cta-btn-white {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: white; color: #1a56db;
+    padding: 11px 22px; border-radius: 6px;
+    font-weight: 700; font-size: 0.88rem;
+    text-decoration: none;
+  }
+  .cta-btn-blue {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--google-blue); color: white;
+    padding: 11px 22px; border-radius: 6px;
+    font-weight: 700; font-size: 0.88rem;
+    text-decoration: none;
+  }
+
+  /* Popular courses */
+  .popular-title {
+    font-size: 1.2rem; font-weight: 700;
+    margin-bottom: 20px; color: var(--dark);
+  }
+  .popular-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  .popular-col-label {
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .popular-col-label::after {
+    content: ''; flex: 1; height: 1px; background: #e5e7eb;
+  }
+  .popular-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 12px;
+    background: #f8f9fa; border: 1px solid #e5e7eb;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .popular-item:hover {
+    background: #e8f0fe;
+    border-color: var(--google-blue);
+    transform: translateX(4px);
+  }
+  .popular-item-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: white; border: 1px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .popular-item-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
+  .popular-item-sub   { font-size: 0.72rem; color: var(--text-muted); }
+
+  /* ══════════════════════════════════════
+     SECTION 3 — PITCH
+     Fond : vert très clair (Google green pâle)
+  ══════════════════════════════════════ */
+  .section-pitch {
+    background: var(--bg-pitch);
+    border-top: 4px solid var(--google-green);
+    border-bottom: 4px solid var(--google-green);
+    padding: 80px 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .section-pitch .inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px; align-items: center;
+  }
+  .pitch-eyebrow {
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--google-green); margin-bottom: 14px;
+  }
+  .pitch-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 800; line-height: 1.1;
+    color: var(--dark); margin-bottom: 16px;
+    letter-spacing: -1px;
+  }
+  .pitch-title span { color: var(--google-blue); }
+  .pitch-desc {
+    font-size: 0.95rem; color: var(--text-muted);
+    line-height: 1.8; margin-bottom: 32px;
+    font-weight: 400; max-width: 440px;
+  }
+  .pitch-features { display: flex; flex-direction: column; gap: 18px; margin-bottom: 36px; }
+  .pitch-feat     { display: flex; align-items: flex-start; gap: 14px; }
+  .pitch-feat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: white; border: 1px solid #c8e6c9;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0; margin-top: 2px;
+    box-shadow: 0 2px 8px rgba(52,168,83,0.12);
+  }
+  .pitch-feat-text strong {
+    display: block; font-size: 0.9rem; font-weight: 700;
+    color: var(--dark); margin-bottom: 3px;
+  }
+  .pitch-feat-text span {
+    font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;
+  }
+  .pitch-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--google-blue); color: white;
+    padding: 13px 26px; border-radius: 10px;
+    font-size: 0.9rem; font-weight: 600;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pitch-btn:hover {
+    background: #1a56db;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(66,133,244,0.3);
+  }
+
+  /* Vidéo */
+  .video-wrapper {
+    position: relative;
+    border-radius: 20px; overflow: hidden;
+    background: white;
+    border: 2px solid #c8e6c9;
+    aspect-ratio: 16/9;
+    box-shadow: 0 12px 40px rgba(52,168,83,0.15);
+  }
+  .video-wrapper iframe,
+  .video-wrapper video {
+    width: 100%; height: 100%; border: none; display: block;
+  }
+  .video-placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px;
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+    cursor: pointer; transition: all 0.3s ease;
+  }
+  .video-placeholder:hover .play-btn { transform: scale(1.08); }
+  .play-btn {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: var(--google-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 14px rgba(66,133,244,0.15);
+  }
+  .video-placeholder p { font-size: 0.88rem; color: var(--text-muted); }
+  .video-meta-bar {
+    position: absolute; bottom: 16px; left: 16px; right: 16px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(10px);
+    border: 1px solid #e5e7eb;
+    border-radius: 10px; padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .video-meta-bar strong { display: block; font-size: 0.82rem; color: var(--dark); }
+  .video-meta-bar span  { font-size: 0.7rem; color: var(--text-muted); }
+
+  /* ══════════════════════════════════════
+     SECTION 4 — CATÉGORIES
+     Fond : jaune très clair (Google yellow pâle)
+  ══════════════════════════════════════ */
+  .section-categories {
+    background: var(--bg-categories);
+    border-top: 4px solid var(--google-yellow);
+    border-bottom: 4px solid var(--google-yellow);
+    padding: 60px 40px;
+    position: relative; z-index: 2;
+  }
+  .section-categories .inner {
+    max-width: 1200px; margin: 0 auto;
+  }
+  .section-label {
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 6px;
+  }
+  .section-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 800; color: var(--dark);
+    letter-spacing: -0.5px; margin-bottom: 28px;
+  }
+  .pill-list { display: flex; flex-wrap: wrap; gap: 10px; padding: 0; list-style: none; }
+  .pill {
+    display: inline-flex; align-items: center;
+    padding: 10px 22px; border-radius: 100px;
+    font-size: 0.83rem; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+  }
+  .pill:hover {
+    background: #e8f0fe;
+    border-color: var(--google-blue);
+    color: var(--google-blue);
+  }
+  .pill.active {
+    background: var(--google-blue);
+    border-color: var(--google-blue);
+    color: white;
+  }
+  .clear-filter {
+    font-size: 0.8rem; color: var(--text-muted);
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 14px; transition: color 0.2s ease;
+  }
+  .clear-filter:hover { color: var(--google-red); }
+
+  /* ══════════════════════════════════════
+     SECTION 5 — COURS (SLIDER)
+     Fond : rouge très clair (Google red pâle)
+  ══════════════════════════════════════ */
+  .section-courses {
+    background: var(--bg-courses);
+    border-top: 4px solid var(--google-red);
+    padding: 60px 0 80px;
+    position: relative; z-index: 2;
+  }
+  .section-courses .inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 40px;
+  }
+
+  .courses-container { position: relative; width: 100%; }
+  .courses-slider {
+    display: flex; gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; -ms-overflow-style: none;
+    padding: 16px 4px 20px;
+  }
+  .courses-slider::-webkit-scrollbar { display: none; }
+
+  .course-card-wrapper {
+    flex: 0 0 240px; width: 240px;
+    scroll-snap-align: start;
+    position: relative;
+  }
+  .course-card {
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 16px; overflow: hidden;
+    text-decoration: none; color: var(--dark);
+    display: flex; flex-direction: column;
+    height: 360px;
+    transition: all 0.28s ease;
+  }
+  .course-card:hover {
+    border-color: var(--google-blue);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(66,133,244,0.18);
+  }
+  .course-media {
+    position: relative; height: 160px;
+    overflow: hidden; flex-shrink: 0;
+    background: linear-gradient(135deg, #e8f0fe, #c8e6c9);
+  }
+  .course-media img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.28s ease;
+  }
+  .course-card:hover .course-media img { transform: scale(1.04); }
+  .course-fallback {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; font-weight: 900;
+    color: rgba(66,133,244,0.2);
+  }
+  .media-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(255,255,255,0.6), transparent);
+  }
+  .media-badge {
+    position: absolute; left: 12px; bottom: 10px;
+    background: var(--google-blue); color: white;
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 0.65rem; font-weight: 700;
+  }
+  .course-meta { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; }
+  .course-title {
+    font-size: 0.92rem; font-weight: 700;
+    line-height: 1.4; margin-bottom: 8px; color: var(--dark);
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em;
+  }
+  .course-desc {
+    font-size: 0.75rem; color: var(--text-muted);
+    line-height: 1.55;
+    display: -webkit-box; -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1;
+  }
+  .course-footer {
+    padding: 10px 16px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid #f0f0f0;
+  }
+  .course-lessons { font-size: 0.72rem; color: var(--text-muted); }
+  .course-arrow {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #e8f0fe;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; color: var(--google-blue);
+    transition: all 0.2s ease;
+  }
+  .course-card:hover .course-arrow {
+    background: var(--google-blue); color: white;
+  }
+
+  /* Slider nav */
+  .slider-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: white; border: 1.5px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 10;
+    color: var(--google-blue); font-size: 1rem;
+    transition: all 0.2s ease; outline: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .slider-nav:hover { background: var(--google-blue); color: white; border-color: var(--google-blue); }
+  .slider-nav.prev { left: -22px; }
+  .slider-nav.next { right: -22px; }
+
+  .slider-dots { display: flex; justify-content: center; gap: 6px; margin-top: 24px; }
+  .dot {
+    width: 24px; height: 3px; border-radius: 2px;
+    background: #e5e7eb; border: none; cursor: pointer; padding: 0;
+    transition: all 0.25s ease;
+  }
+  .dot.active { background: var(--google-blue); width: 36px; }
+
+  .no-courses {
+    text-align: center; padding: 60px 20px;
+    color: var(--text-muted); width: 100%;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .section-pitch .inner { grid-template-columns: 1fr; gap: 40px; }
+    .popular-grid { grid-template-columns: 1fr; }
+    .cta-grid { flex-direction: column; }
+  }
+  @media (max-width: 600px) {
+    .section-coursera, .section-pitch,
+    .section-categories, .section-courses .inner { padding: 40px 20px; }
+    .cta-card { flex-direction: column; text-align: center; padding: 28px 20px; }
+    .slider-nav { display: none; }
+    .google-text { font-size: 60px; }
+    .humanz { font-size: 80px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Overlay de chargement ── -->
+<div class="overlay">
+  <h1>Welcome</h1>
+  <span>@{{ request.user.username|lower }}</span>
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 1 — HERO (inchangée)
+══════════════════════════════════════ -->
+<div class="section-hero">
+  <div class="canvas" id="hero">
+    <div class="shape red-block"></div>
+    <div class="shape green-ring"></div>
+    <div class="shape yellow-ring"></div>
+    <div class="shape blue-rect"></div>
+    <div class="shape green-rect"></div>
+
+    <div class="main-content" style="position:relative; z-index:10; text-align:left;">
+      {% if request.user.is_authenticated %}
+      <div class="come-back-box">
+        <img class="phone-mockup" src="https://cdn-icons-png.flaticon.com/512/0/191.png" alt="phone">
+        <img class="megaphone" src="https://cdn-icons-png.flaticon.com/512/1997/1997935.png" alt="megaphone">
+        <div style="font-size:24px; font-weight:900;">
+          ¡Bienvenue <br> {{ request.user.username }}!
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          <div style="background:var(--google-red); width:35px; height:12px; border-radius:5px;"></div>
+          <div style="background:var(--google-blue); width:35px; height:12px; border-radius:5px;"></div>
+        </div>
+      </div>
+      {% else %}
+      <div class="come-back-box">
+        <img class="phone-mockup" src="https://cdn-icons-png.flaticon.com/512/0/191.png" alt="phone">
+        <img class="megaphone" src="https://cdn-icons-png.flaticon.com/512/1997/1997935.png" alt="megaphone">
+        <div style="font-size:24px; font-weight:900;">
+          ¡Bienvenue <br> sur CRVS Training!
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="google-text">
+        <span class="g1">C</span><span class="o1">r</span><span class="o2">v</span><span class="g2">s</span><span class="e">e</span>
+      </div>
+      <div class="humanz">
+        Lea<span>rning</span>
+        <div class="in-text">e</div>
+      </div>
+    </div>
+
+    <!-- Scroll button -->
+    <a href="#section-coursera" style="
+      position:absolute; bottom:80px; left:50%; transform:translateX(-50%);
+      width:74px; height:74px; border-radius:50%;
+      background:rgba(255,255,255,0.55);
+      backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+      display:flex; align-items:center; justify-content:center;
+      text-decoration:none; cursor:pointer;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(255,255,255,0.6);
+      animation:outerPulse 2.4s infinite; z-index:50;
+    ">
+      <span style="
+        width:42px; height:42px; border-radius:50%;
+        background:rgba(255,255,255,0.7);
+        display:flex; align-items:center; justify-content:center;
+        animation:innerPulse 2.4s infinite;
+      ">
+        <span style="
+          width:14px; height:14px;
+          border-left:3px solid var(--google-blue);
+          border-bottom:3px solid var(--google-blue);
+          transform:rotate(-45deg); margin-top:-3px; display:block;
+        "></span>
+      </span>
+    </a>
+
+    <img src="{% static '/img/crayon.png' %}" alt="cursor"
+      style="position:absolute; top:45%; left:58%; width:70px; z-index:20;">
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 2 — COURSERA-STYLE
+     Fond blanc pur, bordure bleue haut/bas
+══════════════════════════════════════ -->
+<section class="section-coursera" id="section-coursera">
+  <div class="inner">
+
+    <!-- CTA Cards -->
+    <div class="cta-grid">
+      <div class="cta-card cta-card-blue">
+        <div style="flex:1; z-index:2;">
+          <h3>Rejoignez nos salles virtuelles et forums</h3>
+          <p>Apprenez et collaborez dans plus de 100 salles virtuelles thématiques</p>
+          <a href="{% url 'classrooms:my_classrooms' %}" class="cta-btn-white">
+            Explorer les salles →
+          </a>
+        </div>
+        <div class="cta-card-emoji">🏫</div>
+      </div>
+
+      <div class="cta-card cta-card-white">
+        <div style="flex:1;">
+          <div style="font-size:12px; color:var(--google-blue); font-weight:700; margin-bottom:8px;">
+            CRVS Training | Communauté
+          </div>
+          <h3>Discutez et partagez vos idées</h3>
+          <p style="color:var(--text-muted);">Rejoignez la communauté CRVS maintenant !</p>
+          <a href="{% url 'forum:home' %}" class="cta-btn-blue">
+            Accéder au forum →
+          </a>
+        </div>
+        <div class="cta-card-emoji">💬</div>
+      </div>
+    </div>
+
+    <!-- Popular courses -->
+    <p class="popular-title">Cours populaires</p>
+    <div class="popular-grid">
+
+      <div>
+        <div class="popular-col-label">Les plus appréciés</div>
+        <div class="popular-item">
+          <div class="popular-item-icon">📊</div>
+          <div>
+            <div class="popular-item-title">Statistiques & Visualisation</div>
+            <div class="popular-item-sub">⭐ 4.8 · 450 étudiants</div>
+          </div>
+        </div>
+        <div class="popular-item">
+          <div class="popular-item-icon">💻</div>
+          <div>
+            <div class="popular-item-title">Outils numériques CRVS</div>
+            <div class="popular-item-sub">⭐ 4.9 · 380 étudiants</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="popular-col-label">Cours du moment</div>
+        <div class="popular-item">
+          <div class="popular-item-icon">🎯</div>
+          <div>
+            <div class="popular-item-title">Procédures d'enregistrement</div>
+            <div class="popular-item-sub">⭐ 4.7 · 220 étudiants</div>
+          </div>
+        </div>
+        <div class="popular-item">
+          <div class="popular-item-icon">🎨</div>
+          <div>
+            <div class="popular-item-title">Sécurité des données civiles</div>
+            <div class="popular-item-sub">⭐ 4.6 · 180 étudiants</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="popular-col-label">Nouveautés</div>
+        <div class="popular-item">
+          <div class="popular-item-icon">🤖</div>
+          <div>
+            <div class="popular-item-title">Digitalisation de l'état civil</div>
+            <div class="popular-item-sub">🆕 Nouveau · 95 étudiants</div>
+          </div>
+        </div>
+        <div class="popular-item">
+          <div class="popular-item-icon">📜</div>
+          <div>
+            <div class="popular-item-title">Droit de la famille & actes</div>
+            <div class="popular-item-sub">🆕 Nouveau · 75 étudiants</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 3 — PITCH
+     Fond vert très clair, bordure verte haut/bas
+══════════════════════════════════════ -->
+<section class="section-pitch" id="section-pitch">
+  <div class="inner">
+
+    <!-- Texte gauche -->
+    <div>
+      <div class="pitch-eyebrow">Pourquoi CRVS Training</div>
+      <h2 class="pitch-title">
+        Une formation pensée<br>pour <span>le terrain</span>
+      </h2>
+      <p class="pitch-desc">
+        Conçu pour les professionnels de l'état civil, CRVS Training vous accompagne de la prise de poste jusqu'à la maîtrise complète des procédures d'enregistrement.
+      </p>
+
+      <div class="pitch-features">
+        <div class="pitch-feat">
+          <div class="pitch-feat-icon">🎓</div>
+          <div class="pitch-feat-text">
+            <strong>Cours certifiants</strong>
+            <span>Validez vos compétences avec des certificats reconnus par le BUNEC</span>
+          </div>
+        </div>
+        <div class="pitch-feat">
+          <div class="pitch-feat-icon">🏫</div>
+          <div class="pitch-feat-text">
+            <strong>Salles virtuelles</strong>
+            <span>Collaborez en temps réel avec des collègues dans des espaces dédiés</span>
+          </div>
+        </div>
+        <div class="pitch-feat">
+          <div class="pitch-feat-icon">📱</div>
+          <div class="pitch-feat-text">
+            <strong>Accessible partout</strong>
+            <span>Apprenez à votre rythme, depuis n'importe quel appareil</span>
+          </div>
+        </div>
+      </div>
+
+      <a href="#section-categories" class="pitch-btn">
+        ▶ Explorer les cours
+      </a>
+    </div>
+
+    <!-- Vidéo droite -->
+    <div class="video-wrapper">
+      <!--
+        REMPLACE LE PLACEHOLDER CI-DESSOUS PAR TON IFRAME OU TA VIDÉO :
+
+        YouTube :
+        <iframe src="https://www.youtube.com/embed/TON_ID" allowfullscreen></iframe>
+
+        Vidéo locale :
+        <video controls poster="{% static 'img/video-poster.jpg' %}">
+          <source src="{% static 'videos/presentation.mp4' %}" type="video/mp4">
+        </video>
+      -->
+      <div class="video-placeholder">
+        <div class="play-btn">▶</div>
+        <p>Présentation de la plateforme</p>
+      </div>
+      <div class="video-meta-bar">
+        🎬
+        <div>
+          <strong>Visite guidée — 3 min</strong>
+          <span>Découvrez comment fonctionne CRVS Training</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 4 — CATÉGORIES
+     Fond jaune très clair, bordure jaune haut/bas
+══════════════════════════════════════ -->
+<section class="section-categories" id="section-categories">
+  <div class="inner" id="course-category">
+
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+      <div>
+        <div class="section-label">Catalogue</div>
+        <h2 class="section-heading">Tous les cours</h2>
+      </div>
+      {% if selected_category %}
+        <a href="{% url 'users:dashboard' %}" class="clear-filter">
+          <i class="fa fa-times-circle"></i> Réinitialiser le filtre
+        </a>
+      {% endif %}
+    </div>
+
+    <ul class="pill-list">
+      <li>
+        <a href="{% url 'users:dashboard' %}" class="pill {% if not selected_category %}active{% endif %}">
+          Tous
+        </a>
+      </li>
+      {% for category in categories %}
+      <li>
+        <a href="?category={{ category.slug }}" class="pill {% if selected_category == category.slug %}active{% endif %}">
+          {{ category.name }}
+        </a>
+      </li>
+      {% empty %}
+      <li style="font-size:0.85rem; color:var(--text-muted); padding:8px 0;">Aucune catégorie.</li>
+      {% endfor %}
+    </ul>
+
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SECTION 5 — COURS (SLIDER)
+     Fond rouge très clair, bordure rouge en haut
+══════════════════════════════════════ -->
+<section class="section-courses" id="section-courses">
+  <div class="inner">
+    <div class="courses-container">
+
+      <div class="courses-slider" id="courses-slider">
+        {% for course in courses %}
+        <div class="course-card-wrapper" data-category="{{ course.category.slug|default:'all' }}">
+          <a class="course-card" href="{% url 'courses:course_detail' course.id %}">
+            <div class="course-media">
+              {% if course.thumbnail %}
+                <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}">
+              {% else %}
+                <div class="course-fallback">{{ course.title|first|upper }}</div>
+              {% endif %}
+              <div class="media-overlay"></div>
+              <div class="media-badge">{{ course.category.name|default:'Général' }}</div>
+            </div>
+            <div class="course-meta">
+              <h3 class="course-title">{{ course.title }}</h3>
+              <p class="course-desc">{{ course.description|truncatechars:100 }}</p>
+            </div>
+            <div class="course-footer">
+              <span class="course-lessons">
+                <i class="fa fa-book-open" style="font-size:0.7rem; margin-right:4px;"></i>
+                {{ course.lessons.count }} leçon{{ course.lessons.count|pluralize }}
+              </span>
+              <span class="course-arrow">→</span>
+            </div>
+          </a>
+        </div>
+        {% empty %}
+        <p class="no-courses">
+          Aucun cours disponible.<br>
+          <a href="{% url 'users:dashboard' %}" style="color:var(--google-blue); margin-top:8px; display:inline-block;">
+            Voir tous les cours →
+          </a>
+        </p>
+        {% endfor %}
+      </div>
+
+      <div class="slider-dots" id="slider-dots"></div>
+
+      <button class="slider-nav prev" aria-label="Précédent">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+      <button class="slider-nav next" aria-label="Suivant">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script>
+/* ── Animations GSAP hero (inchangées) ── */
+document.addEventListener('DOMContentLoaded', function () {
+  if (typeof gsap !== 'undefined') {
+    const shapes = gsap.utils.toArray('.shape');
+    gsap.from(shapes, { opacity: 0, y: 50, stagger: 0.15, duration: 1.2, ease: 'power3.out' });
+    gsap.from('.come-back-box div', { y: 20, opacity: 0, stagger: 0.2, duration: 0.8, ease: 'power3.out' });
+    gsap.to('.red-block',  { y: '+=10', duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    gsap.to('.green-ring', { rotation: 360,  duration: 20, repeat: -1, ease: 'none' });
+    gsap.to('.yellow-ring',{ rotation: -360, duration: 25, repeat: -1, ease: 'none' });
+    gsap.to('.blue-rect',  { x: '+=20', rotation: '+=5', duration: 3, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+    gsap.to('.green-rect', { y: '+=15', rotation: '+=3', duration: 4, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+  }
+});
+
+/* ── Filtrage catégories ── */
+document.addEventListener('DOMContentLoaded', function () {
+  const pills    = document.querySelectorAll('.pill-list a.pill');
+  const wrappers = document.querySelectorAll('.course-card-wrapper');
+
+  function filterCourses(cat) {
+    wrappers.forEach(w => {
+      w.style.display = (cat === 'all' || w.dataset.category === cat) ? '' : 'none';
+    });
+  }
+
+  pills.forEach(link => {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      pills.forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+      const href = this.getAttribute('href');
+      const cat  = href.includes('category=') ? href.split('category=')[1] : 'all';
+      filterCourses(cat);
+      const url = new URL(window.location);
+      cat !== 'all' ? url.searchParams.set('category', cat) : url.searchParams.delete('category');
+      window.history.pushState({}, '', url);
+      document.getElementById('course-category').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const urlCat = new URLSearchParams(window.location.search).get('category');
+  if (urlCat) filterCourses(urlCat);
+});
+
+/* ── Slider ── */
+document.addEventListener('DOMContentLoaded', function () {
+  const slider  = document.getElementById('courses-slider');
+  const prevBtn = document.querySelector('.slider-nav.prev');
+  const nextBtn = document.querySelector('.slider-nav.next');
+  const dotsEl  = document.getElementById('slider-dots');
+  if (!slider) return;
+
+  const CARD_W = 240 + 20;
+  let currentSlide = 0;
+  let dots = [];
+
+  function getTotal() {
+    const visible  = Array.from(slider.querySelectorAll('.course-card-wrapper')).filter(w => w.style.display !== 'none');
+    const perView  = Math.max(1, Math.floor(slider.clientWidth / CARD_W));
+    return Math.ceil(visible.length / perView);
+  }
+
+  function buildDots() {
+    dotsEl.innerHTML = ''; dots = [];
+    const total = getTotal();
+    for (let i = 0; i < total; i++) {
+      const d = document.createElement('button');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dotsEl.appendChild(d);
+      dots.push(d);
+    }
+  }
+
+  function updateDots() {
+    dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+  }
+
+  function goTo(index) {
+    const total = getTotal();
+    currentSlide = Math.max(0, Math.min(index, total - 1));
+    const perView = Math.max(1, Math.floor(slider.clientWidth / CARD_W));
+    slider.scrollTo({ left: currentSlide * CARD_W * perView, behavior: 'smooth' });
+    updateDots();
+  }
+
+  prevBtn && prevBtn.addEventListener('click', () => goTo(currentSlide - 1));
+  nextBtn && nextBtn.addEventListener('click', () => goTo(currentSlide + 1));
+  slider.addEventListener('scroll', () => {
+    const perView  = Math.max(1, Math.floor(slider.clientWidth / CARD_W));
+    const newSlide = Math.round(slider.scrollLeft / (CARD_W * perView));
+    if (newSlide !== currentSlide) { currentSlide = newSlide; updateDots(); }
+  });
+
+  buildDots();
+  window.addEventListener('resize', buildDots);
+});
+</script>
+
+<script src="{% static 'js/cookie-consent.js' %}"></script>
+<script src="{% static 'js/preferences.js' %}"></script>
+
+{% endblock %}

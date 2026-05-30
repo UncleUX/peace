@@ -1,0 +1,157 @@
+// JavaScript pour l'onglet Analytics
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les graphiques quand l'onglet Analytics est activé
+    document.getElementById('analytics-tab').addEventListener('shown.bs.tab', function () {
+        initAnalyticsCharts();
+        updateAnalyticsStats();
+    });
+
+    // Bouton de rafraîchissement Analytics
+    document.getElementById('refreshAnalytics')?.addEventListener('click', function() {
+        updateAnalyticsCharts();
+        updateAnalyticsStats();
+    });
+
+    function initAnalyticsCharts() {
+        // Graphique des utilisateurs actifs
+        const activeUsersCtx = document.getElementById('activeUsersChart');
+        if (activeUsersCtx && !activeUsersCtx.chart) {
+            activeUsersCtx.chart = new Chart(activeUsersCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:59'],
+                    datasets: [{
+                        label: 'Utilisateurs actifs',
+                        data: [12, 19, 45, 67, 56, 43, 28],
+                        borderColor: '#2fdc74',
+                        backgroundColor: 'rgba(47, 220, 116, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#d6d8dc' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#9aa0a6' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#9aa0a6' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Graphique de performance système
+        const performanceCtx = document.getElementById('performanceChart');
+        if (performanceCtx && !performanceCtx.chart) {
+            performanceCtx.chart = new Chart(performanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['CPU', 'RAM', 'Disque', 'Réseau'],
+                    datasets: [{
+                        label: 'Utilisation (%)',
+                        data: [65, 78, 45, 32],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#d6d8dc' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#9aa0a6' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#9aa0a6' },
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function updateAnalyticsCharts() {
+        // Mettre à jour le graphique des utilisateurs actifs avec des données aléatoires
+        const activeUsersChart = document.getElementById('activeUsersChart')?.chart;
+        if (activeUsersChart) {
+            activeUsersChart.data.datasets[0].data = activeUsersChart.data.datasets[0].data.map(() => 
+                Math.floor(Math.random() * 80) + 10
+            );
+            activeUsersChart.update();
+        }
+
+        // Mettre à jour le graphique de performance
+        const performanceChart = document.getElementById('performanceChart')?.chart;
+        if (performanceChart) {
+            performanceChart.data.datasets[0].data = [
+                Math.floor(Math.random() * 40) + 40, // CPU
+                Math.floor(Math.random() * 30) + 60, // RAM
+                Math.floor(Math.random() * 40) + 30, // Disque
+                Math.floor(Math.random() * 50) + 20  // Réseau
+            ];
+            performanceChart.update();
+        }
+    }
+
+    function updateAnalyticsStats() {
+        // Simuler des données pour les statistiques
+        const totalUsers = Math.floor(Math.random() * 500) + 1000;
+        const onlineUsers = Math.floor(Math.random() * 100) + 50;
+        const todayLogins = Math.floor(Math.random() * 200) + 80;
+        const systemLoad = Math.floor(Math.random() * 40) + 30;
+
+        // Mettre à jour les éléments avec animation
+        animateValue('totalUsersStat', 0, totalUsers, 1500);
+        animateValue('onlineUsersStat', 0, onlineUsers, 1500);
+        animateValue('todayLoginsStat', 0, todayLogins, 1500);
+        animateValue('systemLoadStat', 0, systemLoad, 1500, '%');
+    }
+
+    function animateValue(id, start, end, duration, suffix = '') {
+        const element = document.getElementById(id);
+        if (!element) return;
+
+        const range = end - start;
+        const increment = range / (duration / 16);
+        let current = start;
+
+        const timer = setInterval(() => {
+            current += increment;
+            if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+                current = end;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(current) + suffix;
+        }, 16);
+    }
+});

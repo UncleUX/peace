@@ -1,0 +1,228 @@
+{% extends "chat/base.html" %}
+{% load static %}
+
+{% block title %}Messagerie - Chat{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Sidebar gauche - Conversations -->
+        <div class="col-md-4 col-lg-3 border-end bg-light p-0">
+            <div class="p-3 border-bottom bg-white">
+                <h5 class="mb-3">
+                    <i class="fas fa-comments"></i> Messagerie
+                </h5>
+                
+                <!-- Barre de recherche -->
+                <div class="mb-3">
+                    <input type="text" class="form-control form-control-sm" id="userSearch" placeholder="Rechercher un utilisateur...">
+                    <div id="searchResults" class="position-absolute w-100 bg-white border rounded shadow-sm mt-1" style="z-index: 1000; display: none;"></div>
+                </div>
+                
+                <!-- Utilisateurs en ligne -->
+                <div class="mb-3">
+                    <small class="text-muted">UTILISATEURS EN LIGNE</small>
+                    <div class="mt-2">
+                        {% for user in online_users %}
+                            <a href="{% url 'chat:conversation' user.id %}" class="d-flex align-items-center p-2 text-decoration-none text-dark hover-bg-light rounded">
+                                <div class="me-2">
+                                    <span class="online-indicator"></span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                    <small class="d-block text-muted">@{{ user.username }}</small>
+                                </div>
+                            </a>
+                        {% empty %}
+                            <small class="text-muted">Aucun utilisateur en ligne</small>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liste des conversations -->
+            <div class="conversations-list" style="overflow-y: auto; max-height: calc(100vh - 300px);">
+                {% if conversations %}
+                    {% for conversation in conversations %}
+                        {% if conversation.participant1 == request.user %}
+                            {% with other_user=conversation.participant2 %}
+                                <a href="{% url 'chat:conversation' other_user.id %}" class="conversation-item d-flex align-items-center p-3 text-decoration-none text-dark border-bottom hover-bg-light">
+                                    <div class="me-3">
+                                        {% if other_user.is_online %}
+                                            <span class="online-indicator"></span>
+                                        {% else %}
+                                            <span class="offline-indicator" style="width: 10px; height: 10px; background: #6c757d; border-radius: 50%; display: inline-block;"></span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ other_user.get_full_name|default:other_user.username }}</strong>
+                                                {% if conversation.get_last_message %}
+                                                    <div class="small text-muted truncate">
+                                                        {% if conversation.get_last_message.sender == request.user %}
+                                                            Vous: 
+                                                        {% endif %}
+                                                        {{ conversation.get_last_message.content|truncatechars:30 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-end">
+                                                {% if conversation.get_last_message %}
+                                                    <small class="text-muted">{{ conversation.get_last_message.get_time_display }}</small>
+                                                {% endif %}
+                                                {% if conversation.unread_count > 0 %}
+                                                    <span class="badge bg-primary rounded-pill">{{ conversation.unread_count }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endwith %}
+                        {% else %}
+                            {% with other_user=conversation.participant1 %}
+                                <a href="{% url 'chat:conversation' other_user.id %}" class="conversation-item d-flex align-items-center p-3 text-decoration-none text-dark border-bottom hover-bg-light">
+                                    <div class="me-3">
+                                        {% if other_user.is_online %}
+                                            <span class="online-indicator"></span>
+                                        {% else %}
+                                            <span class="offline-indicator" style="width: 10px; height: 10px; background: #6c757d; border-radius: 50%; display: inline-block;"></span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ other_user.get_full_name|default:other_user.username }}</strong>
+                                                {% if conversation.get_last_message %}
+                                                    <div class="small text-muted truncate">
+                                                        {% if conversation.get_last_message.sender == request.user %}
+                                                            Vous: 
+                                                        {% endif %}
+                                                        {{ conversation.get_last_message.content|truncatechars:30 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-end">
+                                                {% if conversation.get_last_message %}
+                                                    <small class="text-muted">{{ conversation.get_last_message.get_time_display }}</small>
+                                                {% endif %}
+                                                {% if conversation.unread_count > 0 %}
+                                                    <span class="badge bg-primary rounded-pill">{{ conversation.unread_count }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="p-3 text-center text-muted">
+                        <i class="fas fa-comments fa-2x mb-2"></i>
+                        <p>Aucune conversation</p>
+                        <small>Recherchez un utilisateur pour commencer</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Zone principale -->
+        <div class="col-md-8 col-lg-9 d-flex flex-column">
+            <div class="flex-grow-1 d-flex align-items-center justify-content-center bg-light">
+                <div class="text-center">
+                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                    <h4>Bienvenue dans la messagerie</h4>
+                    <p class="text-muted">Sélectionnez une conversation ou recherchez un utilisateur pour commencer à discuter</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-bg-light:hover {
+    background-color: #f8f9fa !important;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversation-item.active {
+    background-color: #e3f2fd;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userSearch = document.getElementById('userSearch');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+    
+    if (userSearch) {
+        userSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/chat/search-users/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchResults.innerHTML = '';
+                        
+                        if (data.users.length === 0) {
+                            searchResults.innerHTML = '<div class="p-2 text-muted">Aucun utilisateur trouvé</div>';
+                        } else {
+                            data.users.forEach(user => {
+                                const userItem = document.createElement('div');
+                                userItem.className = 'p-2 border-bottom hover-bg-light cursor-pointer';
+                                userItem.innerHTML = `
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-2">
+                                            ${user.is_online ? 
+                                                '<span class="online-indicator"></span>' : 
+                                                '<span class="offline-indicator" style="width: 10px; height: 10px; background: #6c757d; border-radius: 50%; display: inline-block;"></span>'
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>${user.full_name}</strong>
+                                            <small class="d-block text-muted">@${user.username}</small>
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                userItem.addEventListener('click', () => {
+                                    window.location.href = `/chat/conversation/${user.id}/`;
+                                });
+                                
+                                searchResults.appendChild(userItem);
+                            });
+                        }
+                        
+                        searchResults.style.display = 'block';
+                    })
+                    .catch(error => console.error('Error:', error));
+            }, 300);
+        });
+        
+        // Cacher les résultats quand on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (!userSearch.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

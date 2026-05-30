@@ -1,0 +1,1448 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Mon profil{% endblock %}
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<!-- Font Awesome CDN comme solution de secours -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block content %}
+<style>
+        :root { --bg: #eef4fb; --dark: #0d3b66; --blue: #2a85ff; --radius: 10px; }
+        
+        body { 
+            background: var(--bg); 
+            font-family: 'Segoe UI', sans-serif; 
+            font-size: 0.85rem; 
+            min-height: 100vh; /* Assure que le body prend toute la hauteur */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            body {
+                overflow-x: hidden;
+            }
+            .main-wrapper {
+                overflow-x: hidden;
+                padding: 15px;
+            }
+            .tab-pane h1,
+            .tab-pane h2,
+            .tab-pane h3,
+            .tab-pane h4,
+            .tab-pane h5,
+            .tab-pane h6 {
+                display: none;
+            }
+            .tab-pane .line-hi {
+                display: none !important;
+            }
+        .activity{
+            display: none;
+        }
+        .task{
+            display:none;
+        }
+          
+        }
+
+        .card-c { 
+            border: none; 
+            border-radius: var(--radius); 
+            background: #fff; 
+            padding: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); 
+        }
+        
+        /* Nav & Tabs */
+        .nav-container { background: #fff; border-radius: 50px; padding: 10px 15px; margin-top: -25px; width: 50%; display: flex; justify-content: center; align-items: center; margin-left: auto; margin-right: auto; position: static !important;}
+        
+        @media (max-width: 768px) {
+          .nav-container {
+        width: 95%; /* On donne plus d'espace sur tablette */
+        padding: 8px 10px;
+        border-radius: 25px;
+        flex-wrap: wrap;
+        justify-content: center;
+        }
+        .nav-tabs-custom .nav-link {
+                font-size: 0.75rem;
+                padding: 6px 10px !important;
+                white-space: nowrap;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .nav-container {
+                width: 100%;
+                padding: 6px 8px;
+                border-radius: 20px;
+                flex-wrap: wrap;
+                gap: 5px;
+                justify-content: center;
+            }
+            .nav-tabs-custom .nav-link {
+                font-size: 0.7rem;
+                padding: 5px 8px !important;
+                padding: 4px 8px !important;
+                border-radius: 15px !important;
+            }
+            #dashboard h1 {
+                display: none;
+            }
+            .nav-tabs-custom{
+                padding: 8px 9px;
+                margin-left: -30px;
+                background-color: transparent;
+                box-shadow: transparent;
+            }
+            .tab-content{
+                margin-top: 20px;
+            }
+        }
+        
+        /* Avatar edit hover effect */
+        a[href*="upload_avatar"]:hover .avatar-edit-overlay {
+            opacity: 1 !important;
+        }
+        
+        /* Course cards hover effects */
+        .course-card:hover {
+            transform: translateY(-8px) !important;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .course-card:hover img {
+            transform: scale(1.05) !important;
+        }
+        
+        .course-card:hover .course-overlay {
+            opacity: 1 !important;
+        }
+        
+        /* Filter buttons */
+        .btn-group .btn:not(.active):hover {
+            background-color: #eef2ff !important;
+            color: #4f46e5 !important;
+        }
+        
+        .btn-group .btn.active {
+            background-color: #4f46e5 !important;
+            color: white !important;
+        }
+        
+        /* Hover effects for stat cards */
+        .stat-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4) !important;
+        }
+        
+        .stat-card-1:hover {
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4) !important;
+        }
+        
+        .stat-card-2:hover {
+            box-shadow: 0 12px 35px rgba(240, 147, 251, 0.4) !important;
+        }
+        
+        .stat-card-3:hover {
+            box-shadow: 0 12px 35px rgba(79, 172, 254, 0.4) !important;
+        }
+        
+        .nav-tabs-custom { border-bottom: none !important; gap: 10px; }
+        .nav-tabs-custom .nav-link { border: none !important; color: #666; font-size: 0.8rem; padding: 8px 18px !important; border-radius: 20px !important; transition: 0.3s; }
+        .nav-tabs-custom .nav-link.active { background: var(--dark) !important; color: #fff !important; }
+
+        /* Profile & Content */
+        .profile-box { background: linear-gradient(180deg, #b0d8ff, #fff); border-radius: var(--radius); text-align: center; padding: 20px; position: relative; }
+        .profile-img { width: 100%; height: 180px; object-fit: cover; border-radius: 25px; margin-bottom: 15px; }
+        .stat-v { font-size: 2.2rem; font-weight: 700; line-height: 1; color: var(--dark); }
+        
+        /* Bar Graphics */
+        .bar-h { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 15px; }
+        .bar { flex: 1; background: var(--dark); border-radius: 5px; opacity: 0.15; transition: 0.5s; }
+        .bar.active { opacity: 1; background: var(--blue); }
+
+        /* Feed & Activity */
+        .feed-section { margin-top: 10px; }
+        .feed-item { border-left: 3px solid var(--blue); padding: 5px 0 5px 15px; margin-bottom: 15px; }
+        .activity-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 0.8rem; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* Tasks */
+        .task-dark { background: var(--dark); color: #fff; border-radius: var(--radius); padding: 20px; min-height: 200px; }
+        .task-i { background: rgba(255,255,255,0.06); border-radius: 15px; padding: 12px 15px; margin-bottom: 10px; transition: 0.3s; }
+        .task-i:hover { background: rgba(255,255,255,0.1); }
+
+        /* Styles pour les inscriptions */
+        .enrollments-slider-container {
+            position: relative;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        
+        .enrollments-slider {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #e5e7eb #f3f4f6;
+            padding: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .enrollments-slider::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .enrollments-slider::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 3px;
+        }
+        
+        .enrollments-slider::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 3px;
+        }
+        
+        .enrollments-slider::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+        
+        .enrollment-card {
+            flex: 0 0 auto;
+            width: 180px;
+        }
+        
+        .card-link {
+            position: relative;
+            display: block;
+            background: #ffffff;
+            border-radius: 5px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-link:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-media {
+            position: relative;
+            height: 129px;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            overflow: hidden;
+        }
+        
+        .card-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .card-link:hover .card-media img {
+            transform: scale(1.05);
+        }
+        
+        .card-fallback {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 34px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            border-radius: 5px;
+        }
+        
+        .card-content {
+            padding: 12px;
+        }
+        
+        .card-content h6 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        
+        .card-content small {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        /* Animation du cercle de progression */
+        .progress-circle {
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            background: none;
+            margin: 0 auto;
+            box-shadow: none;
+            position: relative;
+        }
+
+        .progress-circle:after {
+            content: "";
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid #f3f4f6;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .progress-circle > span {
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            z-index: 1;
+        }
+
+        .progress-circle .progress-bar {
+            width: 100%;
+            height: 100%;
+            background: none;
+            border-width: 8px;
+            border-style: solid;
+            position: absolute;
+            top: 0;
+            border-color: #4f46e5;
+        }
+
+        .progress-circle .progress-left {
+            left: 0;
+        }
+
+        .progress-circle .progress-right {
+            right: 0;
+        }
+
+        .progress-circle .progress-value {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            padding: 5px 0;
+        }
+
+        .progress-circle .progress-value div:last-child {
+            font-size: 0.7rem;
+            color: #6b7280;
+            line-height: 1.2;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-circle .progress-value div:first-child {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1f2937;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        /* Animation du cercle */
+        .progress-circle .progress-left .progress-bar {
+            left: 100%;
+            border-top-right-radius: 80px;
+            border-bottom-right-radius: 80px;
+            border-left: 0;
+            -webkit-transform-origin: center left;
+            transform-origin: center left;
+        }
+
+        .progress-circle .progress-right .progress-bar {
+            left: -100%;
+            border-top-left-radius: 80px;
+            border-bottom-left-radius: 80px;
+            border-right: 0;
+            -webkit-transform-origin: center right;
+            transform-origin: center right;
+            animation: loading-1 1.5s linear forwards;
+        }
+
+        .progress-circle .progress-value {
+            border-radius: 50%;
+        }
+
+        @keyframes loading-1 {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
+            }
+        }
+
+        @keyframes loading-2 {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(180deg);
+                transform: rotate(180deg);
+            }
+        }
+</style>
+
+<!-- POPUP DE RAPPEL DYNAMIQUE - STYLE APPLE -->
+<div id="courseReminderPopupFinal" style="
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 99999 !important;
+  padding: 12px !important;
+  border-radius: 14px !important;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  min-width: 280px !important;
+  max-width: 360px !important;
+  animation: popupSlideIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: none !important;
+">
+  <div style="
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 50%, #34495e 100%) !important;
+    padding: 16px !important;
+    border-radius: 10px !important;
+    color: white !important;
+    text-align: center !important;
+    position: relative;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+  ">
+    <!-- Bouton de fermeture -->
+    <button onclick="closeReminderPopup()" style="
+      position: absolute !important;
+      top: 12px !important;
+      right: 12px !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      color: rgba(255, 255, 255, 0.7) !important;
+      font-size: 14px !important;
+      cursor: pointer !important;
+      width: 28px !important;
+      height: 28px !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: all 0.2s ease !important;
+      backdrop-filter: blur(4px) !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    " onmouseover="this.style.background='rgba(255, 255, 255, 0.2)'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.transform='scale(1)'">
+      <i class="fas fa-times"></i>
+    </button>
+    
+    <!-- En-tête -->
+    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+      <div style="font-size: 20px; margin-right: 10px; color: rgba(255, 255, 255, 0.7);">📚</div>
+      <div style="font-size: 16px; font-weight: 500; color: rgba(255, 255, 255, 0.85); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">
+        Reprise d'apprentissage
+      </div>
+    </div>
+    
+    <!-- Contenu principal -->
+    <div style="background: rgba(255, 255, 255, 0.04); padding: 14px; border-radius: 10px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.06); backdrop-filter: blur(3px);">
+      <div style="font-weight: 500; margin-bottom: 10px; font-size: 14px; line-height: 1.3; color: rgba(255, 255, 255, 0.8); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">
+        <span id="reminderCourseTitle">Chargement...</span>
+      </div>
+      
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div style="font-size: 11px; color: rgba(255, 255, 255, 0.5); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">
+          Progression actuelle
+        </div>
+        <div style="font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.8); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">
+          <span id="reminderProgress">Chargement...</span>%
+        </div>
+      </div>
+      
+      <!-- Barre de progression -->
+      <div style="background: rgba(255, 255, 255, 0.08); height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08);">
+        <div id="reminderProgressBar" style="
+          background: linear-gradient(90deg, #3498db 0%, #2980b9 100%) !important; 
+          height: 100%; 
+          width: 0%; 
+          border-radius: 5px; 
+          transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 0 10px rgba(52, 152, 219, 0.15);
+          position: relative;
+        ">
+          <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12)); border-radius: 5px; animation: progressShine 2s ease-in-out infinite;"></div>
+        </div>
+      </div>
+      
+      <div style="font-size: 11px; color: rgba(255, 255, 255, 0.4); margin-top: 10px; font-style: italic; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">
+        Continuez votre progression là où vous l'avez laissée
+      </div>
+    </div>
+    
+    <!-- Boutons d'action -->
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button onclick="closeReminderPopup()" style="
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: rgba(255, 255, 255, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        padding: 8px 16px !important;
+        border-radius: 6px !important;
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        backdrop-filter: blur(3px) !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      " onmouseover="this.style.background='rgba(255, 255, 255, 0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.transform='translateY(0px)'">
+        Plus tard
+      </button>
+      
+      <button id="continueCourseBtn" onclick="continueToCourse()" style="
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 8px 20px !important;
+        border-radius: 6px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 3px 8px rgba(52, 152, 219, 0.25) !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      " onmouseover="this.style.background='linear-gradient(135deg, #2980b9 0%, #1f5f8b 100%)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 10px rgba(41, 128, 185, 0.3)'" onmouseout="this.style.background='linear-gradient(135deg, #3498db 0%, #2980b9 100%)'; this.style.transform='translateY(0px)'; this.style.boxShadow='0 3px 8px rgba(52, 152, 219, 0.25)'">
+        Continuer
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+    @media (max-width: 768px) {
+
+  .nav-tabs-custom {
+    background: none;
+    box-shadow: none;
+    margin-top: 10px;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .nav-tabs-custom .nav-item {
+    flex: 0 0 auto;
+  }
+
+  .nav-tabs-custom .nav-link {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  /* hide scrollbar (optional clean UI) */
+  .nav-tabs-custom::-webkit-scrollbar {
+    display: none;
+  }
+  @media (max-width: 768px) {
+
+  .nav-tabs-custom {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .nav-tabs-custom .nav-item {
+    flex: 0 0 auto;
+  }
+
+  .nav-tabs-custom .nav-link {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  /* hide scrollbar (optional clean UI) */
+  .nav-tabs-custom::-webkit-scrollbar {
+    display: none;
+  }
+
+}
+
+}
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.7); }
+  70% { box-shadow: 0 0 0 12px rgba(0, 122, 255, 0); }
+  100% { box-shadow: 0 0 0 20px rgba(0, 122, 255, 0); }
+}
+
+@keyframes progressShine {
+  0% { background-position: -100% 0; }
+  50% { background-position: 200% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@keyframes appleGlow {
+  0% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.3); }
+  50% { box-shadow: 0 0 0 15px rgba(0, 122, 255, 0.5); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 122, 255, 0.3); }
+}
+
+#continueCourseBtn:hover {
+  animation: pulse 1.5s infinite;
+}
+
+#reminderProgressBar {
+  animation: progressShine 3s ease-in-out infinite;
+  background-size: 200% 100%;
+}
+
+#continueCourseBtn {
+  animation: appleGlow 2s ease-in-out infinite;
+}
+</style>
+
+<script>
+// Fonction pour fermer le popup
+function closeReminderPopup() {
+  const popup = document.getElementById('courseReminderPopupFinal');
+  if (popup) {
+    popup.style.animation = 'popupSlideIn 0.3s ease-out reverse';
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 300);
+  }
+}
+
+// Fonction pour charger les données du cours et rediriger
+function continueToCourse() {
+  console.log('🔄 Tentative de redirection vers le cours...');
+  
+  fetch('/tracking/api/reminders/')
+    .then(response => {
+      console.log('📡 Réponse API:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('📊 Données reçues:', data);
+      
+      if (data.reminders && data.reminders.length > 0) {
+        const courseId = data.reminders[0].course_id;
+        const courseTitle = data.reminders[0].course_title;
+        console.log(`🎯 Cours trouvé: ${courseTitle} (ID: ${courseId})`);
+        
+        if (courseId) {
+          console.log(`🚀 Redirection vers: /courses/${courseId}/`);
+          
+          // Animation de fermeture avant redirection
+          const popup = document.getElementById('courseReminderPopupFinal');
+          if (popup) {
+            popup.style.animation = 'popupSlideIn 0.3s ease-out reverse';
+            setTimeout(() => {
+              window.location.href = `/courses/${courseId}/`;
+            }, 300);
+          } else {
+            window.location.href = `/courses/${courseId}/`;
+          }
+        } else {
+          console.log('⚠️ Aucun ID de cours trouvé, redirection vers /courses/');
+          window.location.href = '/courses/';
+        }
+      } else {
+        console.log('⚠️ Aucun rappel trouvé, redirection vers /courses/');
+        window.location.href = '/courses/';
+      }
+    })
+    .catch(error => {
+      console.error('❌ Erreur:', error);
+      console.log('⚠️ Redirection de secours vers /courses/');
+      window.location.href = '/courses/';
+    });
+}
+
+// Charger les informations du cours au démarrage
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🔔 Chargement des informations du cours...');
+  
+  fetch('/tracking/api/reminders/')
+    .then(response => {
+      console.log('📡 Réponse API:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('📊 Données reçues:', data);
+      
+      // DÉBOGAGE: Afficher les informations de l'utilisateur dans la réponse
+      console.log(`🔍 DEBUG FRONTEND: Utilisateur API = ${data.debug_user} (ID: ${data.debug_user_id})`);
+      
+      if (data.reminders && data.reminders.length > 0) {
+        const reminder = data.reminders[0];
+        console.log('🎯 Rappel trouvé:', reminder);
+        
+        document.getElementById('reminderCourseTitle').textContent = reminder.course_title || 'Cours inconnu';
+        document.getElementById('reminderProgress').textContent = `${reminder.progress_percentage || 0}%`;
+        document.getElementById('reminderProgressBar').style.width = `${reminder.progress_percentage || 0}%`;
+        
+        // Afficher le popup uniquement s'il y a des reminders
+        const popup = document.getElementById('courseReminderPopupFinal');
+        if (popup) {
+          popup.style.display = 'block';
+        }
+        
+        console.log(`✅ Infos mises à jour: ${reminder.course_title} - ${reminder.progress_percentage}%`);
+      } else {
+        console.log('ℹ️ Aucun rappel trouvé - popup non affiché');
+        // Le popup reste caché (display: none)
+      }
+    })
+    .catch(error => {
+      console.error('❌ Erreur de chargement:', error);
+      // En cas d'erreur, le popup reste caché
+    });
+});
+</script>
+
+<div class="main-wrapper container-fluid">
+
+<div class="main-wrapper container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-center">
+        <header class="nav-container d-flex justify-content-between align-items-center shadow-sm">
+        <!-- <div class="fw-bold fs-5">Mon Espace</div> -->
+        <ul class="nav nav-tabs nav-tabs-custom" id="myTab" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#dashboard" type="button">Dashboard</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#courses" type="button">Cours</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#certifications" type="button">Certifications</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#quiz" type="button">Quiz</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#activity" type="button">Activité</button></li>
+        </ul>
+        </header>
+    </div>
+
+    <div class="tab-content flex-grow-1 mb-5" id="myTabContent">
+        <div class="tab-pane fade show active mb-4" id="dashboard">
+            <!-- 1. HEADER -->
+                <div class="line-hi" style="max-width: 1400px; margin: 0 auto 30px auto;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #888; font-size: 11px; font-weight: 500;">
+                        <i class="bi bi-folder2"></i> Profile
+                        <span style="opacity: 0.5;">→</span> 
+                        <i class="bi bi-folder2"></i> Dashboard
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                        <h1 style="font-size: 2.5rem; font-weight: 500; color: #000; margin: 0; letter-spacing: -1px;">Hi Welcome, <small style="font-size: 14px;">@{{ me.get_full_name|default:me.username }} </small> 👋</h1>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; background: #eaeced; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; cursor: pointer;"><i class="bi bi-search"></i></div>
+                            <div style="width: 40px; height: 40px; background: #eaeced; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; cursor: pointer;"><i class="bi bi-sliders"></i></div>
+                            
+                            <div style="background: #eaeced; padding: 8px 16px; border-radius: 25px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">
+                                <i class="bi bi-calendar3"></i> 06-14 Mai, 2026 <i class="bi bi-chevron-down" style="font-size: 10px;"></i>
+                            </div>
+
+                            <button style="border: none; background: #eaeced; padding: 10px 20px; border-radius: 25px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">+ Add Widget</button>
+                            <button style="border: none; background: #eaeced; padding: 10px 20px; border-radius: 25px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">Create a Report</button>
+                        </div>
+                    </div>
+                </div>
+            <!-- <h1 class="mb-0 p-3">Bonjour, {{ me.get_full_name|default:me.username }} 👋</h1> -->
+            
+            <div class="row g-4 h-50">
+                
+                <!-- Colonne Gauche -->
+                <div class="col-lg-3">
+                    <div class="card-c profile-box mb-4">
+                        <!-- Avatar -->
+                        <div class="text-center mb-3">
+                            <a href="{% url 'users:upload_avatar' %}" style="text-decoration: none; display: block; position: relative; width: 100%; height: 250px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s ease;">
+                                {% if me.avatar %}
+                                    <img src="{{ me.avatar.url }}" style="width: 100%; height: 100%; object-fit: cover;" alt="{{ me.username }}">
+                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); pointer-events: none;"></div>
+                                {% else %}
+                                    <div class="d-flex align-items-center justify-content-center" style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; font-size: 3.5rem;">
+                                        {{ me.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Icône d'édition au survol -->
+                                <div class="avatar-edit-overlay" style="
+                                    position: absolute;
+                                    top: 0;
+                                    left: 0;
+                                    right: 0;
+                                    bottom: 0;
+                                    background: rgba(0, 0, 0, 0.6);
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    justify-content: center;
+                                    color: white;
+                                    opacity: 0;
+                                    transition: opacity 0.3s ease;
+                                    pointer-events: none;
+                                ">
+                                    <i class="bi bi-camera-fill" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                                    <span style="font-size: 0.9rem; font-weight: 500;">Modifier l'avatar</span>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-1">{{ me.get_full_name|default:me.username }}</h5>
+                        <p class="text-muted small">@{{ me.username }}</p>
+                         <!-- Bio -->
+                        {% if me.bio %}
+                        <p class="small text-muted mt-2" style="font-size: 0.8rem; line-height: 1.3;">{{ me.bio|linebreaks|truncatechars:120 }}</p>
+                        {% endif %}
+                        
+                        <!-- Statut -->
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge" style="width:10px;height:13px;border-radius:50%;display:inline-block;margin-right:6px; background-color: {% if me.is_online %}#10b981{% else %}#9ca3af{% endif %};"></span>
+                            <span class="text-muted small">{{ me.is_online|yesno:"En ligne,Hors ligne" }}</span>
+                        </div>
+                        
+                        <!-- Structure & Job -->
+                        {% if me.structure %}
+                        <div class="text-start small text-muted mb-2">
+                            <div class="mb-1">
+                                <i class="fas fa-building me-2" style="color: #4f46e5;"></i>
+                                {% if me.structure == 'bunec' %}
+                                    BUNEC {% if me.service %}- {{ me.service }}{% endif %}
+                                {% elif me.structure == 'commune' %}
+                                    {{ me.commune }}
+                                    {% if me.fonction %}
+                                        <div class="text-muted small mt-1">
+                                            <i class="fas fa-user-tie me-1"></i> {{ me.get_fonction_display }}
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    {{ me.get_structure_display }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if me.role %}
+                        <div class="text-start small text-muted mb-2">
+                            <i class="fas fa-user-tag me-2" style="color: #4f46e5;"></i>
+                            {{ me.get_role_display }}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Date -->
+                        <div class="text-muted small mt-2 pt-2 border-top">
+                            Membre depuis {{ me.date_joined|date:"F Y" }}
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="btn-group position-absolute" style="bottom: 10px; right: 10px;">
+                            <button type="button" class="btn btn-sm btn-dark rounded-circle dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-cog" style="font-size: 12px;"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 200px; font-size: 0.85rem; border-radius: 8px;">
+                                {% if request.user == me %}
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="{% url 'users:edit_profile' %}">
+                                        <i class="fas fa-user-edit me-2 text-primary"></i> Modifier le profil
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="{% url 'users:change_password' %}">
+                                        <i class="fas fa-key me-2 text-secondary"></i> Mot de passe
+                                    </a>
+                                    <a class="dropdown-item d-flex align-items-center justify-content-between py-2" href="{% url 'chat:chat' %}">
+                                        <span><i class="fas fa-comments me-2 text-info"></i> Messagerie</span>
+                                        {% if unread_count %}<span class="badge bg-danger rounded-pill">{{ unread_count }}</span>{% endif %}
+                                    </a>
+                                {% else %}
+                                    <a class="dropdown-item d-flex align-items-center py-2" href="{% url 'chat:chat' %}?to={{ me.id }}">
+                                        <i class="fas fa-paper-plane me-2 text-primary"></i> Envoyer un message
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne Centrale - Statistiques -->
+                <div class="col-lg-6">
+                    <div class="row text-center mb-4">
+                        <div class="col-4">
+                            <div class="card-c p-1 stat-card stat-card-1" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transform: translateY(0); transition: all 0.3s ease; min-height: 80px;">
+                                <i class="bi bi-book fs-5 mb-0"></i>
+                                <div class="stat-v" style="color: white; font-size: 1.2rem; margin-bottom: 0;">{{ enrollments|length|default:0 }}</div>
+                                <div class="small" style="color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.65rem; margin-top: 0;">Cours inscrits</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card-c p-1 stat-card stat-card-2" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3); transform: translateY(0); transition: all 0.3s ease; min-height: 80px;">
+                                <i class="bi bi-check-circle fs-5 mb-0"></i>
+                                <div class="stat-v" style="color: white; font-size: 1.2rem; margin-bottom: 0;">{{ completed_lessons_count|default:0 }}</div>
+                                <div class="small" style="color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.65rem; margin-top: 0;">Leçons terminées</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="card-c p-1 stat-card stat-card-3" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3); transform: translateY(0); transition: all 0.3s ease; min-height: 80px;">
+                                <i class="bi bi-award fs-5 mb-0"></i>
+                                <div class="stat-v" style="color: white; font-size: 1.2rem; margin-bottom: 0;">{{ certifications|length|default:0 }}</div>
+                                <div class="small" style="color: rgba(255,255,255,0.9); font-weight: 500; font-size: 0.65rem; margin-top: 0;">Certifications</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graphique de progression -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-7">
+                            <div class="card-c">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="fw-bold">Progression d'apprentissage</h6>
+                                    <i class="bi bi-three-dots"></i>
+                                </div>
+                                <h2 class="fw-bold mt-2">{{ progress_percentage|default:0 }}%</h2>
+                                <p class="text-muted small">Taux de complétion global</p>
+                                <div class="bar-h">
+                                    <div class="bar" style="height:40%"></div>
+                                    <div class="bar active" style="height:90%"></div>
+                                    <div class="bar active" style="height:70%"></div>
+                                    <div class="bar" style="height:50%"></div>
+                                    <div class="bar active" style="height:85%"></div>
+                                    <div class="bar" style="height:30%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="card-c text-center">
+                                <h6 class="fw-bold mb-3">Temps d'apprentissage</h6>
+                                <div style="position: relative; width: 100px; height: 100px; margin: 0 auto;">
+                                    <svg viewBox="0 0 36 36" class="w-100"><path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#eee" stroke-width="2.5"/><path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-dasharray="72, 100"/></svg>
+                                    <div class="position-absolute top-50 start-50 translate-middle"><b>12h30</b></div>
+                                </div>
+                                <div class="mt-3 d-flex justify-content-center gap-3">
+                                    <i class="bi bi-play-circle fs-5"></i>
+                                    <i class="bi bi-pause-circle fs-5 text-muted"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activité récente -->
+                    <div class="card-c activity">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6 class="fw-bold">Activité récente</h6>
+                            <a href="{% url 'users:activity' %}" class="small text-decoration-none">Voir tout</a>
+                        </div>
+                        <div class="feed-section">
+                            {% if recent_activity %}
+                                {% for activity in recent_activity|slice:":5" %}
+                                    <div class="feed-item">
+                                        <div class="fw-bold">{{ activity.title }}</div>
+                                        <div class="text-muted small">{{ activity.timestamp|timesince }}</div>
+                                        {% if activity.course %}
+                                            <div class="text-muted small">dans {{ activity.course }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-2 mb-2"></i>
+                                    <p class="mb-0">Aucune activité récente</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colonne Droite -->
+                <div class="col-lg-3">
+                    <!-- Progression -->
+                    <div class="card-c">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-graph-up me-2"></i>Ma progression</h6>
+                        
+                        <!-- Cercle de progression -->
+                        <div class="text-center mb-3">
+                            <div class="progress-circle mx-auto" data-value="{{ progress_percentage|default:0 }}">
+                                <span class="progress-left">
+                                    <span class="progress-bar" style="border-color: #4f46e5;"></span>
+                                </span>
+                                <span class="progress-right">
+                                    <span class="progress-bar" style="border-color: #4f46e5;"></span>
+                                </span>
+                                <div class="progress-value w-100">
+                                    <div style="font-size: 1.5rem; font-weight: 700; color: #1f2937;">
+                                        {{ progress_percentage|default:0 }}%
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #6b7280;">
+                                {{ completed_lessons_count|default:0 }}/{{ total_lessons|default:0 }} leçons
+                            </div>
+                        </div>
+                        
+                        <!-- Statistiques -->
+                        <div class="text-center">
+                            <p class="mb-2" style="font-size: 0.9rem; color: #4f46e5; font-weight: 600;">
+                                Votre progression globale
+                            </p>
+                            <p class="text-muted small mb-0">
+                                Continuez à apprendre pour débloquer de nouveaux cours !
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-c mb-5 mt-3 task" style="padding: 15px 20px;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h6 class="fw-bold mb-0">Tâches en cours</h6>
+                            <span class="badge bg-primary rounded-pill">3/8</span>
+                        </div>
+                        <div class="task-dark">
+                            <div class="task-i d-flex justify-content-between align-items-center">
+                                <span>Finaliser le module 3</span>
+                                <i class="bi bi-check-circle-fill text-info"></i>
+                            </div>
+                            <div class="task-i d-flex justify-content-between align-items-center">
+                                <span>Quiz final</span>
+                                <i class="bi bi-check-circle-fill text-info"></i>
+                            </div>
+                            <div class="task-i d-flex justify-content-between align-items-center opacity-40">
+                                <span>Exercice pratique</span>
+                                <i class="bi bi-circle"></i>
+                            </div>
+                            <div class="task-i d-flex justify-content-between align-items-center opacity-40">
+                                <span>Projet final</span>
+                                <i class="bi bi-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- Onglet Cours -->
+        <div class="tab-pane fade" id="courses">
+           <!-- Section Dashboard Globale "BUNEC-SHIELD" -->
+            <section style="border-radius: 20px; padding: 30px; background-color: #f2f4f55e; font-family: 'Inter', -apple-system, sans-serif;">
+
+                <!-- 1. HEADER (Style IMG_6562.JPG) -->
+                <div class="line-hi" style="max-width: 1400px; margin: 0 auto 30px auto;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #888; font-size: 11px; font-weight: 500;">
+                        <i class="bi bi-folder2"></i> Profile   
+                        <span style="opacity: 0.5;">→</span> 
+                        <i class="bi bi-folder2"></i> Dashboard
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                        <h1 style="font-size: 2.5rem; font-weight: 500; color: #000; margin: 0; letter-spacing: -1px;">Mes inscriptions aux cours</h1>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; background: #eaeced; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; cursor: pointer;"><i class="bi bi-search"></i></div>
+                            <div style="width: 40px; height: 40px; background: #eaeced; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; cursor: pointer;"><i class="bi bi-sliders"></i></div>
+                            
+                            <div style="background: #eaeced; padding: 8px 16px; border-radius: 25px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">
+                                <i class="bi bi-calendar3"></i> 06-14 Mai, 2026 <i class="bi bi-chevron-down" style="font-size: 10px;"></i>
+                            </div>
+
+                            <button style="border: none; background: #eaeced; padding: 10px 20px; border-radius: 25px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">+ Add Widget</button>
+                            <button style="border: none; background: #eaeced; padding: 10px 20px; border-radius: 25px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">Create a Report</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. GRILLE DE CARTES (Avec Count on Hover) -->
+                <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                    {% for enrollment in enrollments %}
+                    <div class="ui-trend-card" 
+                        style="position: relative; height: 220px; background: #000; overflow: hidden; transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; z-index: 1;"
+                        onmouseover="
+                            this.style.transform='scale(1.2)'; 
+                            this.style.zIndex='100'; 
+                            this.style.boxShadow='0 40px 80px rgba(0,0,0,0.5)';
+                            document.getElementById('active-page-num').innerText = '{{ forloop.counter }}';
+                            document.getElementById('pager-bar').style.left = '{{ forloop.counter0 }}0%';
+                        "
+                        onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none';"
+                        onclick="location.href='{% url 'courses:course_detail' enrollment.course.id %}'">
+                        
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; padding: 12px; z-index: 10;">
+                            <span style="color: #d32f2f; font-size: 7px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">{{ enrollment.course.category.name|default:"SEC-ARCH"|upper }}</span>
+                            <h3 style="color: #fff; font-size: 0.85rem; font-weight: 800; margin: 2px 0 0; line-height: 1;">{{ enrollment.course.title|truncatechars:22 }}</h3>
+                        </div>
+
+                        <div style="height: 100%; width: 100%;">
+                            {% if enrollment.course.thumbnail %}
+                                <img src="{{ enrollment.course.thumbnail.url }}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.4; filter: grayscale(100%);">
+                            {% else %}
+                                <div style="width:100%; height:100%; background:#050505;"></div>
+                            {% endif %}
+                        </div>
+
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 12px; z-index: 10;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 5px;">
+                                <span style="color: #fff; font-size: 10px; font-weight: 900;">{{ enrollment.progress_percentage|floatformat:0 }}%</span>
+                                <span style="color: #444; font-size: 7px; font-weight: 700;">{{ forloop.counter|stringformat:"02d" }}</span>
+                            </div>
+                            <div style="width: 100%; height: 1px; background: #222;">
+                                <div style="width: {{ enrollment.progress_percentage }}%; height: 100%; background: #d32f2f;"></div>
+                            </div>
+                        </div>
+                        <div style="position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: #d32f2f; opacity: 0.3;"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- 3. PAGINATION DYNAMIQUE -->
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 25px; margin-top: 40px; padding-right: 20px;">
+                    <div style="width: 120px; height: 1px; background: #e0e0e0; position: relative;">
+                        <div id="pager-bar" style="position: absolute; top: 0; left: 0%; width: 20px; height: 2px; background: #d32f2f; transform: translateY(-50%); transition: all 0.4s ease;"></div>
+                    </div>
+                    <div style="display: flex; align-items: baseline; gap: 8px; color: #ccc; font-weight: 700;">
+                        <span style="font-size: 9px; opacity: 0.3;">PAGE</span>
+                        <span id="active-page-num" style="font-size: 28px; color: #000; line-height: 0.8;">1</span>
+                        <span style="font-size: 9px; opacity: 0.3;">/ {{ enrollments|length }}</span>
+                    </div>
+                </div>
+
+                <!-- 4. FOOTER (Style téléchargement (49) - Copie.jfif) -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 60px; padding: 0 15px;">
+                    <div style="line-height: 1.1; letter-spacing: -0.2px;">
+                        <span style="display: block; font-size: 14px; font-weight: 800; color: #000;">Exp.</span>
+                        <span style="display: block; font-size: 14px; font-weight: 800; color: #000;">Outdoor for</span>
+                        <span style="display: block; font-size: 14px; font-weight: 800; color: #000;">Everyone</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-size: 10px; font-weight: 900; letter-spacing: 1px; color: #000; text-transform: uppercase;">Newsletter</label>
+                        <div style="display: flex; align-items: center; background: #e6e8e9; padding: 2px; border-radius: 1px;">
+                            <input type="email" placeholder="Your email" style="border: none; background: transparent; padding: 10px 15px; font-size: 11px; outline: none; width: 180px; color: #666;">
+                            <button style="background: #d32f2f; color: white; border: none; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <i class="bi bi-send-fill" style="font-size: 0.8rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- Onglet Certifications -->
+        <div class="tab-pane fade" id="certifications">
+           <!-- Section Dashboard Globale "BUNEC-SHIELD" -->
+            <section style="border-radius: 20px; padding: 30px; background-color: #f2f4f55e; font-family: 'Inter', -apple-system, sans-serif;">
+
+                <!-- 1. HEADER -->
+                <div class="line-hi" style="max-width: 1400px; margin: 0 auto 30px auto;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #888; font-size: 11px; font-weight: 500;">
+                        <i class="bi bi-folder2"></i> Profile
+                        <span style="opacity: 0.5;">→</span> 
+                        <i class="bi bi-folder2"></i> Dashboard 
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                        <h1 style="font-size: 2.5rem; font-weight: 500; color: #000; margin: 0; letter-spacing: -1px;">Mes certifications</h1>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; background: #eaeced; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; cursor: pointer;"><i class="bi bi-search"></i></div>
+                            <div style="width: 40px; height: 40px; background: #eaeced; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; cursor: pointer;"><i class="bi bi-sliders"></i></div>
+                            
+                            <div style="background: #eaeced; padding: 8px 16px; border-radius: 25px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">
+                                <i class="bi bi-calendar3"></i> 06-14 Mai, 2026 <i class="bi bi-chevron-down" style="font-size: 10px;"></i>
+                            </div>
+
+                            <button style="border: none; background: #eaeced; padding: 10px 20px; border-radius: 25px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">+ Add Widget</button>
+                            <button style="border: none; background: #eaeced; padding: 10px 20px; border-radius: 25px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer;">Create a Report</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. GRILLE DE CERTIFICATIONS -->
+                {% if certifications %}
+                    <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        {% for cert in certifications|slice:":6" %}
+                            <div class="ui-trend-card" 
+                                style="position: relative; height: 220px; background: #000; overflow: hidden; transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; z-index: 1;"
+                                onmouseover="
+                                    this.style.transform='scale(1.2)'; 
+                                    this.style.zIndex='100'; 
+                                    this.style.boxShadow='0 40px 80px rgba(0,0,0,0.5)';
+                                    document.getElementById('cert-active-page-num').innerText = '{{ forloop.counter }}';
+                                    document.getElementById('cert-pager-bar').style.left = '{{ forloop.counter0 }}0%';
+                                "
+                                onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1'; this.style.boxShadow='none';"
+                                onclick="window.open('{{ cert.certificate_file.url }}', '_blank')">
+                                
+                                <div style="position: absolute; top: 0; left: 0; width: 100%; padding: 12px; z-index: 10;">
+                                    <span style="color: #d32f2f; font-size: 7px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">{{ cert.get_level_display|default:"CERT"|upper }}</span>
+                                    <h3 style="color: #fff; font-size: 0.85rem; font-weight: 800; margin: 2px 0 0; line-height: 1;">{{ cert.course.title|truncatechars:22 }}</h3>
+                                </div>
+
+                                <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center;">
+                                    {% if cert.level == 'beginner' %}
+                                        <i class="bi bi-award-fill" style="color: #0dcaf0; font-size: 4rem; opacity: 0.8;"></i>
+                                    {% elif cert.level == 'intermediate' %}
+                                        <i class="bi bi-award-fill" style="color: #ffc107; font-size: 4rem; opacity: 0.8;"></i>
+                                    {% else %}
+                                        <i class="bi bi-award-fill" style="color: #dc3545; font-size: 4rem; opacity: 0.8;"></i>
+                                    {% endif %}
+                                </div>
+
+                                <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 12px; z-index: 10;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="color: #fff; font-size: 10px; font-weight: 900;">VALIDÉ</span>
+                                        <div style="display: flex; gap: 5px;">
+                                            <a href="{{ cert.certificate_file.url }}" target="_blank" 
+                                               style="background: rgba(255,255,255,0.2); color: #fff; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 8px; font-weight: 600; transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.3);"
+                                               onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.borderColor='rgba(255,255,255,0.5)'"
+                                               onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.borderColor='rgba(255,255,255,0.3)'">
+                                                <i class="bi bi-eye" style="font-size: 7px;"></i>
+                                            </a>
+                                            <a href="{{ cert.certificate_file.url }}" download="certificat-{{ cert.id }}.pdf"
+                                               style="background: rgba(211,47,47,0.8); color: #fff; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 8px; font-weight: 600; transition: all 0.2s ease; border: 1px solid rgba(211,47,47,0.9);"
+                                               onmouseover="this.style.background='rgba(211,47,47,1)'; this.style.borderColor='rgba(211,47,47,1)'"
+                                               onmouseout="this.style.background='rgba(211,47,47,0.8)'; this.style.borderColor='rgba(211,47,47,0.9)'">
+                                                <i class="bi bi-download" style="font-size: 7px;"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div style="width: 100%; height: 1px; background: #222;">
+                                        <div style="width: 100%; height: 100%; background: #d32f2f;"></div>
+                                    </div>
+                                    <div style="color: #888; font-size: 8px; font-weight: 600; margin-top: 5px;">{{ cert.issued_date|date:"d/m/Y" }}</div>
+                                </div>
+                                <div style="position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: #d32f2f; opacity: 0.3;"></div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <!-- État vide amélioré -->
+                    <div style="max-width: 1400px; margin: 0 auto; text-center; padding: 60px 20px;">
+                        <div style="margin-bottom: 30px;">
+                            <div style="display: inline-flex; align-items: center; justify-content: center; width: 120px; height: 120px; background: linear-gradient(135deg, #eef2ff 0%, #ddd6fe 100%); border-radius: 50%;">
+                                <i class="bi bi-award" style="font-size: 3rem; color: #6366f1;"></i>
+                            </div>
+                        </div>
+                        <h2 style="font-size: 1.8rem; font-weight: 600; color: #000; margin-bottom: 15px;">Aucune certification</h2>
+                        <p style="color: #666; font-size: 1rem; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto;">Vous n'avez pas encore obtenu de certification. Continuez vos cours pour débloquer vos premiers certificats !</p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <a href="{% url 'courses:category_list' %}" style="background: #d32f2f; color: white; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(211, 47, 47, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                <i class="bi bi-search me-2"></i>Explorer les cours
+                            </a>
+                            <a href="#" style="background: #eaeced; color: #333; padding: 12px 24px; border-radius: 25px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.background='#e0e0e0'" onmouseout="this.style.transform='translateY(0)'; this.style.background='#eaeced'">
+                                <i class="bi bi-info-circle me-2"></i>En savoir plus
+                            </a>
+                        </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Onglet Quiz -->
+        <div class="tab-pane fade" id="quiz">
+            <h3 class="fw-bold mb-4">Mes résultats de quiz</h3>
+            
+            <div class="card-c">
+                {% if quiz_results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Quiz</th>
+                                    <th>Cours</th>
+                                    <th>Score</th>
+                                    <th>Date</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in quiz_results %}
+                                    <tr>
+                                        <td>{{ result.quiz.title }}</td>
+                                        <td>{{ result.quiz.lesson.module.course.title }}</td>
+                                        <td>
+                                            <span class="badge {% if result.score >= 70 %}bg-success{% elif result.score >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ result.score }}%
+                                            </span>
+                                        </td>
+                                        <td>{{ result.completed_at|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            {% if result.is_passed %}
+                                                <span class="badge bg-success">Réussi</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Échoué</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-data" style="font-size: 3rem; color: #dee2e6;"></i>
+                        <p class="text-muted mt-3">Aucun résultat de quiz disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Onglet Activité -->
+        <div class="tab-pane fade" id="activity">
+            <h3 class="fw-bold mb-4">Mon activité détaillée</h3>
+            
+            {% if recent_activity %}
+                <div class="card-c">
+                    {% for activity in recent_activity %}
+                        <div class="activity-item">
+                            <span class="dot" style="background: {% if activity.type == 'lesson' %}#28a745{% elif activity.type == 'quiz' %}#ffc107{% else %}#6c757d{% endif %};"></span>
+                            <div>
+                                <div class="fw-bold">{{ activity.title }}</div>
+                                {% if activity.course %}
+                                    <div class="text-muted small">dans {{ activity.course }}</div>
+                                {% endif %}
+                                <div class="text-muted small">{{ activity.timestamp|timesince }}</div>
+                                {% if activity.score %}
+                                    <div class="progress mt-1" style="height: 4px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ activity.score }}%;"></div>
+                                    </div>
+                                    <div class="text-muted small">Score: {{ activity.score }}%</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-clock-history fs-1 text-muted mb-3"></i>
+                    <h5 class="text-muted">Aucune activité récente</h5>
+                    <p class="text-muted">Commencez à apprendre pour voir votre activité ici !</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Animation du cercle de progression
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page de profil chargée');
+    
+    const progressCircles = document.querySelectorAll('.progress-circle');
+    
+    progressCircles.forEach(circle => {
+        const value = parseInt(circle.getAttribute('data-value'));
+        const leftCircle = circle.querySelector('.progress-left .progress-bar');
+        const rightCircle = circle.querySelector('.progress-right .progress-bar');
+        
+        if (value > 0) {
+            if (value <= 50) {
+                rightCircle.style.transform = `rotate(${value * 3.6}deg)`;
+            } else {
+                rightCircle.style.transform = 'rotate(180deg)';
+                leftCircle.style.animation = `loading-2 0.5s linear forwards ${value > 50 ? '0.5s' : '0s'}`;
+                leftCircle.style.transform = `rotate(${(value - 50) * 3.6}deg)`;
+            }
+        }
+    });
+});
+
+// Support du swipe tactile pour mobile
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.querySelector('.enrollments-slider');
+    if (slider) {
+        slider.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        slider.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+    }
+});
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    const diff = touchStartX - touchEndX;
+    
+    if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+            slideEnrollments('right'); // Swipe vers la gauche
+        } else {
+            slideEnrollments('left'); // Swipe vers la droite
+        }
+    }
+}
+
+function slideEnrollments(direction) {
+    const slider = document.querySelector('.enrollments-slider');
+    if (!slider) return;
+    
+    const scrollAmount = 200;
+    const currentScroll = slider.scrollLeft;
+    
+    if (direction === 'left') {
+        slider.scrollTo({
+            left: Math.max(0, currentScroll - scrollAmount),
+            behavior: 'smooth'
+        });
+    } else {
+        slider.scrollTo({
+            left: currentScroll + scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+}
+</script>
+{% endblock %}
+</body>
+</html>

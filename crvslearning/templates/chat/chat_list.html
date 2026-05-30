@@ -1,0 +1,215 @@
+{% extends "chat/base.html" %}
+{% load static %}
+
+{% block title %}Chat - Salons de discussion{% endblock %}
+
+{% block content %}
+<!-- Loader circulaire fluide -->
+{% include 'courses/partials/course_loader.html' %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-comments"></i> Chat
+                    <span class="badge bg-success ms-2">{{ online_users }} en ligne</span>
+                </h2>
+                <a href="{% url 'chat:create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau salon
+                </a>
+            </div>
+            
+            {% if rooms %}
+                <div class="row">
+                    {% for room in rooms %}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card h-100 room-card" data-room-id="{{ room.id }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title">
+                                                {% if room.is_private %}
+                                                    <i class="fas fa-lock text-muted"></i>
+                                                {% else %}
+                                                    <i class="fas fa-users text-muted"></i>
+                                                {% endif %}
+                                                {{ room.name }}
+                                            </h5>
+                                            {% if room.description %}
+                                                <p class="card-text text-muted small">{{ room.description|truncatechars:50 }}</p>
+                                            {% endif %}
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users"></i> {{ room.participants.count }} participants
+                                                </small>
+                                            </p>
+                                        </div>
+                                        {% if room.get_last_message %}
+                                            <div class="text-end">
+                                                <small class="text-muted d-block">
+                                                    {{ room.get_last_message.timestamp|date:"H:i" }}
+                                                </small>
+                                                <small class="text-muted">
+                                                    {{ room.get_last_message.sender.username }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <a href="{% url 'chat:room' room.id %}" class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-sign-in-alt"></i> Rejoindre
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                    <h4>Aucun salon de discussion</h4>
+                    <p class="text-muted">Créez votre premier salon pour commencer à discuter.</p>
+                    <a href="{% url 'chat:create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Créer un salon
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour ajouter des participants -->
+<div class="modal fade" id="addParticipantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter des participants</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="userSearch" placeholder="Rechercher un utilisateur...">
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Connexion WebSocket pour les notifications en temps réel
+    const onlineUsersSocket = new ReconnectingWebSocket(
+        'ws://' + window.location.host + '/ws/online-users/'
+    );
+    
+    onlineUsersSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'online_users') {
+            // Mettre à jour le compteur d'utilisateurs en ligne
+            const badge = document.querySelector('.badge.bg-success');
+            if (badge) {
+                badge.textContent = data.users.length + ' en ligne';
+            }
+        }
+    };
+    
+    // Gestion de la recherche d'utilisateurs
+    const userSearch = document.getElementById('userSearch');
+    const searchResults = document.getElementById('searchResults');
+    let searchTimeout;
+    
+    if (userSearch) {
+        userSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                searchResults.innerHTML = '';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/chat/search-users/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchResults.innerHTML = '';
+                        
+                        if (data.users.length === 0) {
+                            searchResults.innerHTML = '<p class="text-muted">Aucun utilisateur trouvé</p>';
+                            return;
+                        }
+                        
+                        data.users.forEach(user => {
+                            const userItem = document.createElement('div');
+                            userItem.className = 'd-flex justify-content-between align-items-center p-2 border-bottom';
+                            userItem.innerHTML = `
+                                <div>
+                                    <strong>${user.full_name || user.username}</strong>
+                                    <small class="text-muted d-block">@${user.username}</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="startDirectChat(${user.id})">
+                                    <i class="fas fa-comment"></i> Discuter
+                                </button>
+                            `;
+                            searchResults.appendChild(userItem);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }, 300);
+        });
+    }
+    
+    // Fonction pour démarrer une discussion directe
+    window.startDirectChat = function(userId) {
+        // Créer un salon privé avec l'utilisateur
+        fetch('/chat/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: new URLSearchParams({
+                'name': 'Discussion privée',
+                'is_private': 'true',
+                'participants': userId
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Failed to create room');
+        })
+        .then(html => {
+            // Extraire l'ID du salon de la réponse ou rediriger
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erreur lors de la création du salon');
+        });
+    };
+    
+    // Fonction utilitaire pour obtenir le cookie CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

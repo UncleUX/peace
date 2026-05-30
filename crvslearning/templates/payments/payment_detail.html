@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% load static %}
+{% load payment_tags %}
+
+{% block title %}Détails du paiement - {{ payment.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <!-- En-tête du paiement -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Détails du paiement
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID du paiement :</strong> {{ payment.id }}</p>
+                            <p><strong>Date :</strong> {{ payment.created_at|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Statut :</strong> 
+                                {% if payment.status == 'pending' %}
+                                    <span class="badge bg-warning">En attente</span>
+                                {% elif payment.status == 'completed' %}
+                                    <span class="badge bg-success">Complété</span>
+                                {% elif payment.status == 'failed' %}
+                                    <span class="badge bg-danger">Échoué</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ payment.get_status_display }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Module :</strong> {{ payment.module.title }}</p>
+                            <p><strong>Montant :</strong> {{ payment.amount|format_price }}</p>
+                            {% if payment.transaction_id %}
+                                <p><strong>Transaction ID :</strong> {{ payment.transaction_id }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if payment.status == 'pending' %}
+                <!-- Formulaire de paiement -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Finaliser le paiement
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'payments:process_payment' payment.id %}">
+                            {% csrf_token %}
+                            
+                            <!-- Méthodes de paiement -->
+                            <div class="mb-4">
+                                <h6>Choisissez votre méthode de paiement</h6>
+                                <div class="row">
+                                    {% for method in payment_methods %}
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card payment-method-card">
+                                                <div class="card-body text-center">
+                                                    <div class="payment-icon mb-2">
+                                                        <span style="font-size: 2rem;">{{ method.icon }}</span>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" 
+                                                               name="payment_method" 
+                                                               id="{{ method.id }}" 
+                                                               value="{{ method.id }}"
+                                                               required>
+                                                        <label class="form-check-label" for="{{ method.id }}">
+                                                            {{ method.name }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Numéro de téléphone -->
+                            <div class="mb-4">
+                                <label for="phone_number" class="form-label">
+                                    <i class="fas fa-phone me-1"></i>
+                                    Numéro de téléphone
+                                </label>
+                                <input type="tel" 
+                                       class="form-control" 
+                                       id="phone_number" 
+                                       name="phone_number"
+                                       placeholder="Ex: 612345678"
+                                       pattern="[6-9][0-9]{8}"
+                                       required>
+                                <div class="form-text">
+                                    Entrez votre numéro de téléphone camerounais (ex: 612345678)
+                                </div>
+                            </div>
+                            
+                            <!-- Bouton de paiement -->
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Confirmer le paiement de {{ payment.amount|format_price }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% elif payment.status == 'completed' %}
+                <!-- Paiement réussi -->
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-check-circle me-2"></i>Paiement effectué avec succès !</h5>
+                    <p class="mb-2">Votre paiement a été traité avec succès.</p>
+                    <p class="mb-0">Vous avez maintenant accès au module "{{ payment.module.title }}".</p>
+                </div>
+                <div class="text-center">
+                    <a href="{% url 'courses:module_detail' payment.module.course.id payment.module.id %}" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-play me-2"></i>Commencer le module
+                    </a>
+                    <a href="{% url 'payments:payment_history' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-history me-2"></i>Voir l'historique
+                    </a>
+                </div>
+            {% elif payment.status == 'failed' %}
+                <!-- Paiement échoué -->
+                <div class="alert alert-danger">
+                    <h5><i class="fas fa-exclamation-circle me-2"></i>Paiement échoué</h5>
+                    <p class="mb-0">Le paiement a échoué. Vous pouvez réessayer ou contacter le support.</p>
+                </div>
+                <div class="text-center">
+                    <button onclick="window.location.reload()" class="btn btn-warning btn-lg me-2">
+                        <i class="fas fa-redo me-2"></i>Réessayer
+                    </button>
+                    <a href="{% url 'payments:payment_history' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-history me-2"></i>Voir l'historique
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Informations du module -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-book me-2"></i>
+                        Informations du module
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6>{{ payment.module.title }}</h6>
+                            <p class="text-muted small">{{ payment.module.description|truncatewords:20 }}</p>
+                            <div>
+                                <span class="badge bg-info me-2">{{ payment.module.get_level_display }}</span>
+                                <span class="badge bg-secondary">{{ payment.module.lessons.count }} leçon{{ payment.module.lessons.count|pluralize }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <strong>{{ payment.amount|format_price }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-method-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.payment-method-card:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.payment-method-card.selected {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.payment-icon {
+    color: #007bff;
+}
+
+.form-check-input:checked + .form-check-label {
+    font-weight: bold;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gérer la sélection des méthodes de paiement
+    const cards = document.querySelectorAll('.payment-method-card');
+    const radios = document.querySelectorAll('input[name="payment_method"]');
+    
+    cards.forEach((card, index) => {
+        card.addEventListener('click', function() {
+            radios[index].checked = true;
+            updateCardSelection();
+        });
+    });
+    
+    radios.forEach(radio => {
+        radio.addEventListener('change', updateCardSelection);
+    });
+    
+    function updateCardSelection() {
+        cards.forEach((card, index) => {
+            if (radios[index].checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+    }
+    
+    updateCardSelection();
+});
+</script>
+{% endblock %}

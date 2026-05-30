@@ -1,0 +1,92 @@
+{% extends "chat/base.html" %}
+{% load static %}
+
+{% block title %}Modifier {{ room.name }} - Chat{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit"></i> Modifier le salon
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">Nom du salon *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.participants.id_for_label }}" class="form-label">Participants</label>
+                            {{ form.participants }}
+                            {% if form.participants.errors %}
+                                <div class="text-danger">{{ form.participants.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Sélectionnez les utilisateurs à inviter dans ce salon.
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_private }}
+                                <label class="form-check-label" for="{{ form.is_private.id_for_label }}">
+                                    Salon privé
+                                </label>
+                            </div>
+                            {% if form.is_private.errors %}
+                                <div class="text-danger">{{ form.is_private.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Les salons privés ne sont visibles que par les participants invités.
+                            </small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'chat:room' room.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Améliorer le sélecteur de participants avec Select2 si disponible
+    const participantSelect = document.getElementById('{{ form.participants.id_for_label }}');
+    if (participantSelect && typeof $ !== 'undefined' && $.fn.select2) {
+        $(participantSelect).select2({
+            placeholder: 'Rechercher des utilisateurs...',
+            allowClear: true,
+            width: '100%'
+        });
+    }
+});
+</script>
+{% endblock %}

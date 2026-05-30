@@ -1,0 +1,92 @@
+<!-- Loader Terminal -->
+<div class="terminal-loader-overlay" id="terminalLoader">
+    <div class="terminal-loader">
+        <div class="terminal-header">
+            <div class="terminal-title">CRVS Admin Terminal v2.1.0</div>
+            <div class="terminal-buttons">
+                <div class="terminal-button close"></div>
+                <div class="terminal-button minimize"></div>
+                <div class="terminal-button maximize"></div>
+            </div>
+        </div>
+        <div class="terminal-body">
+            <div class="terminal-line">
+                <span class="terminal-prompt">admin@crvs:~$</span> 
+                <span class="terminal-command">initializing system...</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">admin@crvs:~$</span> 
+                <span class="terminal-command">loading modules...</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output">✓ Authentication module loaded</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-output">✓ Database connection established</span>
+            </div>
+            <div class="terminal-line">
+                <span class="terminal-prompt">admin@crvs:~$</span> 
+                <span class="terminal-command">starting dashboard...</span>
+                <span class="terminal-cursor"></span>
+            </div>
+            <div class="terminal-progress">
+                <div class="terminal-progress-bar"></div>
+                <div class="terminal-progress-text">0%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// JavaScript pour le loader terminal
+document.addEventListener('DOMContentLoaded', function() {
+    const loader = document.getElementById('terminalLoader');
+    const progressBar = document.querySelector('.terminal-progress-bar');
+    const progressText = document.querySelector('.terminal-progress-text');
+    
+    // Animation de la barre de progression - RALENTIE
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 8; // Réduit de 15 à 8
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = progress + '%';
+        progressText.textContent = Math.floor(progress) + '%';
+        
+        if (progress >= 100) {
+            clearInterval(progressInterval);
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 800); // Augmenté de 500 à 800ms
+            }, 800); // Augmenté de 500 à 800ms
+        }
+    }, 350); // Augmenté de 200 à 350ms
+    
+    // Ajouter des lignes de log dynamiques - RALENTI
+    const terminalBody = document.querySelector('.terminal-body');
+    const additionalLogs = [
+        '✓ User permissions verified',
+        '✓ Cache initialized',
+        '✓ Security protocols active',
+        '✓ Dashboard components ready'
+    ];
+    
+    let logIndex = 0;
+    const logInterval = setInterval(() => {
+        if (logIndex < additionalLogs.length && progress < 80) {
+            const newLine = document.createElement('div');
+            newLine.className = 'terminal-line';
+            newLine.style.opacity = '0';
+            newLine.innerHTML = `<span class="terminal-output">${additionalLogs[logIndex]}</span>`;
+            terminalBody.insertBefore(newLine, terminalBody.querySelector('.terminal-progress'));
+            
+            setTimeout(() => newLine.style.opacity = '1', 200); // Augmenté de 100 à 200ms
+            logIndex++;
+        } else {
+            clearInterval(logInterval);
+        }
+    }, 900); // Augmenté de 600 à 900ms
+});
+</script>

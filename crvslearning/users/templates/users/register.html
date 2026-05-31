@@ -4,120 +4,633 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer votre compte - PEACE Crvs</title>
+    <title>PEACE Crvs - Inscription</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'vendor/css/sweetalert2.min.css' %}" rel="stylesheet">
     <style>
-        :root { --bg-color: #0b0114; --accent: #6d28d9; --text-main: #ffffff; --text-muted: #94a3b8; }
-        body { font-family: 'Inter', sans-serif; margin: 0; min-height: 100vh; background: url("{% static 'img/bg-profil.png' %}") center/cover no-repeat, var(--bg-color); display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(11, 1, 20, 0.85); z-index: 0; }
-        .register-container { width: 100%; max-width: 600px; z-index: 2; background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); padding: 40px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        
-        .form-section { display: none; }
-        .form-section.active { display: block; }
-        .form-group { margin-bottom: 20px; }
-        label { color: var(--text-muted); font-size: 13px; margin-bottom: 8px; display: block; }
-        .form-control { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px; border-radius: 12px; color: white; box-sizing: border-box; }
-        .form-control:focus { border-color: var(--accent); outline: none; background: rgba(109, 40, 217, 0.1); }
-        .btn { padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-secondary { background: rgba(255,255,255,0.1); color: white; }
-        .required-star { color: #ef4444; }
-        .password-input-wrapper { position: relative; }
-        .password-toggle { position: absolute; right: 15px; top: 12px; background: none; border: none; color: var(--text-muted); cursor: pointer; }
+        :root { 
+            --bg-color: #0b0114; 
+            --accent: #6d28d9; 
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; min-height: 100vh;
+            background: url("{% static 'img/bg-profil.png' %}") center/cover no-repeat, var(--bg-color);
+            display: flex; justify-content: center; align-items: center; overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* Calque sombre pour le style Nixon */
+        .overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(11, 1, 20, 0.75); z-index: 0; }
+
+        /* Texte de fond */
+        .bg-text {
+            position: absolute; top: -1%;letter-spacing: 50px; font-size: 15vw; font-weight: 800; color: rgba(255,255,255,0.03);
+            pointer-events: none; z-index: 1; user-select: none;
+        }
+
+        /* Armoirie */
+        .armoirie { position: absolute; bottom: 40px; width: 150px; opacity: 0.15; z-index: 1; filter: grayscale(1) brightness(0.8); }
+
+        /* Card stylisée */
+        .register-card {
+            width: 100%; max-width: 900px; z-index: 2;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            max-height: 90vh; overflow-y: auto;
+        }
+
+        .logo-shape { 
+            width: 50px; height: 50px; background: var(--accent); 
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); 
+            margin: 0 auto 15px; box-shadow: 0 0 20px var(--accent);
+        }
+
+        .register-card h2 { font-size: 18px; margin-bottom: 5px; color: white; }
+        .register-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 25px; }
+
+        .form-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-sections {
+                grid-template-columns: 1fr;
+            }
+            .register-card {
+                padding: 20px;
+            }
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(109, 40, 217, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .section-title h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            margin: 0;
+        }
+
+        .section-title p {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .required-star {
+            color: #ef4444;
+        }
+
+        input, select { 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px; border-radius: 5px; color: white; 
+            font-size: 13px; transition: 0.3s; width: 100%; box-sizing: border-box;
+        }
+        input:focus, select:focus { border-color: var(--accent); background: rgba(109, 40, 217, 0.1); outline: none; }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+
+        select option {
+            background: #0b0114;
+            color: white;
+        }
+
+        .date-input-wrapper, .password-input-wrapper {
+            position: relative;
+        }
+
+        .date-toggle, .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .date-toggle:hover, .password-toggle:hover {
+            background: rgba(109, 40, 217, 0.2);
+            color: var(--accent);
+        }
+
+        .password-strength {
+            margin-top: 5px;
+        }
+
+        .password-strength-bar {
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .password-strength-bar.weak { background: #ef4444; }
+        .password-strength-bar.medium { background: #f59e0b; }
+        .password-strength-bar.strong { background: #10b981; }
+
+        .conditional-fields {
+            background: rgba(109, 40, 217, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 3px solid var(--accent);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6d28d9, #a78bfa);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(109, 40, 217, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(109, 40, 217, 0.2);
+            border-color: var(--accent);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 11px;
+            border-left: 3px solid #ef4444;
+            margin-top: 5px;
+        }
+
+        .footer-link { font-size: 12px; color: var(--text-muted); margin-top: 15px; }
+        .footer-link a { color: #a78bfa; text-decoration: none; font-weight: 600; }
+
+        .doc-link {
+            position: fixed; right: 30px; bottom: 30px; color: rgba(255,255,255,0.5);
+            text-decoration: none; font-size: 12px; z-index: 10;
+        }
+
+        /* Scrollbar styling */
+        .register-card::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .register-card::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .register-card::-webkit-scrollbar-thumb {
+            background: rgba(109, 40, 217, 0.5);
+            border-radius: 3px;
+        }
+
+        .register-card::-webkit-scrollbar-thumb:hover {
+            background: rgba(109, 40, 217, 0.7);
+        }
     </style>
 </head>
+
+
 <body>
+
     <div class="overlay"></div>
+    <div class="bg-text">PEACE</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c8/Coat_of_arms_of_Cameroon.svg" class="armoirie">
 
-    <div class="register-container">
-        <form method="post" action="{% url 'users:register' %}" id="registerForm" novalidate>
-            {% csrf_token %}
-            
-            <div class="form-section active">
-                <h3>Informations personnelles</h3>
-                <div class="form-group"><label>Prénom <span class="required-star">*</span></label><input type="text" name="first_name" class="form-control" required></div>
-                <div class="form-group"><label>Nom <span class="required-star">*</span></label><input type="text" name="last_name" class="form-control" required></div>
-                <div class="form-group"><label>Date de naissance <span class="required-star">*</span></label><input type="date" name="date_of_birth" class="form-control" required></div>
-                <div class="form-group"><label>Email <span class="required-star">*</span></label><input type="email" name="email" class="form-control" required></div>
-            </div>
+    <div class="register-card">
+        <div class="logo-shape"></div>
+        <h2>PEACE</h2>
+        <p>CRVS-Learning Inscription</p>
 
-            <div class="form-section">
-                <h3>Structure professionnelle</h3>
-                <div class="form-group"><label>Nom d'utilisateur</label><input type="text" name="username" class="form-control" readonly></div>
-                <div class="form-group"><label>Votre structure <span class="required-star">*</span></label>
-                    <select name="structure" id="id_structure" class="form-control" onchange="handleStructureChange(this.value)">
-                        <option value="">Sélectionnez...</option>
-                        <option value="bunec">BUNEC</option>
-                        <option value="commune">Commune</option>
-                        <option value="minsante">Ministère de la Santé</option>
-                        <option value="universite">Université</option>
-                    </select>
-                </div>
-                <div id="bunec-container" style="display:none;" class="conditional-fields">
-                    <div class="form-group"><label>Structure BUNEC</label><select name="bunec_structure" class="form-control"><option value="direction_generale">Direction Générale</option><option value="agence_regionale">Agence Régionale</option></select></div>
-                </div>
-                <div id="commune-container" style="display:none;" class="conditional-fields">
-                    <div class="form-group"><label>Nom de la commune</label><input type="text" name="commune" class="form-control"></div>
-                    <div class="form-group"><label>Fonction</label><select name="fonction" class="form-control"><option value="secretaire">Secrétaire</option><option value="officier">Officier</option></select></div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Sécurité du compte</h3>
-                <div class="form-group"><label>Mot de passe <span class="required-star">*</span></label><input type="password" name="password1" class="form-control" required></div>
-                <div class="form-group"><label>Confirmation <span class="required-star">*</span></label><input type="password" name="password2" class="form-control" required></div>
-                <button type="submit" class="btn btn-primary" style="width:100%">CRÉER MON COMPTE</button>
-            </div>
-        </form>
-
-        <div style="display:flex; justify-content:space-between; margin-top:20px;">
-            <button id="prevBtn" class="btn btn-secondary" onclick="changeStep(-1)" disabled>Retour</button>
-            <button id="nextBtn" class="btn btn-primary" onclick="changeStep(1)">Suivant</button>
+        <!-- Messages container -->
+        <div id="messages" style="display: none;">
+          {% if messages %}
+            {% for message in messages %}
+              <div class="message" data-type="{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
         </div>
+
+        <!-- Form -->
+        <form method="post" action="{% url 'users:register' %}" id="registerForm" novalidate>
+          {% csrf_token %}
+
+          <div class="form-sections">
+          <!-- SECTION 1: Informations personnelles -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="section-title">
+                <h4>Informations personnelles</h4>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_first_name">
+                <i class="fas fa-user-circle"></i>
+                Prénom <span class="required-star">*</span>
+              </label>
+              <input type="text" name="first_name" id="id_first_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="id_last_name">
+                <i class="fas fa-user-tag"></i>
+                Nom <span class="required-star">*</span>
+              </label>
+              <input type="text" name="last_name" id="id_last_name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="id_date_of_birth">
+                <i class="fas fa-calendar-alt"></i>
+                Date de naissance <span class="required-star">*</span>
+              </label>
+              <div class="date-input-wrapper">
+                <input type="date" name="date_of_birth" id="id_date_of_birth" class="form-control" required>
+                <button type="button" class="date-toggle" onclick="toggleDatePicker()">
+                  <i class="fas fa-calendar"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_email">
+                <i class="fas fa-envelope"></i>
+                Adresse email <span class="required-star">*</span>
+              </label>
+              <input type="email" name="email" id="id_email" class="form-control" required>
+            </div>
+          </div>
+
+          <!-- SECTION 2: Structure professionnelle -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="section-title">
+                <h3>Structure professionnelle</h3>
+                <p>Votre affiliation professionnelle</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_username">
+                <i class="fas fa-id-badge"></i>
+                Nom d'utilisateur
+              </label>
+              <input type="text" name="username" id="id_username" class="form-control" readonly>
+            </div>
+
+            <div class="form-group">
+              <label for="id_structure">
+                <i class="fas fa-sitemap"></i>
+                Votre structure <span class="required-star">*</span>
+              </label>
+              <select name="structure" id="id_structure" class="form-control form-select" required>
+                <option value="" disabled selected>Sélectionnez votre structure</option>
+                <option value="bunec">BUNEC</option>
+                <option value="commune">Commune</option>
+                <option value="minsante">Ministère de la Santé</option>
+                <option value="minddevel">Ministère du Développement</option>
+                <option value="ong">ONG</option>
+                <option value="universite">Université</option>
+                <option value="consultant">Consultant</option>
+                <option value="partenaire">Partenaire</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+
+            <!-- Champs conditionnels BUNEC -->
+            <div id="bunec-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="bunec_structure_select">
+                  <i class="fas fa-building"></i>
+                  Structure BUNEC <span class="required-star">*</span>
+                </label>
+                <select name="bunec_structure" id="bunec_structure_select" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre structure BUNEC</option>
+                  <option value="direction_generale">Direction Générale</option>
+                  <option value="agence_regionale">Agence Régionale</option>
+                </select>
+                {% if form.bunec_structure.errors %}
+                  <div class="error-message">{{ form.bunec_structure.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+              
+              <div id="bunec_service_container" style="display: none;" class="conditional-fields">
+                <div class="form-group">
+                  <label for="bunec_service_select">
+                    <i class="fas fa-briefcase"></i>
+                    Service BUNEC <span class="required-star">*</span>
+                  </label>
+                  <select name="bunec_service" id="bunec_service_select" class="form-control form-select">
+                    <option value="" disabled selected>Sélectionnez d'abord votre structure</option>
+                  </select>
+                  {% if form.bunec_service.errors %}
+                    <div class="error-message">{{ form.bunec_service.errors|join:", " }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Ancien champ service (conservé pour compatibilité) -->
+            <div id="service-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_service">
+                  <i class="fas fa-briefcase"></i>
+                  Service à la BUNEC <span class="required-star">*</span>
+                </label>
+                <input type="text" name="service" id="id_service" class="form-control" placeholder="Entrez votre service à la BUNEC">
+                {% if form.service.errors %}
+                  <div class="error-message">{{ form.service.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="commune-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_commune">
+                  <i class="fas fa-city"></i>
+                  Nom de votre commune <span class="required-star">*</span>
+                </label>
+                <input type="text" name="commune" id="id_commune" class="form-control" placeholder="Entrez le nom de votre commune">
+                {% if form.commune.errors %}
+                  <div class="error-message">{{ form.commune.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label for="id_fonction">
+                  <i class="fas fa-user-tie"></i>
+                  Votre fonction <span class="required-star">*</span>
+                </label>
+                <select name="fonction" id="id_fonction" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre fonction</option>
+                  <option value="secretaire">Secrétaire d'état civil</option>
+                  <option value="officier">Officier d'état civil</option>
+                </select>
+                {% if form.fonction.errors %}
+                  <div class="error-message">{{ form.fonction.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="universite-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_universite">
+                  <i class="fas fa-graduation-cap"></i>
+                  Votre établissement <span class="required-star">*</span>
+                </label>
+                <select name="universite" id="id_universite" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre établissement</option>
+                  {% for value, label in form.fields.universite.choices %}
+                    {% if value %}
+                      <option value="{{ value }}">{{ label }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+                {% if form.universite.errors %}
+                  <div class="error-message">{{ form.universite.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="sante-type-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_sante_type">
+                  <i class="fas fa-hospital"></i>
+                  Type de structure <span class="required-star">*</span>
+                </label>
+                <select name="sante_type" id="id_sante_type" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez le type de structure</option>
+                  <option value="admin_centrale">Administration centrale</option>
+                  <option value="fosa">FOSA (Formation Sanitaire)</option>
+                </select>
+                {% if form.sante_type.errors %}
+                  <div class="error-message">{{ form.sante_type.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="sante-service-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_sante_service">
+                  <i class="fas fa-clinic-medical"></i>
+                  Service <span class="required-star">*</span>
+                </label>
+                <input type="text" name="sante_service" id="id_sante_service" class="form-control" placeholder="Entrez votre service">
+                {% if form.sante_service.errors %}
+                  <div class="error-message">{{ form.sante_service.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div id="fosa-profession-container" style="display: none;" class="conditional-fields">
+              <div class="form-group">
+                <label for="id_fosa_profession">
+                  <i class="fas fa-user-md"></i>
+                  Profession <span class="required-star">*</span>
+                </label>
+                <select name="fosa_profession" id="id_fosa_profession" class="form-control form-select">
+                  <option value="" disabled selected>Sélectionnez votre profession</option>
+                  <option value="medecin">Médecin</option>
+                  <option value="sage_femme">Sage femme</option>
+                  <option value="infirmiere">Infirmière</option>
+                  <option value="aide_soignant">Aide soignant</option>
+                </select>
+                {% if form.fosa_profession.errors %}
+                  <div class="error-message">{{ form.fosa_profession.errors|join:", " }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+           <!-- SECTION 3: Sécurité -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="section-title">
+              <h3>Sécurité du compte</h3>
+              <p>Créez votre mot de passe</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_password1">
+              <i class="fas fa-key"></i>
+              Mot de passe <span class="required-star">*</span>
+            </label>
+            <div class="password-input-wrapper">
+              <input type="password" name="password1" id="id_password1" class="form-control" required>
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('id_password1')" title="Afficher le mot de passe">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="password-strength">
+              <div class="password-strength-bar" id="passwordStrength"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_password2">
+              <i class="fas fa-lock"></i>
+              Confirmer le mot de passe <span class="required-star">*</span>
+            </label>
+            <div class="password-input-wrapper">
+              <input type="password" name="password2" id="id_password2" class="form-control" required>
+              <button type="button" class="password-toggle" onclick="togglePasswordVisibility('id_password2')" title="Afficher le mot de passe">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Champ caché pour le rôle -->
+          <input type="hidden" name="role" value="learner" checked>
+        </div>
+        </div>
+               <!-- Actions -->
+          <div class="form-actions">
+             <div class="footer-link">
+          Vous avez déjà un compte ? <a href="{% url 'users:login' %}">Connectez-vous</a>
+        </div>
+            <a href="{% url 'users:login' %}" class="btn btn-secondary">
+              <i class="fas fa-arrow-left"></i>
+              Retour
+            </a>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <i class="fas fa-user-plus"></i>
+              CRÉER MON COMPTE
+            </button>
+          </div>
     </div>
 
+   
+        </form>
+
+       
+    </div>
+
+    <a href="{% url 'documentation:index' %}" class="doc-link">
+        <i class="fas fa-book-open"></i>
+    </a>
+
+  <!-- SweetAlert2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Progress bar update
-      function updateProgress() {
-        const firstName = document.getElementById('id_first_name').value;
-        const lastName = document.getElementById('id_last_name').value;
-        const email = document.getElementById('id_email').value;
-        const structure = document.getElementById('id_structure').value;
-        const password1 = document.getElementById('id_password1').value;
-        const password2 = document.getElementById('id_password2').value;
-        
-        const steps = document.querySelectorAll('.progress-step');
-        
-        // Step 1: Personal info
-        if (firstName && lastName && email) {
-          steps[0].classList.add('completed');
-          steps[0].classList.remove('active');
-        } else {
-          steps[0].classList.add('active');
-          steps[0].classList.remove('completed');
-        }
-        
-        // Step 2: Structure
-        if (structure) {
-          steps[1].classList.add('completed');
-          steps[1].classList.remove('active');
-        } else {
-          steps[1].classList.add('active');
-          steps[1].classList.remove('completed');
-        }
-        
-        // Step 3: Security
-        if (password1 && password2) {
-          steps[2].classList.add('completed');
-          steps[2].classList.remove('active');
-        } else {
-          steps[2].classList.add('active');
-          steps[2].classList.remove('completed');
-        }
-      }
-      
       // Password strength indicator
       function checkPasswordStrength(password) {
         const strengthBar = document.getElementById('passwordStrength');
@@ -199,8 +712,6 @@
               break;
           }
         }
-        
-        updateProgress();
       }
       
       // Toggle health ministry fields
@@ -410,15 +921,6 @@
       // Password strength
       document.getElementById('id_password1')?.addEventListener('input', (e) => {
         checkPasswordStrength(e.target.value);
-        updateProgress();
-      });
-      
-      document.getElementById('id_password2')?.addEventListener('input', updateProgress);
-      
-      // Progress update on all inputs
-      document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('input', updateProgress);
-        input.addEventListener('blur', updateProgress);
       });
       
       // Form submission
@@ -456,7 +958,6 @@
       
       // Initialize
       toggleFields();
-      updateProgress();
       
       // Password validation
       const password1 = document.getElementById('id_password1');
@@ -561,50 +1062,5 @@
       yearSelect.focus();
     }
   </script>
-  <script>
-    // Variables nécessaires au fonctionnement de la navigation
-    let currentStep = 0; // Définit la page de départ
-
-    /**
-     * Fonction de navigation par étapes (Next/Prev)
-     * @param {number} n - 1 pour avancer, -1 pour reculer
-     */
-    function changeStep(n) {
-        const sections = document.querySelectorAll(".form-section");
-        
-        // 1. Validation : Vérifier les champs obligatoires avant d'avancer
-        if (n === 1) {
-            const currentInputs = sections[currentStep].querySelectorAll('input[required], select[required]');
-            for (let input of currentInputs) {
-                if (!input.value.trim()) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Champs manquants',
-                        text: 'Veuillez remplir tous les champs obligatoires.',
-                        confirmButtonColor: '#d13438'
-                    });
-                    input.focus();
-                    return false; // Stoppe la navigation
-                }
-            }
-        }
-
-        // 2. Masquer la section actuelle
-        sections[currentStep].classList.remove("active");
-        
-        // 3. Incrémenter l'index
-        currentStep += n;
-        
-        // 4. Afficher la nouvelle section
-        sections[currentStep].classList.add("active");
-        
-        // 5. Mise à jour de l'état des boutons
-        const prevBtn = document.getElementById("prevBtn");
-        const nextBtn = document.getElementById("nextBtn");
-        
-        if (prevBtn) prevBtn.disabled = (currentStep === 0);
-        if (nextBtn) nextBtn.style.display = (currentStep === sections.length - 1) ? "none" : "block";
-    }
-</script>
 </body>
 </html>

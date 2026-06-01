@@ -1649,12 +1649,20 @@ document.addEventListener('DOMContentLoaded', function() {
     width: 100%;
     height: 90vh;
     padding: 30px;
-    background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%), url('TON_IMAGE_ICI.jpg') center/cover;
-    border-radius: 30px;
+/* Dégradé : Bleu plus clair en haut (#1a365d) vers Bleu nuit profond en bas */
+    background: linear-gradient(180deg, rgba(26, 54, 93, 0.6) 0%, rgba(2, 12, 27, 0.95) 100%), url('{% static "img/bg-profil.png" %}');
+    background-blend-mode: multiply;
+    background-position: center;
+    background-size: cover;
+    
+    /* Ajout du border-radius pour l'effet moderne */
+    border-radius: 20px;
+    
+    /* Optionnel : ajout d'un overflow pour que l'image ne dépasse pas des coins */
+    overflow: hidden;
     color: white;
     font-family: sans-serif;
-    box-sizing: border-box;
-">
+    box-sizing: border-box;">
     
     <div style="margin-bottom: 20px;">
         <h1 style="font-size: 2.5rem; font-weight: 800; margin: 0; line-height: 1.1;">Explorer.<br>Apprendre.<br>Réussir.</h1>

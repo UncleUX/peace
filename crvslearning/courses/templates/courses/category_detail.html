@@ -167,6 +167,16 @@
                 </div>
             {% endif %}
         </div>
+
+        <!-- Flèches de navigation pour le diaporama mobile -->
+        <div class="slider-arrows d-md-none">
+            <button class="slider-arrow slider-arrow-left" onclick="scrollSlider('left')">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="slider-arrow slider-arrow-right" onclick="scrollSlider('right')">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
     </main>
 </div>
 
@@ -272,7 +282,7 @@
     .custom-cards-container { justify-content: center !important; }
 }
 /* --- MOBILE VUE --- */
-  
+
 @media (max-width: 768px) {
      .skills-highlight{
         display:none;
@@ -290,6 +300,166 @@
     .hero-category{
         background: transparent !important;
     }
+
+    /* Barre de filtre collée au header sur mobile */
+    .sticky-filter-bar {
+        margin-top: -80px !important;
+        position: relative !important;
+    }
+
+    /* Filtres scrollables sur mobile */
+    .sticky-filter-bar .d-flex {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        gap: 10px !important;
+        padding: 10px 5px !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-behavior: smooth !important;
+    }
+
+    .filter-pill {
+        flex: none !important;
+        white-space: nowrap !important;
+        font-size: 0.75rem !important;
+        padding: 6px 14px !important;
+    }
+
+    .sticky-filter-bar .d-flex::-webkit-scrollbar {
+        height: 3px;
+    }
+
+    .sticky-filter-bar .d-flex::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .sticky-filter-bar .d-flex::-webkit-scrollbar-thumb {
+        background: #3b82f6;
+        border-radius: 10px;
+    }
+
+    /* Remonter tous les éléments après le filtre sur mobile */
+    main {
+        margin-top: -40px !important;
+    }
+
+    .section-title-box {
+        margin-top: 0 !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* Slider horizontal pour les cours sur mobile */
+    .custom-cards-container {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        gap: 15px !important;
+        justify-content: flex-start !important;
+        padding: 10px 5px !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-behavior: smooth !important;
+        scroll-timeline: auto !important;
+    }
+
+    .custom-course-card {
+        flex: none !important;
+        width: 65vw !important;
+        height: 260px !important;
+        scroll-snap-align: center !important;
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    }
+
+    .custom-course-card:hover {
+        transform: scale(1.02) !important;
+    }
+
+    /* Scrollbar personnalisée */
+    .custom-cards-container::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .custom-cards-container::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .custom-cards-container::-webkit-scrollbar-thumb {
+        background: #3b82f6;
+        border-radius: 10px;
+    }
+
+    .custom-cards-container::-webkit-scrollbar-thumb:hover {
+        background: #2563eb;
+    }
+
+    /* Flèches de navigation du slider */
+    .slider-arrows {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: -170px;
+        padding: 0 10px;
+        pointer-events: none;
+    }
+
+    .slider-arrow {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid #3b82f6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        pointer-events: auto;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .slider-arrow:hover {
+        background: #3b82f6;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .slider-arrow-left {
+        margin-right: auto;
+    }
+
+    .slider-arrow-right {
+        margin-left: auto;
+    }
+
+    .slider-arrow i {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
         }
 </style>
+
+<script>
+function scrollSlider(direction) {
+    const container = document.getElementById('courses-container');
+    const scrollAmount = 220; // Largeur d'une carte + gap
+
+    if (direction === 'left') {
+        container.scrollBy({
+            left: -scrollAmount,
+            behavior: 'smooth'
+        });
+    } else if (direction === 'right') {
+        container.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+}
+</script>
 {% endblock %}

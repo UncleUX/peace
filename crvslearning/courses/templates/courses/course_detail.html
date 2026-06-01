@@ -41,18 +41,12 @@
 @media (max-width: 1199px){
 
     .nav-wrapper-cyber{
-        overflow-x: auto;
+        overflow-x: hidden;
         width: 100%;
-        scrollbar-width: none;
-    }
-
-    .nav-wrapper-cyber::-webkit-scrollbar{
-        display: none;
     }
 
     .nav-pills-coursera{
-        flex-wrap: nowrap;
-        min-width: max-content;
+        flex-wrap: wrap;
     }
 
     .thm-card-compact,
@@ -79,38 +73,17 @@
 
     .nav-island-container{
         display: flex !important;
-        overflow-x: auto;
+        overflow-x: hidden;
         padding-bottom: 8px;
-        scrollbar-width: none;
-    }
-
-    .nav-island-container::-webkit-scrollbar{
-        display: none;
     }
 
     .nav-wrapper-cyber{
         width: 100%;
-        min-width: max-content;
     }
 
     .nav-pills-coursera{
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         gap: 8px;
-    }
-     .nav-island-container{
-        overflow-x: auto;
-        padding-bottom: 4px;
-        scrollbar-width: none;
-    }
-
-    .nav-island-container::-webkit-scrollbar{
-        display: none;
-    }
-
-    .nav-pills-coursera{
-        flex-wrap: nowrap !important;
-        gap: 6px;
-        width: max-content;
     }
 
     .nav-pills-coursera .nav-link{
@@ -258,7 +231,7 @@
         .nav-wrapper-cyber {
             background: #111827; /* Fond sombre proche de la photo */
             padding: 6px;
-            border-radius: 50px; /* Très arrondi */
+            border-radius: 10px; /* Très arrondi */
             display: inline-flex;
             gap: 5px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -267,7 +240,7 @@
 
         /* Style des boutons (Pilules) */
         .nav-pills-coursera .nav-link {
-            border-radius: 50px !important;
+            border-radius: 9px !important;
             padding: 8px 20px !important;
             color: #94a3b8 !important; /* Texte gris clair */
             font-size: 13px;
@@ -470,15 +443,13 @@
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.3);
         }
-        main{
-            width: 100vw !important;
-        }
     </style>
 </head>
 <body>
 
     <!-- ================= 1. EN-TÊTE COURSERA HERO COMPACT (WITH BURGER ON MOBILE) ================= -->
      {% include 'courses/partials/header-saved19-05-2026.html' %}
+     <!-- {% include 'courses/partials/header-mobile.html' %} -->
 
     <!-- BARRE TRICOLORE DE SOUVERAINETÉ -->
     <div class="national-ribbon">
@@ -487,13 +458,13 @@
         <div class="ribbon-yellow"></div>
     </div>
     <div class="koln" style="
-    font-family: 'Inter', system-ui, sans-serif; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 16px 24px; 
-    background: rgba(255, 255, 255, 0.4); 
-    backdrop-filter: blur(12px); 
+    font-family: 'Inter', system-ui, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 5px;
@@ -502,9 +473,9 @@
 
     <div class="overtop" style="height: 24px; overflow: hidden; position: relative; font-weight: 700; color: #1e293b; font-size: 16px;">
         <div style="animation: scrollUp 6s infinite;">
-        <div style="height: 24px;">Learning Overview</div>
-        <div style="height: 24px; color: #6366f1;">New Courses Added</div>
-        <div style="height: 24px;">System Status</div>
+        <div style="height: 24px;">Vue d'ensemble</div>
+        <div style="height: 24px; color: #6366f1;">Nouveaux cours ajoutés</div>
+        <div style="height: 24px;">Statut du système</div>
         </div>
     </div>
 
@@ -533,10 +504,10 @@
 
         <div class="solid-widget">
         <span style="width: 6px; height: 6px; background: #22c55e; border-radius: 50%;"></span>
-        LMS ACTIVE
+        LMS ACTIF
         </div>
-        <div class="solid-widget">COURSES</div>
-        <div class="solid-widget" style="background: #0f172a; color: #f8fafc; border: none;">SEARCH DATA</div>
+        <div class="solid-widget">{{ course.modules.count }} Modules</div>
+        <div class="solid-widget" style="background: #0f172a; color: #f8fafc; border: none;">{{ course.get_niveau_display }}</div>
     </div>
     </div>
     <!-- ================= 2. CONTENU PRINCIPAL DE LA PAGE ================= -->
@@ -556,7 +527,7 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="reviews-tab" data-bs-toggle="pill" data-bs-target="#pills-reviews" type="button" role="tab">
-                                    Cursus <span class="nav-pill-badge">3</span>
+                                    Aperçu <span class="nav-pill-badge">3</span>
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -575,18 +546,130 @@
                     </div>
 
                     <div class="tab-pane fade" id="pills-reviews" role="tabpanel">
-                        <div class="card thm-card-compact p-4 border-0"> <h4 class="fw-bold text-white mb-3">Télémétrie d'apprentissage</h4>
+                        <div class="card thm-card-compact p-4 border-0">
+                            <h4 class="fw-bold text-white mb-4">Ce que vous apprendrez</h4>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-white">Maîtriser les fondamentaux</h6>
+                                            <p class="text-white-50 small mb-0">Comprendre les concepts clés et les principes de base</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-white">Développer des compétences pratiques</h6>
+                                            <p class="text-white-50 small mb-0">Appliquer les connaissances à travers des exercices concrets</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-white">Obtenir une certification</h6>
+                                            <p class="text-white-50 small mb-0">Valider vos compétences avec un diplôme reconnu</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="flex-shrink-0">
+                                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-1 text-white">Accéder à vie au contenu</h6>
+                                            <p class="text-white-50 small mb-0">Revoir les modules à tout moment sans limite</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 border-secondary">
+
+                            <h4 class="fw-bold text-white mb-4">À qui s'adresse ce cours</h4>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 bg-dark rounded">
+                                        <i class="bi bi-person-workspace text-primary fs-3 mb-2"></i>
+                                        <h6 class="fw-bold mb-1 text-white">Professionnels</h6>
+                                        <p class="text-white-50 small mb-0">En reconversion ou perfectionnement</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 bg-dark rounded">
+                                        <i class="bi bi-mortarboard text-primary fs-3 mb-2"></i>
+                                        <h6 class="fw-bold mb-1 text-white">Étudiants</h6>
+                                        <p class="text-white-50 small mb-0">Souhaitant acquérir de nouvelles compétences</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center p-3 bg-dark rounded">
+                                        <i class="bi bi-briefcase text-primary fs-3 mb-2"></i>
+                                        <h6 class="fw-bold mb-1 text-white">Entrepreneurs</h6>
+                                        <p class="text-white-50 small mb-0">Voulant développer leur activité</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 border-secondary">
+
+                            <h4 class="fw-bold text-white mb-4">Prérequis</h4>
+                            <ul class="list-unstyled">
+                                <li class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-check2 text-success"></i>
+                                    <span class="text-white-50">Aucun prérequis spécifique requis</span>
+                                </li>
+                                <li class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-check2 text-success"></i>
+                                    <span class="text-white-50">Motivation et engagement pour apprendre</span>
+                                </li>
+                                <li class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-check2 text-success"></i>
+                                    <span class="text-white-50">Accès à un ordinateur ou tablette</span>
+                                </li>
+                                <li class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check2 text-success"></i>
+                                    <span class="text-white-50">Connexion internet stable</span>
+                                </li>
+                            </ul>
+
+                            <hr class="my-4 border-secondary">
+
+                            <h4 class="fw-bold text-white mb-4">Ce que vous obtiendrez</h4>
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="thm-stat-box p-3">
-                                        <div class="label mb-1">COMPLÉTION</div>
-                                        <div class="val fs-4">45% [05/12]</div>
+                                        <div class="label mb-1 text-white-50">CERTIFICAT</div>
+                                        <div class="val fs-4 text-white">Inclus</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="thm-stat-box p-3">
-                                        <div class="label mb-1">SCORE MOYEN</div>
-                                        <div class="val fs-4" style="color: #10b981;">85.00 / 100</div>
+                                        <div class="label mb-1 text-white-50">DURÉE</div>
+                                        <div class="val fs-4 text-white">{{ course.modules.count }}h</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="thm-stat-box p-3">
+                                        <div class="label mb-1 text-white-50">NIVEAU</div>
+                                        <div class="val fs-4 text-white">{{ course.get_niveau_display }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="thm-stat-box p-3">
+                                        <div class="label mb-1 text-white-50">MODULES</div>
+                                        <div class="val fs-4 text-white">{{ course.modules.count }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -594,8 +677,149 @@
                     </div>
 
                     <div class="tab-pane fade" id="pills-faq" role="tabpanel">
-                        <div class="thm-card-compact p-4 text-muted small font-mono">
-                            <i class="bi bi-terminal me-2"></i> // Serveurs miroirs OK. Aucun incident répertorié sur le nœud d'apprentissage local.
+                        <div class="card thm-card-compact p-4 border-0">
+                            <h4 class="fw-bold text-white mb-4">Ressources du cours</h4>
+
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-white mb-3">
+                                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                    Documents téléchargeables
+                                </h5>
+                                <div class="list-group list-group-flush">
+                                    <a href="#" class="list-group-item list-group-item-action bg-transparent text-white-50 border-secondary d-flex align-items-center gap-3">
+                                        <i class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold text-white">Guide complet du cours</div>
+                                            <small class="text-white-50">PDF • 2.5 MB</small>
+                                        </div>
+                                        <i class="bi bi-download ms-auto text-primary"></i>
+                                    </a>
+                                    <a href="#" class="list-group-item list-group-item-action bg-transparent text-white-50 border-secondary d-flex align-items-center gap-3">
+                                        <i class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold text-white">Fiches de révision</div>
+                                            <small class="text-white-50">PDF • 1.2 MB</small>
+                                        </div>
+                                        <i class="bi bi-download ms-auto text-primary"></i>
+                                    </a>
+                                    <a href="#" class="list-group-item list-group-item-action bg-transparent text-white-50 border-secondary d-flex align-items-center gap-3">
+                                        <i class="bi bi-file-earmark-excel text-success fs-5"></i>
+                                        <div>
+                                            <div class="fw-bold text-white">Exercices pratiques</div>
+                                            <small class="text-white-50">Excel • 890 KB</small>
+                                        </div>
+                                        <i class="bi bi-download ms-auto text-primary"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 border-secondary">
+
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-white mb-3">
+                                    <i class="bi bi-link-45deg text-primary me-2"></i>
+                                    Liens utiles
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <a href="#" class="text-decoration-none">
+                                            <div class="p-3 bg-dark rounded border border-secondary h-100">
+                                                <i class="bi bi-book text-primary fs-4 mb-2"></i>
+                                                <h6 class="fw-bold text-white mb-1">Documentation officielle</h6>
+                                                <p class="text-white-50 small mb-0">Accès à la documentation complète</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a href="#" class="text-decoration-none">
+                                            <div class="p-3 bg-dark rounded border border-secondary h-100">
+                                                <i class="bi bi-people text-primary fs-4 mb-2"></i>
+                                                <h6 class="fw-bold text-white mb-1">Communauté</h6>
+                                                <p class="text-white-50 small mb-0">Rejoignez notre forum</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 border-secondary">
+
+                            <div class="mb-4">
+                                <h5 class="fw-bold text-white mb-3">
+                                    <i class="bi bi-camera-video text-warning me-2"></i>
+                                    Vidéos complémentaires
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="text-center p-3 bg-dark rounded border border-secondary">
+                                            <i class="bi bi-play-circle text-warning fs-3 mb-2"></i>
+                                            <h6 class="fw-bold text-white mb-1">Introduction</h6>
+                                            <p class="text-white-50 small mb-0">5 min</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center p-3 bg-dark rounded border border-secondary">
+                                            <i class="bi bi-play-circle text-warning fs-3 mb-2"></i>
+                                            <h6 class="fw-bold text-white mb-1">Tutoriel avancé</h6>
+                                            <p class="text-white-50 small mb-0">15 min</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center p-3 bg-dark rounded border border-secondary">
+                                            <i class="bi bi-play-circle text-warning fs-3 mb-2"></i>
+                                            <h6 class="fw-bold text-white mb-1">Best practices</h6>
+                                            <p class="text-white-50 small mb-0">10 min</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 border-secondary">
+
+                            <div>
+                                <h5 class="fw-bold text-white mb-3">
+                                    <i class="bi bi-patch-question text-info me-2"></i>
+                                    FAQ
+                                </h5>
+                                <div class="accordion accordion-flush" id="faqAccordion">
+                                    <div class="accordion-item bg-transparent">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                                Comment accéder au certificat ?
+                                            </button>
+                                        </h2>
+                                        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body text-white-50">
+                                                Le certificat est disponible une fois que vous avez complété tous les modules et réussi l'évaluation finale.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item bg-transparent">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                                Puis-je suivre le cours à mon rythme ?
+                                            </button>
+                                        </h2>
+                                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body text-white-50">
+                                                Oui, vous avez un accès illimité au contenu et pouvez avancer à votre propre rythme.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item bg-transparent">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                                Y a-t-il un support technique ?
+                                            </button>
+                                        </h2>
+                                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                            <div class="accordion-body text-white-50">
+                                                Oui, notre équipe de support est disponible 24h/24 pour répondre à vos questions.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

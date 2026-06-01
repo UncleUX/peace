@@ -113,17 +113,29 @@
   }
 
   @media (max-width: 768px) {
+    .hd{
+      overflow-x: hidden;
+    }
     .peace-logo-container {
       display: none !important; /* Masquer le logo sur petit mobile pour éviter l'encombrement */
     }
     .course-hero .desc {
       max-width: 100%;
     }
+    .title{
+      word-break: break-all;
+    }
+    .desc{
+      font-size: 10px;
+      line-height: 0.6;
+    }
+    
+
   }
 </style>
 
-<div class="container-fluide top-info rounded" style="background-image: url('{% static 'img/scrub.jpg' %}'); background-size: cover; background-position: center; background-repeat: no-repeat; width: 100vw !important;">
-  <div class="container-fluide" style="height: 250px;">
+<div class="container-fluide top-info rounded hd" style="background-image: url('{% static 'img/scrub.jpg' %}'); background-size: cover; background-position: center; background-repeat: no-repeat; width: 100vw !important;">
+  <div class="container-fluide">
     <section class="course-hero p-4">
       <div class="hero-overlay"></div>
       <div class="hero-inner">

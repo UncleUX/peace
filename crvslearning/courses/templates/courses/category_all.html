@@ -78,6 +78,7 @@
             {% if categories_with_stats %}
                 {% for item in categories_with_stats %}
                 <div class="col-md-4 col-lg-3 category-item" style="--delay: {{ forloop.counter }}">
+                    <a href="{% url 'courses:category_detail' item.category.slug %}" class="card-link-overlay" style="text-decoration: none;">
                     <div class="node-card-compact animate-in">
                         <div class="scan-line"></div>
                         
@@ -115,6 +116,7 @@
                             </div>
                         </div>
                     </div>
+                    </a>
                 </div>
                 {% endfor %}
             {% endif %}
@@ -133,6 +135,7 @@
 
     .node-card-compact {
         border-radius: 14px;
+        height: 300px;
     }
 
     .node-name {
@@ -172,7 +175,7 @@
     }
 
     .node-card-compact .p-3 {
-        padding: 0.8rem !important;
+        padding: 0.4rem !important;
     }
 }
 /* --- MOBILE VUE --- */
@@ -225,10 +228,19 @@
 
 .node-card-compact {
     background: white; border-radius: 5px; height: 260px; position: relative;
-    border: 1px solid rgba(0,0,0,0.05); transition: all 0.4s ease; overflow: hidden;
-}
-.node-card-compact:hover { transform: translateY(-10px); border-color: #0077B5; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); }
+    border: 2px solid rgba(0,0,0,0.05); transition: all 0.4s ease; overflow: hidden;
 
+}
+.node-card-compact:hover {
+    transform: translateY(-10px) scale(1.03);
+    z-index: 100;
+    box-shadow: 0 20px 40px rgba(0, 119, 181, 0.2);
+    
+    /* Dégradé de bordure : Vert - Jaune - Rouge */
+    border-image: linear-gradient(45deg, #2ecc71, #f1c40f, #e74c3c) 1;
+    border-style: solid;
+    border-width: 2px;
+}
 /* Ligne de Scan */
 .scan-line {
     position: absolute; left: 0; width: 100%; height: 3px;

@@ -4,96 +4,203 @@
     /* ==========================================================================
        ASIDE DYNAMIQUE (Playlist)
        ========================================================================== */
-    .ld-aside { 
-        background: #fff; 
-        border-radius: 16px; /* Arrondis modernes */
-        border: 1px solid #edf2f7; 
-        
-        /* Comportement dynamique : s'adapte strictement au contenu */
-        height: auto !important; 
-        min-height: min-content !important; 
-        display: flex; 
-        flex-direction: column; 
-        padding: 1.25rem;
+    .ld-aside {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        height: auto !important;
+        min-height: min-content !important;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
         width: 100%;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
     }
 
-    .aside-title { 
-        font-weight: 600; 
-        color: #10b981; 
-        margin-bottom: 0.5rem; 
-        font-size: 1rem;
+    .ld-aside::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+        border-radius: 8px 8px 0 0;
     }
-    
+
+    .aside-title {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .aside-title::before {
+        content: '';
+        width: 3px;
+        height: 16px;
+        background: linear-gradient(180deg, #10b981, #3b82f6);
+        border-radius: 2px;
+    }
+
     /* La liste grandit selon le nombre d'éléments */
-    .simple-playlist { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 6px; 
+    .simple-playlist {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 6px;
     }
 
-    .playlist-item { 
-        display: flex; 
-        align-items: center; 
-        padding: 10px; 
-        border-radius: 12px; 
-        cursor: pointer; 
-        transition: all 0.25s ease; 
-        border: 1px solid transparent; 
-        gap: 12px;
+    .simple-playlist::-webkit-scrollbar {
+        width: 4px;
     }
-    
-    .playlist-item:hover { background: #f8fafc; border-color: #e2e8f0; }
-    .playlist-item.current { background: #f0fdf4; border-color: #bbf7d0; }
-    
-    .playlist-item-number { 
-        font-size: 0.85rem; 
-        min-width: 28px; 
-        text-align: center; 
-        color: #64748b; 
-        font-weight: 500;
+
+    .simple-playlist::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 8px;
     }
-    
-    .playlist-item-content { flex-grow: 1; min-width: 0; }
-    
-    .playlist-item-title { 
-        font-weight: 600; 
-        font-size: 0.9rem; 
-        white-space: nowrap; 
-        overflow: hidden; 
-        text-overflow: ellipsis; 
-        color: #1e293b; 
+
+    .simple-playlist::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 8px;
     }
-    
-    .playlist-item-module { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
-    
-    .current-indicator { 
-        font-size: 0.65rem; 
-        background: #dcfce7; 
-        color: #166534; 
-        padding: 2px 8px; 
-        border-radius: 20px; 
-        margin-left: 8px; 
+
+    .simple-playlist::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .playlist-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid transparent;
+        gap: 10px;
+        position: relative;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+
+    .playlist-item:hover {
+        background: rgba(255, 255, 255, 1);
+        border-color: #3b82f6;
+        transform: translateX(2px);
+        box-shadow: 0 2px 12px -3px rgba(59, 130, 246, 0.25);
+    }
+
+    .playlist-item.current {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-color: #10b981;
+        box-shadow: 0 2px 12px -3px rgba(16, 185, 129, 0.35);
+    }
+
+    .playlist-item.completed {
+        opacity: 0.7;
+    }
+
+    .playlist-item-number {
+        font-size: 0.8rem;
+        min-width: 26px;
+        text-align: center;
+        color: #64748b;
+        font-weight: 600;
+        background: #f1f5f9;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+
+    .playlist-item.current .playlist-item-number {
+        background: #10b981;
+        color: white;
+    }
+
+    .playlist-item-content {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .playlist-item-title {
+        font-weight: 600;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #1e293b;
+    }
+
+    .playlist-item.current .playlist-item-title {
+        color: #166534;
+    }
+
+    .playlist-item-module {
+        font-size: 0.7rem;
+        color: #64748b;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .current-indicator {
+        font-size: 0.65rem;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: 6px;
         vertical-align: middle;
+        font-weight: 600;
+        box-shadow: 0 1px 4px -1px rgba(16, 185, 129, 0.4);
     }
 
-    .playlist-item-status { display: flex; gap: 8px; align-items: center; }
+    .playlist-item-status {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .playlist-item-status i {
+        font-size: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .playlist-item:hover .playlist-item-status i {
+        transform: scale(1.1);
+    }
 
     /* ==========================================================================
        RESPONSIVE MOBILE (La remontée "Cover")
        ========================================================================== */
-    @media (max-width: 768px) { 
+    @media (max-width: 768px) {
         .ld-aside {
-            margin-top: -30px !important; /* Effet de recouvrement */
-            border-radius: 20px 20px 0 0;  /* Coins arrondis haut uniquement */
+            margin-top: -30px !important;
+            border-radius: 20px 20px 0 0;
             padding: 1rem !important;
-            /* La section reste en flux normal, aucune hauteur forcée */
+            box-shadow: 0 -8px 30px -8px rgba(0, 0, 0, 0.08);
         }
-        
-        /* Réduction légère pour mobile */
-        .playlist-item { padding: 12px 8px; }
-        .playlist-item-title { font-size: 0.85rem; }
+
+        .playlist-item {
+            padding: 8px 10px;
+        }
+
+        .playlist-item-title {
+            font-size: 0.8rem;
+        }
+
+        .playlist-item-number {
+            min-width: 24px;
+            padding: 4px 6px;
+            font-size: 0.75rem;
+        }
     }
 </style>
 {% load course_extras %}
@@ -103,24 +210,27 @@
     <div class="simple-playlist mt-2" id="simple-playlist">
         {% if simple_playlist %}
             {% for item in simple_playlist %}
-                <div class="playlist-item {% if item.is_current %}current{% endif %}" 
-                     onclick="window.location.href='{{ item.href }}'">
-                    
+                <div class="playlist-item {% if item.is_current %}current{% endif %} {% if item.is_completed %}completed{% endif %}"
+                     data-lesson-id="{{ item.id }}"
+                     data-video-url="{{ item.video_url }}"
+                     data-title="{{ item.title }}"
+                     onclick="changeVideoFromPlaylist(this)">
+
                     <div class="playlist-item-number">
-                        {% if item.is_current %}▶️{% elif item.is_next_module %}🔓{% elif item.is_paid_module %}💳{% else %}{{ forloop.counter }}{% endif %}
+                        {% if item.is_current %}<i class="bi bi-play-fill"></i>{% elif item.is_next_module %}<i class="bi bi-unlock"></i>{% elif item.is_paid_module %}<i class="bi bi-credit-card"></i>{% else %}{{ forloop.counter }}{% endif %}
                     </div>
-                    
+
                     <div class="playlist-item-content">
                         <div class="playlist-item-title">
                             {{ item.title }}
-                            {% if item.is_current %}<span class="current-indicator">Actuelle</span>{% endif %}
+                            {% if item.is_current %}<span class="current-indicator">En cours</span>{% endif %}
                         </div>
                         <div class="playlist-item-module">
-                            {{ item.module_title }} 
+                            <i class="bi bi-folder"></i> {{ item.module_title }}
                             {% if item.lesson_order %}<span class="lesson-order">· Leçon {{ item.lesson_order }}</span>{% endif %}
                         </div>
                     </div>
-                    
+
                     <div class="playlist-item-status">
                         {% if item.is_completed %}<i class="bi bi-check-circle-fill text-success"></i>{% endif %}
                         {% if not item.has_video %}<i class="bi bi-file-earmark-text text-muted"></i>{% else %}<i class="bi bi-play-circle text-primary"></i>{% endif %}
@@ -128,7 +238,10 @@
                 </div>
             {% endfor %}
         {% else %}
-            <div class="text-muted p-2 small">Aucune vidéo disponible</div>
+            <div class="text-muted p-3 text-center">
+                <i class="bi bi-inbox fs-4 mb-2 d-block"></i>
+                <small>Aucune vidéo disponible</small>
+            </div>
         {% endif %}
     </div>
 </aside>

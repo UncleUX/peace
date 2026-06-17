@@ -73,7 +73,7 @@
           .nav-container {
         width: 95%; /* On donne plus d'espace sur tablette */
         padding: 8px 10px;
-        border-radius: 25px;
+        border-radius: 15px;
         flex-wrap: wrap;
         justify-content: center;
         }
@@ -161,9 +161,51 @@
             box-shadow: 0 12px 35px rgba(79, 172, 254, 0.4) !important;
         }
         
-        .nav-tabs-custom { border-bottom: none !important; gap: 10px; }
+        .nav-tabs-custom { border-bottom: none !important; gap: 5px; max-width: 90%; margin: 0 auto; display: flex; justify-content: center; }
         .nav-tabs-custom .nav-link { border: none !important; color: #666; font-size: 0.8rem; padding: 8px 18px !important; border-radius: 20px !important; transition: 0.3s; }
         .nav-tabs-custom .nav-link.active { background: var(--dark) !important; color: #fff !important; }
+
+        /* Responsive pour tablette */
+        @media (max-width: 1024px) {
+            .nav-tabs-custom {
+                max-width: 95%;
+                gap: 4px;
+            }
+            .nav-tabs-custom .nav-link {
+                font-size: 0.75rem;
+                padding: 6px 14px !important;
+            }
+        }
+
+        /* Responsive pour mobile */
+        @media (max-width: 768px) {
+            .nav-tabs-custom {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                overflow-y: hidden;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+                border-bottom: 1px solid #e5e7eb;
+                max-width: 100%;
+                gap: 3px;
+                padding: 0 5px;
+            }
+
+            .nav-tabs-custom .nav-item {
+                flex: 0 0 auto;
+            }
+
+            .nav-tabs-custom .nav-link {
+                font-size: 0.7rem;
+                padding: 5px 10px !important;
+                white-space: nowrap;
+            }
+
+            /* hide scrollbar (optional clean UI) */
+            .nav-tabs-custom::-webkit-scrollbar {
+                display: none;
+            }
+        }
 
         /* Profile & Content */
         .profile-box { background: linear-gradient(180deg, #b0d8ff, #fff); border-radius: var(--radius); text-align: center; padding: 20px; position: relative; }
@@ -554,63 +596,71 @@
 </div>
 
 <style>
+
+    /* Cacher les flèches sur desktop par défaut */
+    .slider-arrow {
+        display: none !important;
+    }
+
     @media (max-width: 768px) {
+        /* Slider horizontal pour les cours sur mobile */
+        .courses-grid {
+            display: flex !important;
+            overflow-x: auto !important;
+            scroll-snap-type: x mandatory !important;
+            gap: 12px !important;
+            padding: 10px 50px !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
 
-  .nav-tabs-custom {
-    background: none;
-    box-shadow: none;
-    margin-top: 10px;
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    border-bottom: 1px solid #e5e7eb;
-  }
+        .courses-grid::-webkit-scrollbar {
+            display: none !important;
+        }
 
-  .nav-tabs-custom .nav-item {
-    flex: 0 0 auto;
-  }
+        .courses-grid .ui-trend-card {
+            flex: 0 0 85vw !important;
+            scroll-snap-align: center !important;
+            max-width: 85vw !important;
+        }
 
-  .nav-tabs-custom .nav-link {
-    font-size: 0.75rem;
-    padding: 6px 10px;
-    white-space: nowrap;
-  }
+        /* Flèches du slider - afficher sur mobile */
+        .slider-arrow {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            width: 40px !important;
+            height: 40px !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+            z-index: 10 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+            transition: all 0.3s ease !important;
+        }
 
-  /* hide scrollbar (optional clean UI) */
-  .nav-tabs-custom::-webkit-scrollbar {
-    display: none;
-  }
-  @media (max-width: 768px) {
+        .slider-arrow:hover {
+            background: rgba(255, 255, 255, 1) !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        }
 
-  .nav-tabs-custom {
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    border-bottom: 1px solid #e5e7eb;
-  }
+        .slider-arrow-left {
+            left: 10px !important;
+        }
 
-  .nav-tabs-custom .nav-item {
-    flex: 0 0 auto;
-  }
+        .slider-arrow-right {
+            right: 10px !important;
+        }
 
-  .nav-tabs-custom .nav-link {
-    font-size: 0.75rem;
-    padding: 6px 10px;
-    white-space: nowrap;
-  }
+        .slider-arrow i {
+            font-size: 1.2rem !important;
+            color: #333 !important;
+        }
+    }
 
-  /* hide scrollbar (optional clean UI) */
-  .nav-tabs-custom::-webkit-scrollbar {
-    display: none;
-  }
-
-}
-
-}
 @keyframes popupSlideIn {
   from {
     opacity: 0;
@@ -655,6 +705,20 @@
 </style>
 
 <script>
+// Fonction pour faire défiler le slider
+function scrollSlider(direction) {
+  const slider = document.querySelector('.courses-grid');
+  if (!slider) return;
+
+  const scrollAmount = slider.clientWidth * 0.85; // Défiler de 85% de la largeur visible
+
+  if (direction === 'left') {
+    slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+  } else if (direction === 'right') {
+    slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  }
+}
+
 // Fonction pour fermer le popup
 function closeReminderPopup() {
   const popup = document.getElementById('courseReminderPopupFinal');
@@ -754,15 +818,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<div class="main-wrapper container-fluid">
 
 <div class="main-wrapper container-fluid">
     <!-- Header -->
     <div class="d-flex justify-content-center">
-        <header class="nav-container d-flex justify-content-between align-items-center shadow-sm">
+        <header class="nav-container d-flex justify-content-between align-items-center shadow-sm mt-3">
         <!-- <div class="fw-bold fs-5">Mon Espace</div> -->
         <ul class="nav nav-tabs nav-tabs-custom" id="myTab" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#dashboard" type="button">Tableau de bord</button></li>
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#dashboard" type="button">Accueil</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#courses" type="button">Cours</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#certifications" type="button">Certifications</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#quiz" type="button">Quiz</button></li>
@@ -1097,7 +1160,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
 
                 <!-- 2. GRILLE DE CARTES (Avec Count on Hover) -->
-                <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                <div style="position: relative; max-width: 1400px; margin: 0 auto;">
+                    <!-- Flèche gauche -->
+                    <button class="slider-arrow slider-arrow-left" onclick="scrollSlider('left')">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <div class="courses-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
                     {% for enrollment in enrollments %}
                     <div class="ui-trend-card" 
                         style="position: relative; height: 220px; background: #000; overflow: hidden; transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; z-index: 1;"
@@ -1136,6 +1205,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div style="position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: #d32f2f; opacity: 0.3;"></div>
                     </div>
                     {% endfor %}
+                    </div>
+
+                    <!-- Flèche droite -->
+                    <button class="slider-arrow slider-arrow-right" onclick="scrollSlider('right')">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
                 </div>
 
                 <!-- 3. PAGINATION DYNAMIQUE -->
@@ -1206,8 +1281,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 {% if certifications %}
                     <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
                         {% for cert in certifications|slice:":6" %}
-                            <div class="ui-trend-card" 
-                                style="position: relative; height: 220px; background: #000; overflow: hidden; transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; z-index: 1;"
+                            <div class="ui-trend-card"
+                                style="position: relative; height: 220px; background: #000; overflow: hidden; transition: all 0.4s cubic-bezier(0.2, 1, 0.2, 1); cursor: pointer; z-index: 1; border-top-right-radius: 60px;"
                                 onmouseover="
                                     this.style.transform='scale(1.2)'; 
                                     this.style.zIndex='100'; 
@@ -1219,8 +1294,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 onclick="window.open('{{ cert.certificate_file.url }}', '_blank')">
                                 
                                 <div style="position: absolute; top: 0; left: 0; width: 100%; padding: 12px; z-index: 10;">
-                                    <span style="color: #d32f2f; font-size: 7px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">{{ cert.get_level_display|default:"CERT"|upper }}</span>
-                                    <h3 style="color: #fff; font-size: 0.85rem; font-weight: 800; margin: 2px 0 0; line-height: 1;">{{ cert.course.title|truncatechars:22 }}</h3>
+                                    <span style="color: #d32f2f; font-size: 10px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">{{ cert.get_level_display|default:"CERT"|upper }}</span>
+                                </div>
+
+                                <div style="position: absolute; top: 35px; left: 0; width: 100%; padding: 0 12px; z-index: 10;">
+                                    <h3 style="color: #fff; font-size: 1rem; font-weight: 800; margin: 0; line-height: 1.2;">{{ cert.course.title|truncatechars:30 }}</h3>
                                 </div>
 
                                 <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center;">

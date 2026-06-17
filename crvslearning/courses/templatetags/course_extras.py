@@ -1,5 +1,5 @@
 from django import template
-from ..models import Category
+from ..models import Category, Course
 
 register = template.Library()
 
@@ -93,3 +93,17 @@ def format_price(price):
         return f"{price_int:,} FCFA".replace(',', ' ')
     except (ValueError, TypeError):
         return f"{price} FCFA"
+
+@register.simple_tag
+def get_related_courses(course, limit=5):
+    """
+    Returns courses of the same level as the given course.
+    Usage: {% get_related_courses course as related_courses %}
+    """
+    if not course:
+        return Course.objects.none()
+    
+    return Course.objects.filter(
+        niveau=course.niveau,
+        is_published=True
+    ).exclude(id=course.id)[:limit]

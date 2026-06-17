@@ -316,14 +316,53 @@
   .video-item a { color: #334155; font-size: 0.85rem; font-weight: 500; width: 80%; display: flex; align-items: center; }
   .video-item a:hover { color: var(--acc-dark); }
   
-  .video-item .v-dur { 
-    background: #e2e8f0; 
-    color: #475569; 
-    font-size: 0.72rem; 
-    font-weight: 600; 
+  .video-item .v-dur {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 0.72rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 4px;
+  }
+
+  /* Quiz Row */
+  .quiz-row {
+    margin-top: 10px;
+    padding: 10px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--global-radius);
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-mark-completed {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0b0f19 !important;
+    border: 2px solid #1e293b !important;
+    color: #ffffff !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 1 !important;
+  }
+
+  .btn-mark-completed:hover {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
+  }
+
+  .btn-mark-completed.completed {
+    background: #2ed573 !important;
+    border-color: #2ed573 !important;
+    color: #ffffff !important;
   }
 
   /* Flèches et indicateurs de déploiement */

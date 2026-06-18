@@ -44,11 +44,31 @@
     height: auto !important;
   }
 
-  /* Detail passe sous la liste */
+  /* Detail passe sous la liste - caché par défaut sur mobile */
   #notification-detail-panel {
     flex: 0 0 100% !important;
     max-width: 100% !important;
     border-top: 1px solid #dee2e6;
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    z-index: 1050 !important;
+    background: white !important;
+  }
+
+  /* Classe active pour afficher le détail sur mobile */
+  #notification-detail-panel.mobile-active {
+    display: flex !important;
+  }
+
+  /* Liste notifications full width */
+  .col-md-4.col-lg-5 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
   }
 
   /* Buttons plus petits */
@@ -174,7 +194,9 @@ body::before {
 
         <li class="nav-item">
 
-          <a href="?filter=all"
+          <a href="#"
+
+             onclick="filterNotifications('all', event)"
 
              class="nav-link text-white {% if not current_filter or current_filter == 'all' %}active bg-primary{% endif %}">
 
@@ -192,7 +214,9 @@ body::before {
 
         <li class="nav-item">
 
-          <a href="?filter=unread"
+          <a href="#"
+
+             onclick="filterNotifications('unread', event)"
 
              class="nav-link text-white {% if current_filter == 'unread' %}active bg-primary{% endif %}">
 
@@ -210,7 +234,9 @@ body::before {
 
         <li class="nav-item">
 
-          <a href="?filter=read"
+          <a href="#"
+
+             onclick="filterNotifications('read', event)"
 
              class="nav-link text-white {% if current_filter == 'read' %}active bg-primary{% endif %}">
 
@@ -232,7 +258,9 @@ body::before {
 
         <li class="nav-item">
 
-          <a href="?filter=certifications"
+          <a href="#"
+
+             onclick="filterNotifications('certifications', event)"
 
              class="nav-link text-white {% if current_filter == 'certifications' %}active bg-primary{% endif %}">
 
@@ -250,7 +278,9 @@ body::before {
 
         <li class="nav-item">
 
-          <a href="?filter=courses"
+          <a href="#"
+
+             onclick="filterNotifications('courses', event)"
 
              class="nav-link text-white {% if current_filter == 'courses' %}active bg-primary{% endif %}">
 
@@ -534,6 +564,12 @@ body::before {
 
       <div class="bg-white border-bottom p-4">
 
+        <!-- Bouton retour mobile -->
+        <button class="btn btn-outline-secondary d-md-none mb-3" onclick="closeMobileDetail()">
+          <i class="fas fa-arrow-left me-2"></i>
+          Retour
+        </button>
+
         {% if selected_notification %}
 
         <div class="d-flex justify-content-between align-items-start">
@@ -784,55 +820,76 @@ let selectedNotificationId = null;
 
 function showNotificationDetail(id) {
   selectedNotificationId = id;
-  
+
+  // Vérifier si on est sur mobile
+  const isMobile = window.innerWidth <= 992;
+
+  // Sur mobile, activer l'affichage plein écran
+  if (isMobile) {
+    const detailPanel = document.getElementById('notification-detail-panel');
+    if (detailPanel) {
+      detailPanel.classList.add('mobile-active');
+    }
+  }
+
   // Trouver l'élément cliqué par son ID
   const selectedItem = document.querySelector(`[onclick*="showNotificationDetail(${id})"]`);
-  
+
   if (!selectedItem) {
     console.error('Élément de notification non trouvé');
     return;
   }
-  
+
   // Mettre à jour l'interface
   document.querySelectorAll('.notification-item').forEach(item => {
     item.classList.remove('active');
     item.style.backgroundColor = '';
     item.style.borderLeft = '';
   });
-  
+
   // Mettre en surbrillance l'élément sélectionné
   selectedItem.classList.add('active');
   selectedItem.style.backgroundColor = '#e3f2fd';
   selectedItem.style.borderLeft = '4px solid #2196f3';
-  
+
   // Récupérer les données depuis les attributs data
   const sender = selectedItem.dataset.sender || 'CRVS Learning';
   const subject = selectedItem.dataset.subject || '';
   const message = selectedItem.dataset.message || '';
   const time = selectedItem.dataset.time || '';
   const url = selectedItem.dataset.url || '';
-  const isRead = selectedItem.dataset.read === 'true';
+  let isRead = selectedItem.dataset.read === 'true';
   const attachmentUrl = selectedItem.dataset.attachment || '';
   const attachmentName = selectedItem.dataset.attachmentName || '';
   const hasAttachment = selectedItem.dataset.hasAttachment === 'true';
-  
+
+  // Marquer comme lu automatiquement si non lu
+  if (!isRead) {
+    markAsReadAjax(id, selectedItem);
+  }
+
   // Debug: Afficher les données récupérées
   console.log('Données de notification:', {
-    id, sender, subject, message, time, url, isRead, 
+    id, sender, subject, message, time, url, isRead,
     attachmentUrl, attachmentName, hasAttachment
   });
-  
+
   // Mettre à jour le panneau de détails
   const detailPanel = document.getElementById('notification-detail-panel');
-  
+
   if (!detailPanel) {
     console.error('Panneau de détail non trouvé');
     return;
   }
-  
+
   const htmlContent = `
     <!-- HEADER DETAIL -->
     <div class="bg-white border-bottom p-4">
+      <!-- Bouton retour mobile -->
+      <button class="btn btn-outline-secondary d-md-none mb-3" onclick="closeMobileDetail()">
+        <i class="fas fa-arrow-left me-2"></i>
+        Retour
+      </button>
       <div class="d-flex justify-content-between align-items-start">
         <div>
           <div class="d-flex align-items-center mb-2">
@@ -851,7 +908,7 @@ function showNotificationDetail(id) {
           </small>
         </div>
         <div>
-          ${!isRead ? '<span class="badge bg-primary">Non lue</span>' : '<span class="badge bg-secondary">Lue</span>'}
+          <span id="detail-read-badge-${id}" class="badge ${!isRead ? 'bg-primary' : 'bg-secondary'}">${!isRead ? 'Non lue' : 'Lue'}</span>
         </div>
       </div>
     </div>
@@ -909,19 +966,19 @@ function showNotificationDetail(id) {
         
         <div class="d-flex gap-2">
           ${!isRead ? `
-          <button class="btn btn-primary" onclick="markAsRead(${id})">
+          <button id="mark-read-btn-${id}" class="btn btn-primary" onclick="markAsRead(${id})">
             <i class="fas fa-envelope-open me-2"></i>
             Marquer comme lu
           </button>
           ` : ''}
-          
+
           ${url && url !== '#' ? `
           <a href="${url}" class="btn btn-outline-primary">
             <i class="fas fa-external-link-alt me-2"></i>
             Voir le lien
           </a>
           ` : ''}
-          
+
           <button class="btn btn-outline-secondary" onclick="deleteNotification(${id})">
             <i class="fas fa-trash me-2"></i>
             Supprimer
@@ -1016,6 +1073,152 @@ function showNotificationDetail(id) {
       `;
     }
   }
+}
+
+// Fonction pour fermer le détail sur mobile et retourner à la liste
+function closeMobileDetail() {
+  const detailPanel = document.getElementById('notification-detail-panel');
+  if (detailPanel) {
+    detailPanel.classList.remove('mobile-active');
+  }
+}
+
+// Fonction pour filtrer les notifications sans rechargement
+function filterNotifications(filterType, event) {
+  event.preventDefault();
+
+  // Mettre à jour les classes actives des navpills
+  document.querySelectorAll('.notification-sidebar .nav-link').forEach(link => {
+    link.classList.remove('active', 'bg-primary');
+  });
+  event.target.closest('.nav-link').classList.add('active', 'bg-primary');
+
+  // Mettre à jour le titre de la navbar
+  const navbarTitle = document.querySelector('.navbar-brand');
+  if (navbarTitle) {
+    const titles = {
+      'all': 'Toutes les notifications',
+      'unread': 'Notifications non lues',
+      'read': 'Notifications lues',
+      'certifications': 'Certifications',
+      'courses': 'Cours'
+    };
+    navbarTitle.textContent = titles[filterType] || 'Toutes les notifications';
+  }
+
+  // Filtrer les notifications
+  const notificationItems = document.querySelectorAll('.notification-item');
+  notificationItems.forEach(item => {
+    const isRead = item.dataset.read === 'true';
+    const url = item.dataset.url || '';
+    const subject = item.dataset.subject || '';
+
+    // Déterminer le type de notification basé sur l'URL ou le sujet
+    let notificationType = 'general';
+    if (url.includes('certification') || subject.toLowerCase().includes('certification') || subject.toLowerCase().includes('certificat')) {
+      notificationType = 'certification';
+    } else if (url.includes('course') || url.includes('lesson') || subject.toLowerCase().includes('cours') || subject.toLowerCase().includes('leçon')) {
+      notificationType = 'course';
+    }
+
+    let shouldShow = false;
+
+    switch (filterType) {
+      case 'all':
+        shouldShow = true;
+        break;
+      case 'unread':
+        shouldShow = !isRead;
+        break;
+      case 'read':
+        shouldShow = isRead;
+        break;
+      case 'certifications':
+        shouldShow = notificationType === 'certification';
+        break;
+      case 'courses':
+        shouldShow = notificationType === 'course';
+        break;
+    }
+
+    item.style.display = shouldShow ? 'block' : 'none';
+  });
+
+  // Fermer le panneau de détail sur mobile
+  const detailPanel = document.getElementById('notification-detail-panel');
+  if (detailPanel && window.innerWidth <= 992) {
+    detailPanel.classList.remove('mobile-active');
+  }
+}
+
+// Fonction pour marquer comme lu via AJAX
+function markAsReadAjax(id, itemElement) {
+  const csrfToken = document.getElementById('csrf-token')?.value || window.CSRF_TOKEN;
+
+  // Mettre à jour l'interface immédiatement avant la requête
+  if (itemElement) {
+    itemElement.dataset.read = 'true';
+    itemElement.classList.remove('unread');
+    itemElement.style.backgroundColor = 'transparent';
+
+    // Supprimer le badge "Nouveau" s'il existe
+    const badge = itemElement.querySelector('.badge.bg-primary');
+    if (badge) {
+      badge.remove();
+    }
+
+    // Mettre à jour le style du titre pour le rendre normal
+    const titleElement = itemElement.querySelector('small.fw-medium');
+    if (titleElement) {
+      titleElement.classList.remove('fw-medium');
+    }
+  }
+
+  // Mettre à jour le badge dans le détail immédiatement
+  const detailBadge = document.getElementById(`detail-read-badge-${id}`);
+  if (detailBadge) {
+    detailBadge.classList.remove('bg-primary');
+    detailBadge.classList.add('bg-secondary');
+    detailBadge.textContent = 'Lue';
+  }
+
+  // Mettre à jour le bouton "Marquer comme lu" dans le détail immédiatement
+  const markReadBtn = document.getElementById(`mark-read-btn-${id}`);
+  if (markReadBtn) {
+    markReadBtn.style.display = 'none';
+  }
+
+  // Envoyer la requête AJAX en arrière-plan
+  fetch(`/notifications/${id}/read/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken,
+      'Content-Type': 'application/json',
+    },
+    credentials: 'same-origin'
+  })
+  .then(response => {
+    if (response.ok) {
+      console.log('Notification marquée comme lue avec succès');
+    } else {
+      console.error('Erreur lors du marquage comme lu');
+      // En cas d'erreur, restaurer l'état précédent
+      if (itemElement) {
+        itemElement.dataset.read = 'false';
+        itemElement.classList.add('unread');
+        itemElement.style.backgroundColor = '#f8f9fa';
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Erreur:', error);
+    // En cas d'erreur, restaurer l'état précédent
+    if (itemElement) {
+      itemElement.dataset.read = 'false';
+      itemElement.classList.add('unread');
+      itemElement.style.backgroundColor = '#f8f9fa';
+    }
+  });
 }
 
 // Fonction pour vérifier si c'est un fichier image
@@ -1498,9 +1701,9 @@ function refreshNotifications() {
 
 
 function markAsRead(id) {
-
-  window.location.href = "/notifications/" + id + "/read/";
-
+  // Trouver l'élément de notification correspondant
+  const itemElement = document.querySelector(`[onclick*="showNotificationDetail(${id})"]`);
+  markAsReadAjax(id, itemElement);
 }
 
 

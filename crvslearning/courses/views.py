@@ -734,6 +734,7 @@ def lesson_detail(request, lesson_id):
     level_key = getattr(lesson.module, 'level', None)
     level_completed = False
     level_evaluation = None
+    certification = None
     if is_enrolled and level_key:
         level_lessons_qs = Lesson.objects.filter(module__course=course, module__level=level_key)
         total_level_lessons = level_lessons_qs.count()
@@ -741,6 +742,12 @@ def lesson_detail(request, lesson_id):
         level_completed = total_level_lessons > 0 and done_in_level == total_level_lessons
         from evaluations.models import EvaluationLevel
         level_evaluation = EvaluationLevel.objects.filter(course=course, level=level_key, is_active=True).first()
+        certification = Certification.objects.filter(
+            user=request.user,
+            course=course,
+            level=level_key,
+            is_valid=True
+        ).first()
 
     # Récupérer l'URL de la miniature du cours
     course_thumbnail_url = course.thumbnail.url if course.thumbnail else None
@@ -864,6 +871,7 @@ def lesson_detail(request, lesson_id):
         'level_key': level_key,
         'level_completed': level_completed,
         'level_evaluation': level_evaluation,
+        'certification': certification,
         'comments': comments,
         'avg_rating': avg_rating,
         'user_rating_value': user_rating_value,

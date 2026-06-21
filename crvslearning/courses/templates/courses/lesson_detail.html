@@ -678,10 +678,35 @@ tabEls.forEach(function(tabEl) {
     if (video) {
         video.autoplay = true;
         video.muted = true; // Nécessaire pour la lecture automatique sur certains navigateurs
-        
+
+        // Optimisations de buffering pour un démarrage plus rapide
+        video.addEventListener('loadedmetadata', () => {
+            // Précharger une petite portion pour démarrer rapidement
+            video.currentTime = 0;
+        });
+
+        video.addEventListener('canplay', () => {
+            // Démarrer la lecture dès que possible
+            if (video.paused) {
+                video.play().catch(e => console.log('Erreur de lecture:', e));
+            }
+        });
+
+        // Optimiser le buffering adaptatif
+        video.addEventListener('progress', () => {
+            if (video.buffered.length > 0) {
+                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                const duration = video.duration;
+                // Si plus de 30% est bufferisé, on peut arrêter le préchargement agressif
+                if (bufferedEnd / duration > 0.3) {
+                    video.preload = 'metadata';
+                }
+            }
+        });
+
         // Essayer de démarrer la lecture automatiquement
         const playPromise = video.play();
-        
+
         // Gérer le cas où la lecture automatique est bloquée
         if (playPromise !== undefined) {
             playPromise.catch(error => {

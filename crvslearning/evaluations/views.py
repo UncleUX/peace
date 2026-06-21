@@ -1466,6 +1466,7 @@ def _generate_certificate_pdf(cert: Certification, score: float) -> str:
     # =========================
     signature_path = None
     cachet_path = None
+    medal_path = None
 
     static_candidates = []
     static_root = getattr(settings, 'STATIC_ROOT', '')
@@ -1477,10 +1478,13 @@ def _generate_certificate_pdf(cert: Certification, score: float) -> str:
     for base in static_candidates:
         sig = os.path.join(base, "img", "signature_dg.png")
         stamp = os.path.join(base, "img", "cachet_bunec.png")
+        medal = os.path.join(base, "img", "csirt.png")
         if os.path.exists(sig):
             signature_path = sig
         if os.path.exists(stamp):
             cachet_path = stamp
+        if os.path.exists(medal):
+            medal_path = medal
 
     # =========================
     # Build PDF
@@ -1522,24 +1526,52 @@ def _generate_certificate_pdf(cert: Certification, score: float) -> str:
     c.rect(ribbon_x + ribbon_w - 11, margin + 10, 6, height - 2*(margin + 10), fill=1, stroke=0)
 
     # =========================
-    # Medal
+    # Medal (Image)
     # =========================
     medal_cx = ribbon_x + ribbon_w / 2
     medal_cy = height - 180
-    medal_r = 55
+    medal_r = 75  # Diamètre 150px (rayon 75px)
 
-    c.setFillColor(colors.HexColor("#f5f3e7"))
-    c.setStrokeColor(ribbon_gold)
-    c.setLineWidth(4)
-    c.circle(medal_cx, medal_cy, medal_r, fill=1, stroke=1)
+    # Dessiner l'image csirt.png avec les mêmes dimensions que le cercle (diamètre 150px)
+    if medal_path:
+        try:
+            c.drawImage(
+                ImageReader(medal_path),
+                medal_cx - medal_r,
+                medal_cy - medal_r,
+                width=medal_r * 2,
+                height=medal_r * 2,
+                preserveAspectRatio=True,
+                mask='auto'
+            )
+        except Exception:
+            # Fallback: dessiner le cercle si l'image n'est pas disponible
+            c.setFillColor(colors.HexColor("#f5f3e7"))
+            c.setStrokeColor(ribbon_gold)
+            c.setLineWidth(4)
+            c.circle(medal_cx, medal_cy, medal_r, fill=1, stroke=1)
 
-    c.setFont("Helvetica-Bold", 9)
-    c.setFillColor(ribbon_gold)
-    c.drawCentredString(medal_cx, medal_cy + 14, "LEARNING PATH")
-    c.drawCentredString(medal_cx, medal_cy - 18, "COMPLETION")
+            c.setFont("Helvetica-Bold", 9)
+            c.setFillColor(ribbon_gold)
+            c.drawCentredString(medal_cx, medal_cy + 14, "LEARNING PATH")
+            c.drawCentredString(medal_cx, medal_cy - 18, "COMPLETION")
 
-    c.setFont("Helvetica-Bold", 24)
-    c.drawCentredString(medal_cx, medal_cy - 4, "★")
+            c.setFont("Helvetica-Bold", 24)
+            c.drawCentredString(medal_cx, medal_cy - 4, "★")
+    else:
+        # Fallback: dessiner le cercle si l'image n'est pas trouvée
+        c.setFillColor(colors.HexColor("#f5f3e7"))
+        c.setStrokeColor(ribbon_gold)
+        c.setLineWidth(4)
+        c.circle(medal_cx, medal_cy, medal_r, fill=1, stroke=1)
+
+        c.setFont("Helvetica-Bold", 9)
+        c.setFillColor(ribbon_gold)
+        c.drawCentredString(medal_cx, medal_cy + 14, "LEARNING PATH")
+        c.drawCentredString(medal_cx, medal_cy - 18, "COMPLETION")
+
+        c.setFont("Helvetica-Bold", 24)
+        c.drawCentredString(medal_cx, medal_cy - 4, "★")
 
     # =========================
     # Content Origin

@@ -1,3 +1,6 @@
+import os
+import subprocess
+import tempfile
 from .models import Course, Module, Lesson, LessonVideo
 
 def duplicate_course(course, new_title=None):
@@ -55,5 +58,65 @@ def duplicate_course(course, new_title=None):
                     order=video.order,
                     duration=video.duration
                 )
-    
+
     return course_copy
+
+
+def apply_faststart_to_video(video_file_path):
+    """
+    Applique l'option faststart de ffmpeg à une vidéo MP4.
+    Cela déplace les métadonnées (moov atom) au début du fichier,
+    permettant un démarrage plus rapide de la lecture.
+
+    Args:
+        video_file_path: Chemin vers le fichier vidéo
+
+    Returns:
+        Chemin vers le fichier optimisé, ou le chemin original si échec
+    """
+    try:
+        # Vérifier que ffmpeg est installé
+        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("ffmpeg n'est pas installé ou n'est pas dans le PATH")
+        return video_file_path
+
+    # Créer un fichier temporaire pour la vidéo optimisée
+    temp_dir = tempfile.gettempdir()
+    temp_path = os.path.join(temp_dir, f'faststart_{os.path.basename(video_file_path)}')
+
+    try:
+        # Commande ffmpeg avec faststart
+        # -c copy: copie les flux sans ré-encodage (rapide)
+        # -movflags +faststart: déplace les métadonnées au début
+        cmd = [
+            'ffmpeg',
+            '-i', video_file_path,
+            '-c', 'copy',
+            '-movflags', '+faststart',
+            '-y',  # Écraser le fichier de sortie s'il existe
+            temp_path
+        ]
+
+        # Exécuter la commande
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            # Remplacer le fichier original par le fichier optimisé
+            import shutil
+            shutil.move(temp_path, video_file_path)
+            print(f"Faststart appliqué avec succès à {video_file_path}")
+            return video_file_path
+        else:
+            print(f"Erreur ffmpeg: {result.stderr}")
+            # Nettoyer le fichier temporaire en cas d'erreur
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            return video_file_path
+
+    except Exception as e:
+        print(f"Erreur lors de l'application du faststart: {e}")
+        # Nettoyer le fichier temporaire en cas d'erreur
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        return video_file_path

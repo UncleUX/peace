@@ -4,7 +4,7 @@
 
     /* Vidéo 16/9 fluide */
     .ld-player { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: var(--radius); overflow: hidden; }
-    #lesson-video { width: 100%; height: 100%; object-fit: contain; }
+    #lesson-video { width: 100%; height: 100%; object-fit: contain; will-change: transform; }
 
     /* Interface de fin de vidéo */
     .video-end-overlay {
@@ -46,12 +46,12 @@
     .video-end-buttons {
         display: flex;
         gap: 12px;
-        margin-top: 16px;
+        margin-top: 10px;
     }
 
     .video-end-btn {
         padding: 10px 20px;
-        border-radius: 8px;
+        border-radius: 5px;
         font-weight: 600;
         font-size: 0.85rem;
         transition: all 0.3s ease;
@@ -149,13 +149,13 @@
 <div class="ld-main">
     {% if active_video_url %}
         <div class="ld-player">
-            <video controls id="lesson-video" autoplay muted>
+            <video controls id="lesson-video" autoplay muted preload="metadata" playsinline>
                 <source src="{{ active_video_url }}" type="video/mp4">
             </video>
             <div class="video-end-overlay" id="video-end-overlay">
                 <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem; margin-bottom: 10px;"></i>
                 <h3>Vidéo terminée !</h3>
-                <p>Que souhaitez-vous faire ?</p>
+
                 <div class="video-end-buttons">
                     <button class="video-end-btn replay" onclick="replayVideo()">
                         <i class="bi bi-arrow-counterclockwise"></i>

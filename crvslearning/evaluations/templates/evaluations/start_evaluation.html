@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-
+{% include 'courses/partials/course_loader.html' %}
 <style>
 /* ===== WRAPPER ===== */
 .eval-wrapper{
@@ -9,14 +9,151 @@
   justify-content:center;
 }
 
+/* ===== EQUAL HEIGHT COLUMNS ===== */
+.eval-wrapper .row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.eval-wrapper .col-12 {
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+}
+
+/* ===== STICKY HEADER ===== */
+.sticky-header {
+  position: sticky;
+  top: 90px;
+  height: 100%;
+}
+
+/* ===== STICKY FORM ===== */
+.eval-wrapper .col-12:nth-child(2) {
+  position: sticky;
+  top: 20px;
+  height: 600px;
+  overflow-y: auto;
+}
+
 /* ===== HEADER ===== */
 .eval-header{
-  background:linear-gradient(135deg,#0f172a,#1f2937);
+  background: #111827;
   color:#fff;
-  border-radius:18px;
+  border-radius:5px;
   padding:36px;
-  margin-bottom:24px;
+  margin-bottom:14px;
+  text-align: center;
 }
+
+/* ===== TIMER ===== */
+.timer-container {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timer-circular {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 10px 0;
+}
+
+.timer-svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.timer-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 8;
+}
+
+.timer-circle-progress {
+  fill: none;
+  stroke: #007a5e;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+}
+
+.timer-circle-progress.warning {
+  stroke: #fbbf24;
+}
+
+.timer-circle-progress.danger {
+  stroke: #ef4444;
+  animation: pulse-stroke 0.5s infinite;
+}
+
+.timer-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: white;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.timer-display.warning {
+  color: #fbbf24;
+}
+
+.timer-display.danger {
+  color: #ef4444;
+  animation: pulse-text 0.5s infinite;
+}
+
+.timer-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes pulse-stroke {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ===== MARQUEE TEXT ===== */
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #007a5e, #111827);
+  padding: 12px 0;
+  border-radius: 5px;
+}
+
+.marquee-text {
+  display: inline-block;
+  animation: marquee 20s linear infinite;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
 .eval-header h2{
   font-weight:900;
   margin-bottom:6px;
@@ -32,9 +169,10 @@
 
 /* ===== CARD ===== */
 .q-card{
-  border-radius:16px;
+  border-radius:5px;
   box-shadow:0 18px 40px rgba(0,0,0,.12);
   border:none;
+  height: 425px !important;
 }
 .q-card .card-body{
   padding:28px;
@@ -75,9 +213,21 @@
   margin-top:28px;
 }
 .btn{
-  padding:12px 18px;
-  border-radius:10px;
+  padding:8px 12px;
+  border-radius:5px;
   font-weight:700;
+  font-size: 0.9rem;
+}
+
+#next-btn {
+  background: #111827;
+  color: #007a5e;
+  border: 1px solid #111827;
+}
+
+#next-btn:hover {
+  background: #1f2937;
+  color: #007a5e;
 }
 
 /* ===== ALERT ===== */
@@ -86,26 +236,79 @@
   padding:20px;
   font-weight:600;
 }
+
+/* ===== QUESTION NAVIGATION ===== */
+.question-step {
+  display: none;
+}
+.question-step.active {
+  display: block;
+}
+.progress-bar-custom {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  transition: width 0.3s ease;
+}
+.question-counter {
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #64748b;
+}
 </style>
 
-<section class="container eval-wrapper py-4">
+  <!-- Texte défilant -->
+  <!-- <div class="marquee-container">
+    <div class="marquee-text">
+      🎓 Évaluation en cours - Bonne chance ! - Répondez attentivement à chaque question - Vous avez 30 minutes - 🎓
+    </div>
+  </div> -->
 
-  <div class="col-lg-9 col-xl-8">
+<section class="container eval-wrapper py-5 mt-5">
 
-    <!-- HEADER -->
-    <div class="eval-header">
-      <h2>
-        Évaluation — {{ course.title }}
-        <small>({{ evaluation.get_level_display|default:level }})</small>
-      </h2>
-      <div class="meta">
-        Seuil de réussite :
-        <strong>{{ threshold }}%</strong>
+
+
+ <div class="row">
+<div class="col-12 col-lg-6">
+  <!-- HEADER -->
+    <div class="sticky-header">
+      <div class="eval-header">
+        <h2>
+          Évaluation — {{ course.title }}
+          <small>({{ evaluation.get_level_display|default:level }})</small>
+        </h2>
+        <div class="meta">
+          Seuil de réussite :
+          <strong>{{ threshold }}%</strong>
+        </div>
+
+        <!-- Timer -->
+        <div class="timer-container">
+          <div class="timer-label">Temps restant</div>
+          <div class="timer-circular">
+            <svg class="timer-svg" viewBox="0 0 120 120">
+              <circle class="timer-circle-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="timer-circle-progress" id="timer-progress" cx="60" cy="60" r="52"
+                      stroke-dasharray="326.73" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="timer-display" id="timer">30:00</div>
+          </div>
+        </div>
       </div>
     </div>
+</div>
+ <div class="col-12 col-lg-6">
 
     {% if questions %}
     <form method="post"
+          id="evaluation-form"
           action="{% url 'evaluations:start_level_evaluation' course.id level %}">
 
       {% csrf_token %}
@@ -113,7 +316,7 @@
       <div class="vstack gap-4">
 
         {% for q in questions %}
-        <div class="card q-card">
+        <div class="card q-card question-step {% if forloop.first %}active{% endif %}" data-step="{{ forloop.counter }}">
           <div class="card-body">
 
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -136,6 +339,7 @@
                        type="radio"
                        name="q_{{ q.id }}"
                        value="{{ c.id }}"
+                       onchange="saveAnswer({{ q.id }}, {{ c.id }})"
                        {% if forloop.first %}required{% endif %}>
                 <span class="form-check-label">
                   {{ c.text }}
@@ -150,16 +354,41 @@
 
       </div>
 
-      <!-- ACTIONS -->
-      <div class="eval-actions d-flex gap-2">
+      <!-- ACTIONS DE NAVIGATION -->
+      <div class="eval-actions d-flex gap-2 mt-4">
+        <button type="button"
+                id="prev-btn"
+                class="btn btn-outline-secondary"
+                onclick="prevQuestion()"
+                style="display: none;">
+          Précédent
+        </button>
+        <button type="button"
+                id="next-btn"
+                class="btn btn-primary"
+                onclick="nextQuestion()">
+          Suivant
+        </button>
+        <button type="submit"
+                id="submit-btn"
+                class="btn btn-success"
+                style="display: none;">
+          Soumettre l'évaluation
+        </button>
         <a href="{% url 'courses:course_detail' course.id %}"
-           class="btn btn-outline-secondary w-50">
+           class="btn btn-outline-danger">
           Annuler
         </a>
-        <button type="submit"
-                class="btn btn-primary w-50">
-          Soumettre l’évaluation
-        </button>
+      </div>
+
+      <!-- Barre de progression -->
+      <div class="progress-bar-custom mt-3">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+
+      <!-- Compteur de questions -->
+      <div class="question-counter mt-3">
+        Question <span id="current-question">1</span> / {{ questions|length }}
       </div>
 
     </form>
@@ -172,11 +401,129 @@
 
   </div>
 
+ </div>
+
 </section>
 
 <!-- 🎉 SweetAlert CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- 🎉 SCRIPT POUR LA NAVIGATION DES QUESTIONS -->
+<script>
+let currentStep = 1;
+const totalSteps = {{ questions|length }};
+const answers = {};
+
+// Timer configuration
+let timeLeft = 30 * 60; // 30 minutes en secondes
+const totalTime = 30 * 60; // Temps total pour le calcul du pourcentage
+let timerInterval;
+
+function startTimer() {
+    const timerDisplay = document.getElementById('timer');
+    const timerProgress = document.getElementById('timer-progress');
+    const circumference = 2 * Math.PI * 52; // 2πr avec r=52
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
+
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        // Mise à jour du cercle de progression
+        const progress = timeLeft / totalTime;
+        const offset = circumference * (1 - progress);
+        timerProgress.style.strokeDashoffset = offset;
+
+        // Changement de couleur selon le temps restant
+        if (timeLeft <= 60) {
+            timerDisplay.classList.add('timer-danger');
+            timerDisplay.classList.remove('timer-warning');
+            timerProgress.classList.add('danger');
+            timerProgress.classList.remove('warning');
+        } else if (timeLeft <= 300) {
+            timerDisplay.classList.add('timer-warning');
+            timerDisplay.classList.remove('timer-danger');
+            timerProgress.classList.add('warning');
+            timerProgress.classList.remove('danger');
+        }
+
+        // Soumission automatique quand le temps est écoulé
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('evaluation-form').submit();
+        }
+    }, 1000);
+}
+
+function saveAnswer(questionId, choiceId) {
+    answers[questionId] = choiceId;
+}
+
+function updateProgress() {
+    const progress = ((currentStep - 1) / totalSteps) * 100;
+    document.getElementById('progress-fill').style.width = progress + '%';
+    document.getElementById('current-question').textContent = currentStep;
+}
+
+function showStep(step) {
+    // Cacher toutes les étapes
+    const allSteps = document.querySelectorAll('.question-step');
+    allSteps.forEach(el => {
+        el.classList.remove('active');
+    });
+
+    // Afficher l'étape actuelle
+    const currentStepEl = document.querySelector(`.question-step[data-step="${step}"]`);
+    if (currentStepEl) {
+        currentStepEl.classList.add('active');
+    }
+
+    // Mettre à jour les boutons
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (step === 1) {
+        prevBtn.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'block';
+    }
+
+    if (step === totalSteps) {
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'block';
+    } else {
+        nextBtn.style.display = 'block';
+        submitBtn.style.display = 'none';
+    }
+
+    updateProgress();
+}
+
+function nextQuestion() {
+    if (currentStep < totalSteps) {
+        currentStep++;
+        showStep(currentStep);
+    }
+}
+
+function prevQuestion() {
+    if (currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+    startTimer(); // Démarrer le timer
+});
+
+</script>
 
 <!-- 🎉 SCRIPT POUR AFFICHER LES SWEETALERT D'ÉVALUATION -->
 <script>

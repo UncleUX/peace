@@ -158,6 +158,37 @@
               </div>
             </div>
 
+            <!-- Bouton d'évaluation du niveau -->
+            {% if is_enrolled and levels_progress %}
+              {% for level in levels_progress %}
+                {% if level.key == module.level %}
+                  {% if level.evaluation %}
+                    <div class="mt-3 p-3" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 8px; border: 1px solid #e2e8f0;">
+                      {% if level.certification %}
+                        <button class="btn btn-success w-100" disabled
+                                title="Vous avez déjà réussi cette évaluation le {{ level.certification.created_at|date:'d/m/Y' }}">
+                          <i class="bi bi-check-circle-fill me-2"></i>
+                          Évaluation réussie
+                        </button>
+                      {% elif level.is_completed %}
+                        <a href="{% url 'evaluations:start_level_evaluation' course.id level.evaluation.level %}"
+                           class="btn btn-success w-100">
+                          <i class="bi bi-trophy me-2"></i>
+                          Démarrer l'évaluation
+                        </a>
+                      {% else %}
+                        <button class="btn btn-secondary w-100" disabled
+                                title="Complétez toutes les leçons de ce niveau pour débloquer l'évaluation">
+                          <i class="bi bi-lock-fill me-2"></i>
+                          Évaluation disponible après complétion du niveau
+                        </button>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+
           </details>
         </div>
 

@@ -310,6 +310,7 @@
       visibility: hidden;
       transform: translateY(-10px);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10000;
     }
 
     .dropdown-menu.show {
@@ -550,7 +551,7 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       display: none;
-      z-index: 1000;
+      z-index: 10000;
       max-height: 300px;
       overflow-y: auto;
     }
@@ -588,7 +589,7 @@
     .header-actions .notification-badge {
       animation: pulse 2s infinite;
       font-weight: 600;
-      z-index: 1000;
+      z-index: 10000;
     }
     
     .header-actions .notification-badge:hover {
@@ -683,7 +684,7 @@
       background: rgba(0, 0, 0, 0.95);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      z-index: 2000;
+      z-index: 10000;
       transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       overflow-y: auto;
     }
@@ -993,7 +994,7 @@
 </head>
 
   
-<body style="background: url('{% static '/img/google.png' %}') no-repeat center center fixed; background-size: cover; min-height: 100vh; width: 100%; margin: 0; padding: 0; position: relative;">
+<body style="background: url('{% static '/img/bubble.jfif' %}') no-repeat center center fixed; background-size: cover; min-height: 100vh; width: 100%; margin: 0; padding: 0; position: relative;">
   <!-- Fond flou bleuté global -->
   <div style="
     position: fixed;
@@ -1002,12 +1003,12 @@
     width: 100%;
     height: 100%;
     background: linear-gradient(135deg, rgba(0, 102, 255, 0.08) 0%, rgba(0, 183, 255, 0.12) 100%);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(1px);
     -webkit-backdrop-filter: blur(8px);
     z-index: -1;
     pointer-events: none;
   "></div>
-<header style="position: fixed; top: 0; left: 0; height: 44px; width: 100%; z-index: 1000; background: linear-gradient(135deg, #0072ce, #00439c); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 1.5rem; box-shadow: none;">
+<header style="position: fixed; top: 0; left: 0; height: 44px; width: 100%; z-index: 9999; background: linear-gradient(135deg, #0072ce, #00439c); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding: 0 1.5rem; box-shadow: none;">
   <div style="width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; height: 100%;">
   <div class="logo">
     <a href="{% if user.is_authenticated %}{% if user.is_formateur %}{% url 'users:instructor_public' username=user.username %}{% elif user.is_superuser %}{% url 'users:instructor_dashboard' %}{% else %}{% url 'users:dashboard' %}{% endif %}{% else %}/{% endif %}" style="display: flex; align-items: center; text-decoration: none; opacity: 0.9; transition: all 0.2s ease;">
@@ -1020,6 +1021,11 @@
         margin-right: 8px;
       " onerror="this.style.display='none';">
       <span style="color: #fff; font-weight: 500; font-size: 1.1rem; white-space: nowrap;">Crvstrainings</span>
+      <span style="display: flex; gap: 4px; margin-left: 8px; align-items: center;">
+        <span style="width: 8px; height: 8px; background: #007a5e; border-radius: 50%;"></span>
+        <span style="width: 8px; height: 8px; background: #ce1126; border-radius: 50%;"></span>
+        <span style="width: 8px; height: 8px; background: #fcd116; border-radius: 50%;"></span>
+      </span>
     </a>
   </div>
   <div style="flex: 1; display: flex; justify-content: center; margin: 0 2rem;">
@@ -1462,10 +1468,42 @@
   {% block content %}{% endblock %}
 </main>
 
-<footer>
-  <div class="container-fluide">
-    <p>&copy; {{ now|date:"Y" }} CRVS Learning — Tous droits réservés.</p>
-  </div>
+<footer class="lms-footer">
+    <div class="container-fluid px-lg-5">
+        <div class="row g-4 justify-content-between">
+            <div class="col-lg-4">
+                <h5 class="text-white mb-3 fw-bold">CRVS Academy</h5>
+                <p class="text-white-50 small">La plateforme de référence pour la maîtrise des systèmes d'enregistrement de l'État Civil. Apprendre, pratiquer, certifier.</p>
+            </div>
+            
+            <div class="col-6 col-lg-2">
+                <h6 class="text-white mb-3">Plateforme</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="#" class="text-white-50 text-decoration-none">Catalogue</a></li>
+                    <li><a href="#" class="text-white-50 text-decoration-none">Certifications</a></li>
+                    <li><a href="#" class="text-white-50 text-decoration-none">Support</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h6 class="text-white mb-3">Légal</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="#" class="text-white-50 text-decoration-none">Confidentialité</a></li>
+                    <li><a href="#" class="text-white-50 text-decoration-none">CGU</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="border-secondary my-4">
+
+        <div class="d-flex justify-content-between align-items-center pb-3">
+            <p class="text-white-50 mb-0 small">&copy; {{ now|date:"Y" }} BUNEC — Tous droits réservés.</p>
+            <div class="social-links">
+                <a href="#" class="text-white-50 mx-2"><i class="bi bi-linkedin"></i></a>
+                <a href="#" class="text-white-50 mx-2"><i class="bi bi-twitter"></i></a>
+            </div>
+        </div>
+    </div>
 </footer>
 
 <script>
@@ -2015,7 +2053,7 @@
 <!-- Section Menu Bottom PS4 -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <!-- Navigation Compacte -->
-<section id="nav-bottom" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:92%; max-width:420px; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); border-radius:15px; padding:10px 15px; box-shadow:0 8px 30px rgba(0,0,0,0.12); z-index:9999; border: 1px solid rgba(255,255,255,0.5);">
+<section id="nav-bottom" style="display:none; position:fixed; bottom:-2px; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(255,255,255,0.95); backdrop-filter:blur(20px); border-radius:15px; padding:10px 15px; box-shadow:0 8px 30px rgba(0,0,0,0.12); z-index:9999; border: 1px solid rgba(255,255,255,0.5);">
   
   <style>
     .nav-list { display:flex; justify-content:space-between; align-items:center; list-style:none; margin:0; padding:0; }
